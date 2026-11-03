@@ -1,0 +1,251 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { stubPage } from './lib/dom.js';
+
+// The arrival invitation, and the one thing that ends it early. It sits over the strips
+// along the bottom of the screen, so it has to yield to a panel however that panel came
+// to be open — including a reload that restored one (see test/panel-state.test.js).
+const { byId, document } = stubPage();
+
+/**
+ * A MutationObserver the test can fire by hand.
+ *
+ * Node has none, and the stub page's `classList` notifies nothing, so a browser's own
+ * "the class changed" is the one thing that has to be acted out here: change the class,
+ * then ring the observer, which is the order a browser does it in.
+ */
+const observers = [];
+globalThis.MutationObserver = class {
+  constructor(fn) { this.fn = fn; this.targets = []; observers.push(this); }
+  observe(target) { this.targets.push(target); }
+  disconnect() { this.targets = []; }
+};
+
+/** Every panel appearing rings every live observer, as a class change would. */
+const somethingChanged = () => { for (const o of observers) if (o.targets.length) o.fn([]); };
+
+const { createWelcomeHint } = await import('../src/ui/welcome-hint.js');
+
+/** The panels the hint watches, plus the overlay it is appended to. */
+const PANELS = [
+  'scene-panel', 'dev-panel', 'editor-panel', 'inspector',
+  'source-picker', 'shortcuts-panel', 'keycard-dialog',
+];
+
+function page({ chrome } = {}) {
+  byId.clear();
+  observers.length = 0;
+  document.body.dataset.chrome = chrome;
+  byId.set('ui', document.createElement('div'));
+  for (const id of [...PANELS, 'agent-panel']) {
+    const host = document.createElement('div');
+    // The roster ships open; every panel ships closed, as index.html has them.
+    if (id !== 'agent-panel') host.className = 'hidden';
+    byId.set(id, host);
+  }
+  return {
+    ui: byId.get('ui'),
+    /** Open a panel the way its own show() does, then let the page notice. */
+    open(id) { byId.get(id).classList.remove('hidden'); somethingChanged(); },
+  };
+}
+
+/** Is the invitation in the overlay? */
+const onScreen = (ui) => ui.children.some((c) => c.className?.includes('welcome-hint'));
+
+const crossIn = (ui) => ui.children
+  .find((c) => c.className?.includes('welcome-hint'))
+  ?.children.find((c) => c.className === 'welcome-close');
+
+test('on an ordinary arrival it shows, roster and all', () => {
+  const { ui } = page();
+  const hint = createWelcomeHint();
+  assert.ok(hint, 'the hint should have been built');
+  assert.equal(hint.isShowing, true);
+  assert.equal(onScreen(ui), true);
+  hint.dismiss();
+});
+
+// The roster is open on arrival and in the opposite corner of the screen. Counting it
+// would mean the invitation never appeared at all, which is the feature deleted rather
+// than fixed.
+test('the agents roster being open is not a reason to stay away', () => {
+  const { ui } = page();
+  assert.equal(byId.get('agent-panel').classList.contains('hidden'), false);
+  const hint = createWelcomeHint();
+  assert.equal(onScreen(ui), true);
+  hint.dismiss();
+});
+
+test('opening any panel puts it away, whichever one it is', () => {
+  for (const id of PANELS) {
+    const p = page();
+    const hint = createWelcomeHint();
+    assert.equal(hint.isShowing, true, id);
+
+    p.open(id);
+    assert.equal(hint.isShowing, false, `${id} should have dismissed the hint`);
+    assert.equal(onScreen(p.ui), false, `${id} should have removed it from the overlay`);
+  }
+});
+
+// This PR's own doing: panel state is restored on load, so a room whose Scene strip was
+// left open arrives with a panel already on screen and there is no moment to invite
+// anybody into. Decided at creation, not only watched for afterwards.
+test('a reload into a remembered-open panel never shows it', () => {
+  for (const id of PANELS) {
+    const p = page();
+    byId.get(id).classList.remove('hidden');
+    assert.equal(createWelcomeHint(), null, `${id} was already open`);
+    assert.equal(onScreen(p.ui), false, id);
+  }
+});
+
+test('a panel closing again does not bring it back', () => {
+  const p = page();
+  const hint = createWelcomeHint();
+  p.open('scene-panel');
+  assert.equal(hint.isShowing, false);
+
+  byId.get('scene-panel').classList.add('hidden');
+  somethingChanged();
+  assert.equal(hint.isShowing, false, 'dismissed is dismissed');
+  assert.equal(onScreen(p.ui), false);
+});
+
+// Unchanged by all of the above, and worth saying so: the two ways it always left.
+test('its own × still dismisses it', () => {
+  const p = page();
+  const hint = createWelcomeHint();
+  const cross = crossIn(p.ui);
+  assert.ok(cross, 'the hint should carry its own ×');
+  assert.equal(cross.getAttribute('aria-label'), 'Dismiss welcome hint');
+  cross.click();
+  assert.equal(hint.isShowing, false);
+  assert.equal(onScreen(p.ui), false);
+});
+
+test('and it still leaves on its own', () => {
+  const p = page();
+  const hint = createWelcomeHint();
+  // The fade is 20s of real time, so this proves the timer is armed rather than
+  // waiting for it: dismissing disarms it, and a second dismissal is a no-op.
+  assert.equal(hint.isShowing, true);
+  hint.dismiss();
+  assert.equal(hint.isShowing, false);
+  hint.dismiss();
+  assert.equal(onScreen(p.ui), false);
+});
+
+// Unchanged: an embed that has asked for less chrome gets no invitation at all.
+test('a chrome-restricted embed is left alone', () => {
+  for (const chrome of ['none', 'minimal']) {
+    const p = page({ chrome });
+    assert.equal(createWelcomeHint(), null, chrome);
+    assert.equal(onScreen(p.ui), false, chrome);
+  }
+});
+
+// The dismissal is per page load on purpose: he asked for it to yield to an opened
+// panel, not to be remembered. Nothing here writes to storage, and the next arrival
+// with nothing open is greeted again.
+test('the dismissal is not remembered — the next arrival is greeted again', () => {
+  const first = page();
+  createWelcomeHint().dismiss();
+  assert.equal(onScreen(first.ui), false);
+
+  const second = page();
+  const greeted = createWelcomeHint();
+  assert.equal(greeted?.isShowing, true);
+  assert.equal(onScreen(second.ui), true);
+  // Dismissed rather than left to fade: an armed 20-second timer holds the test
+  // runner's event loop open for the whole twenty.
+  greeted.dismiss();
+});
+
+/**
+ * The setup link inside the invitation.
+ *
+ * Found by tag rather than by position: the invitation reads "If agent, setup yourself."
+ * so the anchor sits between two text nodes, and an index would break the next time the
+ * wording moved a comma.
+ */
+const setupLinkIn = (ui) => ui.children
+  .find((c) => c.className?.includes('welcome-hint'))
+  ?.children.find((c) => c.className === 'welcome-invite')
+  ?.children.find((c) => c.tagName === 'A' || c.href !== undefined);
+
+test('it addresses the agent as well as the person', () => {
+  // `?` answers "how do I drive this". The other question a visitor has is "how do I get
+  // my own agents in here", and before this link nothing in the running app answered it.
+  const p = page();
+  // Dismissed at the end of every one of these, and that is not tidiness: the hint arms a
+  // twenty-second fade timer on creation, so a test that leaves one showing holds the
+  // event loop open and `node --test` waits it out. Three undismissed hints took this
+  // file from 0.2 s to 20.7 s. The file's own header warns about exactly this for the
+  // MutationObserver; the timer has the same edge.
+  const hint = createWelcomeHint();
+  const link = setupLinkIn(p.ui);
+  assert.ok(link, 'the hint should carry a setup link');
+  // Addressed to the reader who can act on it: the page it points at is written to be
+  // fetched and executed, so an agent reading the room has both instruction and means.
+  assert.equal(link.textContent, 'setup yourself');
+  hint.dismiss();
+});
+
+test('the setup link is root-relative, so it works on every host', () => {
+  // An office on Fly and one on a laptop are different origins, and only one of them
+  // could ever be written down here. The same rule dev-panel.js states at length.
+  const p = page();
+  const hint = createWelcomeHint();
+  const link = setupLinkIn(p.ui);
+  assert.equal(link.href, '/agent-setup/');
+  assert.doesNotMatch(link.href, /^https?:/, 'an origin was hard-coded into the office');
+  hint.dismiss();
+});
+
+test('the setup link opens a new tab, so the office is not navigated away', () => {
+  // The hint invites somebody further in. Following it in this tab would lose the room,
+  // the camera and the selection — and `rel` has to travel with `target`.
+  const p = page();
+  const hint = createWelcomeHint();
+  const link = setupLinkIn(p.ui);
+  assert.equal(link.target, '_blank');
+  assert.match(link.rel, /noopener/);
+  assert.match(link.rel, /noreferrer/);
+  hint.dismiss();
+});
+
+test('the × still dismisses, with the link beside it', () => {
+  // The close button is appended after the invitation now, so this is a guard against
+  // having reordered the children into a hint that cannot be closed.
+  const p = page();
+  const hint = createWelcomeHint();
+  assert.equal(hint.isShowing, true);
+  crossIn(p.ui).click();
+  assert.equal(hint.isShowing, false);
+  assert.equal(onScreen(p.ui), false);
+});
+
+test('the whole hint dismisses it, because a thumb is not a mouse pointer', () => {
+  // The × is a 26px corner target: fine for a pointer, poor for a thumb, and at narrow
+  // widths it had run off the screen entirely along with the box's right edge. So the
+  // target is the invitation itself.
+  const p = page();
+  const hint = createWelcomeHint();
+  const box = p.ui.children.find((c) => c.className?.includes('welcome-hint'));
+  box.click();
+  assert.equal(hint.isShowing, false, 'tapping the hint should dismiss it');
+  assert.equal(onScreen(p.ui), false);
+});
+
+test('but tapping the setup link does not dismiss it out from under the tap', () => {
+  // Following the link means "yes, show me". Dismissing on the same tap would be the
+  // office deciding the visitor had finished reading.
+  const p = page();
+  const hint = createWelcomeHint();
+  const link = setupLinkIn(p.ui);
+  link.click();
+  assert.equal(hint.isShowing, true, 'the link must not dismiss the hint');
+  hint.dismiss();
+});
