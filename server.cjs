@@ -1980,6 +1980,16 @@ function serveStatic(req, res, url) {
     res.end('Not found');
     return;
   }
+  // Dotfiles and dependencies are never static files. A multiplayer host is meant to be
+  // reachable from other machines, and the setup guide has people put a `.env` with their
+  // settings in this very folder; `.git` would hand out the history. Tested on the
+  // resolved path for the same two-spellings reason as the admin guard above.
+  const rel = path.relative(ROOT, filePath).split(path.sep);
+  if (rel.some((seg) => seg.startsWith('.')) || rel[0] === 'node_modules') {
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not found');
+    return;
+  }
   sendFile(res, filePath);
 }
 

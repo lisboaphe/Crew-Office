@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Roving Office</title>
+  <title>Crew Office</title>
   <!-- Absolute, not relative: this shell is served for every path under
        /office/<keycard>, and "./styles.css" would be looked for inside the office. -->
   <link rel="stylesheet" href="/styles.css" />
@@ -140,5 +140,7 @@
   <!-- Absolute for the same reason as the stylesheet: the shell is served for
        /office/<keycard> and anything under it. -->
   <script type="module" src="/src/main.js"></script>
+  <!-- The multiplayer layer: inert unless this office is a crew room (crew/overlay.js). -->
+  <script type="module" src="/crew/overlay.js"></script>
 </body>
 </html>
