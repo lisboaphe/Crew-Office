@@ -15,7 +15,7 @@ import { agentCapacity } from '../layout.js';
 import { MockSource } from './MockSource.js';
 import { AopSource } from './AopSource.js';
 import { officePath } from '../office/keycard.js';
-import { rovoMark, claudeMark, codexMark, cursorMark, openclawMark, museMark, testDataMark } from '../ui/marks.js';
+import { rovoMark, claudeMark, codexMark, cursorMark, openclawMark, museMark, testDataMark, crewMark } from '../ui/marks.js';
 
 /**
  * @typedef {object} SourceDef
@@ -31,6 +31,18 @@ import { rovoMark, claudeMark, codexMark, cursorMark, openclawMark, museMark, te
 
 /** @type {SourceDef[]} */
 export const SOURCES = [
+  {
+    // The multiplayer office (lib/crew): players and their AI employees, every movement
+    // caused by a real backend event — see lib/crew/office.cjs for the mapping.
+    id: 'crew',
+    label: 'Shared office',
+    blurb: 'Players and their AI teams',
+    accent: '#3d6fd6',
+    mark: crewMark,
+    kind: 'aop',
+    harness: 'crew',
+    create: aopFactory('crew'),
+  },
   {
     id: 'rovo-cli',
     label: 'Rovo CLI',

@@ -1210,6 +1210,8 @@ register({
  */
 function selectionChanged(id) {
   selectedId = id;
+  // The multiplayer overlay (crew/overlay.js) opens its agent panel from this.
+  window.dispatchEvent(new CustomEvent('office:select', { detail: { id } }));
   highlightSelected();
   if (!ride.id) return;
   if (id == null) ride.exit();
@@ -1333,6 +1335,8 @@ if (window.visualViewport) {
 
 const timer = new THREE.Timer();
 window.__dbg = { get world(){return world} };
+// What the multiplayer overlay needs to pin speech bubbles over characters.
+window.officeView = { get world() { return world; }, camera: () => activeCamera(), canvas };
 
 function animate(timestamp) {
   requestAnimationFrame(animate);

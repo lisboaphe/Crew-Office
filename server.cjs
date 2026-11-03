@@ -37,6 +37,7 @@ const { createOfficeStore, deriveKey, sameDigest } = require('./lib/office-store
 const { createAvatarStore } = require('./lib/avatar-store.cjs');
 const { createRateLimiter } = require('./lib/rate-limit.cjs');
 const { createStatsStore } = require('./lib/stats-store.cjs');
+const { createCrew } = require('./lib/crew/index.cjs');
 
 const args = process.argv.slice(2);
 
@@ -154,6 +155,8 @@ let keycard = null;
 let store = null;
 /** And the daily tally the admin console draws. Always present; see lib/stats-store.cjs. */
 let stats = null;
+/** The multiplayer office host (lib/crew). Created at boot, after the office store. */
+let crew = null;
 
 // --- the local endpoint ----------------------------------------------------
 
@@ -1986,6 +1989,10 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host ?? '127.0.0.1'}`);
 
   try {
+    // The multiplayer office: lobby pages and /api/crew/*. Checked first so the crew's
+    // routes cannot be shadowed by the office's own catch-alls below.
+    if (crew && await crew.api.handle(req, res, url)) return undefined;
+
     if (url.pathname === '/api/offices' && req.method === 'POST') return handleMint(req, res);
 
     // The admin console, at whatever path the operator configured, matched before
@@ -2130,6 +2137,21 @@ async function main() {
   if (PUBLISH) store.claim(pinned ?? store.claimedKeycard() ?? keycard.DEMO_KEYCARD);
   store.startSweeping();
 
+  // The multiplayer host. Its database and crash logs live beside the office registry, in
+  // the state directory a deployment mounts, so a room survives a restart or a release.
+  crew = createCrew({
+    dataDir: process.env.CREW_DATA_DIR || path.join(stateDir, 'crew'),
+    root: ROOT,
+    store,
+    mintKeycard: (taken) => keycard.mint((c) => taken(c) || store.has(c), { bytes: (n) => new Uint8Array(crypto.randomBytes(n)) }),
+    version: BUILD.version ?? 'dev',
+    mode: process.env.CREW_MODE === 'dedicated' ? 'dedicated' : 'host',
+    bind: HOST,
+    port: () => PORT,
+    lan: process.env.CREW_LAN !== '0' && HOST !== '127.0.0.1',
+  });
+  if (process.env.CREW_CRASH_HANDLERS !== '0') crew.crash.install();
+
   try {
     PORT = await listen(server);
   } catch (err) {
@@ -2156,7 +2178,11 @@ async function main() {
   server.on('error', (err) => console.error(`[office] server error: ${err.message}`));
 
   publishEndpoint();
+  crew.start();
   console.log(`The Roving Office running at http://localhost:${PORT}`);
+  console.log(`Multiplayer lobby (Host Office / Join Office) at http://localhost:${PORT}/crew`);
+  if (HOST !== '127.0.0.1') for (const a of require('./lib/crew/lan.cjs').lanAddresses()) console.log(`  friends on your network join at http://${a}:${PORT}/crew`);
+  console.log(`  crew data and crash logs in ${crew.dataDir}`);
   // Said out loud only when it is the wide bind, because that is the surprising one and
   // it is the hosted deployments' logs this line lands in. A working tree served to a
   // whole network should be a deliberate sentence somebody can find afterwards.
@@ -2247,6 +2273,8 @@ function listen(server) {
 }
 
 function shutdown() {
+  try { crew?.close(); } catch {}
+  crew = null;
   store?.stopSweeping();
   store?.flush();
   // The counters are debounced by two seconds, so a restart inside that window would

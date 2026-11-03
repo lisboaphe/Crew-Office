@@ -67,7 +67,9 @@ const KB_TITLES = ['TO DO', 'IN PROGRESS', 'DONE'];
 // Drawn from the artwork's own 75-unit box so it scales without going soft.
 const KB_LOGO_BLUE = '#1868db';
 const KB_LOGO_BOX = 75;
-const KB_LOGO_GLYPH_D = 'M28.0429 48.5103H23.817C17.4434 48.5103 12.8711 44.6064 12.8711 38.89H35.5942C36.772 38.89 37.534 39.7265 37.534 40.9116V63.7773C31.8532 63.7773 28.0429 59.1763 28.0429 52.7628V48.5103ZM39.266 37.1472H35.04C28.6664 37.1472 24.0941 33.313 24.0941 27.5965H46.8172C47.995 27.5965 48.8263 28.3634 48.8263 29.5485V52.4142C43.1455 52.4142 39.266 47.8132 39.266 41.3996V37.1472ZM50.5582 25.8537H46.3323C39.9587 25.8537 35.3864 21.9498 35.3864 16.2334H58.1095C59.2873 16.2334 60.0493 17.0699 60.0493 18.1853V41.0511C54.3685 41.0511 50.5582 36.45 50.5582 30.0365V25.8537Z';
+// Three bars: an original board glyph in place of the Jira logomark the upstream drew
+// (excluded from the Apache-2.0 grant by NOTICE).
+const KB_LOGO_GLYPH_D = 'M14 18H26V58H14ZM30 18H42V46H30ZM46 18H58V36H46Z';
 // Path2D exists in a browser but not in the headless probe, which stubs the canvas
 // away entirely; there it simply draws no glyph.
 const KB_LOGO_GLYPH = typeof Path2D === 'function' ? new Path2D(KB_LOGO_GLYPH_D) : null;

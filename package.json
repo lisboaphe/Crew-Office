@@ -132,5 +132,8 @@
     "eslint": "^10.9.1",
     "globals": "^17.11.0",
     "markdown-it-anchor": "^9.2.0"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "^1.4.0"
   }
 }
