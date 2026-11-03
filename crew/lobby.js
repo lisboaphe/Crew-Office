@@ -6,6 +6,7 @@
 // host lives.
 
 import { h, api, toast, avatar, BRAND, reportErrors } from './common.js';
+import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 
 reportErrors('lobby');
 const root = document.getElementById('lobby');
@@ -17,12 +18,14 @@ async function boot() {
   [{ user: me }, info] = await Promise.all([api('GET', '/api/crew/me'), api('GET', '/api/crew/host-info')]);
   document.title = `${BRAND} — Lobby`;
   render();
+  tutorialOnFirstVisit();
 }
 
 function header() {
   // The office's own logo: the isometric room it opens onto.
   const brand = h('div.brand', h('img', { src: '/assets/logo-256.png', alt: '', width: 44, height: 44 }), BRAND);
   return h('div.top', brand, h('span.grow'),
+    h('button.btn', { onclick: () => openTutorial(), title: 'A short tour of how the office works' }, '📘 How it works'),
     me ? h('div.row', avatar(me.displayName, me.color), h('b', me.displayName), h('span.muted', `@${me.username}`),
       h('button.btn.small', { onclick: async () => { await api('POST', '/api/crew/logout'); me = null; render(); } }, 'Sign out')) : null);
 }

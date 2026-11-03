@@ -45,7 +45,7 @@ export default [
 
   // The server, the adapters and the tools: Node, mostly CommonJS.
   {
-    files: ['server.cjs', 'lib/**/*.cjs', 'bin/**/*.cjs', 'test/**/*.cjs'],
+    files: ['server.cjs', 'lib/**/*.cjs', 'bin/**/*.cjs', 'test/**/*.cjs', 'installer/**/*.cjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',

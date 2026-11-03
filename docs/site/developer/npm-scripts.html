@@ -492,6 +492,16 @@ next <code>npm run docs</code> will overwrite you. Add a script, add its <code>s
 <td>The Alice-and-Bob multiplayer demo against a running host (<code>npm run host</code> first). <code>-- --provider anthropic</code> for real models, <code>-- --manual</code> to approve by hand.</td>
 </tr>
 <tr>
+<td><code>npm run app</code></td>
+<td><code>node bin/crew-app.cjs</code></td>
+<td>What the desktop shortcut runs: start the host (or find the one already running) and open the lobby in your browser. <code>-- --private</code> for this computer only.</td>
+</tr>
+<tr>
+<td><code>npm run installer</code></td>
+<td><code>node installer/build.cjs</code></td>
+<td>Build dist/CrewOffice-<version>.zip and, on Windows, dist/CrewOfficeSetup.exe (IExpress, built into Windows). See installer/.</td>
+</tr>
+<tr>
 <td><code>npm run test:crew</code></td>
 <td><code>node --test test/crew-*.test.cjs</code></td>
 <td>Only the multiplayer tests: accounts, rooms, permissions, the message bus, workers, reconnects and the end-to-end demo.</td>

@@ -6,6 +6,7 @@
 // is told to resync and fetches the snapshot again, so no state lives only in the page.
 
 import { h, api, toast, modal, avatar, ago, money, BRAND, reportErrors } from './common.js';
+import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 
 const code = (location.pathname.match(/^\/office\/([^/]+)/) ?? [])[1];
 const S = { room: null, me: null, members: [], agents: [], projects: [], tasks: [], channels: [], approvals: [], notifications: [], workers: [], feed: [], artifacts: [], permissions: {}, providers: {}, host: {} };
@@ -31,6 +32,7 @@ async function boot() {
   await refresh();
   buildChrome();
   connect();
+  tutorialOnFirstVisit({ showMe: tourShowMe });
   window.addEventListener('office:select', (e) => {
     const id = String(e.detail?.id ?? '');
     const m = id.match(/#crew:(agt_[A-Za-z0-9_-]+)$/);
@@ -121,7 +123,15 @@ function renderBar() {
     h('button.btn', { onclick: () => openSide('chat') }, 'Chat'),
     h('button.btn', { onclick: () => toggleDash('approvals') }, 'Approvals', pending ? h('span.badge', pending) : null),
     h('button.btn', { onclick: () => toggleDash('notifications') }, '🔔', unread ? h('span.badge', unread) : null),
+    h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'A short tour of how the office works' }, '📘 How it works'),
   );
+}
+
+/** "Show me" from the tour: open the dashboard on the tab that step is about. */
+function tourShowMe(tab) {
+  ui.tab = tab;
+  ui.dash.classList.remove('hidden');
+  render();
 }
 
 function toggleDash(tab) {

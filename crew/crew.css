@@ -60,7 +60,7 @@
 .cr .avatar .on { position: absolute; right: -2px; bottom: -2px; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--cr-panel); background: var(--cr-ok); }
 
 /* --- in-office overlay --- */
-#crew-bar { position: fixed; top: 58px; right: 12px; z-index: 40; display: flex; gap: 6px; align-items: center; pointer-events: auto; }
+#crew-bar { position: fixed; top: 58px; right: 12px; z-index: 40; display: flex; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 24px); gap: 6px; align-items: center; pointer-events: auto; }
 #crew-bar .btn { box-shadow: var(--cr-shadow); position: relative; }
 #crew-bar .badge { position: absolute; top: -6px; right: -6px; background: var(--cr-bad); color: #fff; border-radius: 99px; font-size: 11px; padding: 0 5px; min-width: 18px; text-align: center; }
 #crew-bar .players { display: flex; gap: -4px; background: var(--cr-panel); padding: 4px 8px; border-radius: 99px; box-shadow: var(--cr-shadow); }
@@ -104,6 +104,16 @@
 .cr-stat .card b { display: block; font-size: 20px; }
 .cr-toast-wrap { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 6px; align-items: center; }
 .cr-toast { background: var(--cr-ink); color: var(--cr-bg); padding: 8px 14px; border-radius: 8px; box-shadow: var(--cr-shadow); font-size: 13px; max-width: 90vw; }
+
+/* the How it works tour */
+.cr-tour { width: min(520px, 100%); }
+.cr-tour-head { display: flex; align-items: center; justify-content: space-between; }
+.cr-tour-step { font-size: 12px; color: var(--cr-ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+.cr-tour-icon { font-size: 44px; line-height: 1; margin: 10px 0 6px; }
+.cr-tour-lines { padding-left: 18px; margin: 6px 0 12px; display: flex; flex-direction: column; gap: 7px; }
+.cr-tour-dots { display: flex; gap: 6px; justify-content: center; }
+.cr-tour-dots button { width: 9px; height: 9px; border-radius: 50%; border: 0; padding: 0; background: var(--cr-line); cursor: pointer; }
+.cr-tour-dots button.on { background: var(--cr-accent); width: 22px; border-radius: 99px; }
 
 /* bubbles over characters */
 #crew-bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 30; }

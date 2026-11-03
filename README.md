@@ -10,7 +10,18 @@ Crew Office is a fork of [The Roving Office](https://github.com/atlassian-labs/r
 the multiplayer host, AI teams, message bus, task engine, workers and dashboard are added
 here. Upstream's documentation follows below the line.
 
-## Quick start
+## Install
+
+**Windows:** run `CrewOfficeSetup.exe` (build it with `npm run installer`; it lands in `dist/`).
+It installs for your user only, checks for Node.js 22.5+ (offering to install it with
+winget), and adds **Crew Office** to the Desktop and Start menu, plus **Crew Office Worker**
+and an uninstaller (also listed in Settings → Apps). **macOS / Linux:**
+`sh installer/unix/install.sh dist/CrewOffice-<version>.zip`.
+
+Inside the office, **📘 How it works** opens a short tour; it also opens by itself on your
+first visit.
+
+## Quick start (from a checkout)
 
 ```bash
 npm install            # optional: installs the Anthropic SDK used by workers

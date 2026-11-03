@@ -9,6 +9,17 @@ Every movement you see is caused by something an agent actually did: a character
 a desk when its task starts, walks to the bookshelf when it reads project notes, turns
 amber when it is waiting for a human, and shows a speech bubble when it sends a message.
 
+## Installing
+
+On Windows, run **CrewOfficeSetup.exe**. It installs for your account only (no administrator
+rights), checks that Node.js is installed and offers to install it, and adds a **Crew Office**
+shortcut to the Desktop and Start menu. Double-click it to host an office: it opens the lobby
+in your browser. The first time, Windows asks whether Node.js may use the network — allow
+private networks so friends at home can join. Uninstall from Settings → Apps; your offices
+and keys are kept unless you choose to delete them.
+
+New here? Press **📘 How it works** in the lobby or the office for a short tour.
+
 ## Hosting an office
 
 1. Start the app in host mode (`npm run host` in the app folder). It prints the lobby
