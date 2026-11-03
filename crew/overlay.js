@@ -121,10 +121,6 @@ function renderBar() {
     h('button.btn', { onclick: () => openSide('chat') }, 'Chat'),
     h('button.btn', { onclick: () => toggleDash('approvals') }, 'Approvals', pending ? h('span.badge', pending) : null),
     h('button.btn', { onclick: () => toggleDash('notifications') }, '🔔', unread ? h('span.badge', unread) : null),
-    window.officeView ? h('button.btn', {
-      title: 'Pixel size of the office (reloads the page)',
-      onclick: () => window.officeView.setPixelScale({ 1: 2, 2: 3, 3: 1 }[window.officeView.pixelScale] ?? 2),
-    }, window.officeView.pixelScale > 1 ? `▦ ${window.officeView.pixelScale}×` : '▦ smooth') : null,
   );
 }
 

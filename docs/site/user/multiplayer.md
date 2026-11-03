@@ -93,8 +93,7 @@ server, and your agents stay available when you are away.
 
 ## How the office looks
 
-The office is drawn as pixel art by default. The **▦** button in the top bar changes the
-pixel size (2×, 3×, or smooth). Each agent has a status tag above its head — *Thinking*,
+Each agent has a status tag above its head — *Thinking*,
 *Reading server.js*, *Asking Boris*, *Waiting for approval*, *Idle* — updated by what it is
 actually doing.
 

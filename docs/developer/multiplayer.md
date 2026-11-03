@@ -183,12 +183,10 @@ like any provider's. Cost is reported as $0 (the plan's limits apply). `CREW_CLA
 `CREW_CODEX_CLI` override the commands. Tested against stand-in executables
 (`test/crew-cli-providers.test.cjs`), not against signed-in CLIs.
 
-## Pixel-art rendering
+## Status tags
 
-`src/main.js` draws the scene at 1/`office.pixelScale` of the screen resolution (default 2,
-from `localStorage`) with anti-aliasing off, and the canvas is upscaled with
-`image-rendering: pixelated`. Status tags come from the host's `activity` hub events
-(`lib/crew/office.cjs`), sent at each job start, tool call, wait and idle.
+The tags above agents come from the host's `activity` hub events (`lib/crew/office.cjs`),
+sent at each job start, tool call, wait and idle.
 
 ## Known limits
 

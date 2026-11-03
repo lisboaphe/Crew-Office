@@ -54,18 +54,7 @@ const loading = document.getElementById('loading');
 // Only the world (room, props, agents, feed) is rebuilt when you switch project,
 // so your camera framing survives the swap.
 
-/**
- * The pixel-art look: the office is drawn at 1/pixelScale of the screen's resolution with
- * no anti-aliasing, and the canvas is scaled back up with nearest-neighbour sampling, so
- * every desk, plant and character lands on hard square pixels. 1 is the smooth original.
- * A per-viewer preference (the overlay's pixel button); changing it reloads, because
- * anti-aliasing is fixed when the WebGL context is made.
- */
-const pixelScale = (() => {
-  try { const v = Number(localStorage.getItem('office.pixelScale')); return [1, 2, 3, 4].includes(v) ? v : 2; } catch { return 2; }
-})();
-if (pixelScale > 1) canvas.style.imageRendering = 'pixelated';
-const renderer = createRenderer({ canvas, antialias: pixelScale === 1, pixelRatio: pixelScale > 1 ? 1 / pixelScale : undefined });
+const renderer = createRenderer({ canvas });
 
 /**
  * How big the picture actually is, in CSS pixels.
@@ -1347,10 +1336,7 @@ if (window.visualViewport) {
 const timer = new THREE.Timer();
 window.__dbg = { get world(){return world} };
 // What the multiplayer overlay needs to pin speech bubbles over characters.
-window.officeView = {
-  get world() { return world; }, camera: () => activeCamera(), canvas, pixelScale,
-  setPixelScale(n) { try { localStorage.setItem('office.pixelScale', String(n)); } catch {} window.location.reload(); },
-};
+window.officeView = { get world() { return world; }, camera: () => activeCamera(), canvas };
 
 function animate(timestamp) {
   requestAnimationFrame(animate);
