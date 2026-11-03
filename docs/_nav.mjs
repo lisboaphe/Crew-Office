@@ -70,6 +70,7 @@ export const NAV = {
         { url: '/user/rearranging-furniture.html', title: 'Rearranging the furniture' },
         { url: '/user/layouts.html', title: 'Layouts' },
         { url: '/user/sharing-an-office.html', title: 'Sharing an office' },
+        { url: '/user/multiplayer.html', title: 'Multiplayer: host, join, bring your AI team' },
       ],
     },
     {
@@ -129,6 +130,7 @@ export const NAV = {
       label: 'How it works',
       pages: [
         { url: '/developer/architecture.html', title: 'Architecture' },
+        { url: '/developer/multiplayer.html', title: 'The multiplayer layer' },
         { url: '/developer/physics.html', title: 'The physics of the office' },
         { url: '/developer/scene-internals.html', title: 'Scene internals' },
         { url: '/developer/job-delivery.html', title: 'Job delivery' },

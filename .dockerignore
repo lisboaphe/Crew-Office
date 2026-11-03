@@ -98,3 +98,9 @@ tro-2-automation-rules.md
 Dockerfile.fly
 .dockerignore
 fly.toml
+
+# Crew Office: deployment files and local settings are not part of the image.
+Dockerfile
+docker-compose.yml
+.env
+.env.example

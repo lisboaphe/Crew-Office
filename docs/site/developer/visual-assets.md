@@ -69,9 +69,9 @@ Jira logomark is a mark lifted out of an attribution lockup.
 | Asset | Where | Source | Release basis |
 |---|---|---|---|
 | **Rovo logomark** (picker tile) | `src/ui/marks.js` — `rovoMark`, built from `ROVO_SHAPES` in `src/rovo-mark.js` | Atlassian's own Rovo mark: the four-facet hexagon in four Atlassian brand colours (`#1868db`, `#bf63f3`, `#fca700`, `#82b536`). The polygon geometry is the very points the standee below is extruded from, turned into 2D SVG paths, so the tile and the statue are one artwork and cannot drift apart | Approved by Atlassian Brand for use in this repository. Excluded from the grant |
-| **Rovo logomark standee** | `src/rovo-mark.js` — `ROVO_SHAPES`, extruded by `src/scene/standees.js`; portrait at `docs/images/objects/rovoLogo.png` | The same mark, flattened one polygon per facet for extrusion. The same polygons are the picker tile in the row above | Approved by Atlassian Brand, covering the 3D extrusion. Excluded from the grant |
-| **Atlassian logo standee** | `src/scene/standees.js` — `ACE_SHAPES`; portrait at `docs/images/objects/aceLogo.png` | Atlassian logo kit, `Atlassian/Atlassian Mark/SVG/Atlassian mark brand RGB.svg`, from <https://atlassian.design/> | Approved by Atlassian Brand, covering the 3D extrusion. Excluded from the grant |
-| **Jira logomark** on the kanban board texture | `src/scene/kanban.js` — `KB_LOGO_GLYPH_D`; portrait at `docs/images/objects/kanbanBoard.png` | Jira attribution kit, `jira attribution/SVG/Jira_attribution_dark.svg`, from <https://atlassian.design/> | Approved by Atlassian Brand. Excluded from the grant |
+| **Four-facet diamond standee** (was the Rovo logomark) | `src/rovo-mark.js` — `ROVO_SHAPES`, extruded by `src/scene/standees.js`; portrait at `docs/images/objects/rovoLogo.png` | Original to this fork; replaces the Atlassian mark, which NOTICE excludes from the grant | Apache-2.0, as the rest of this repository |
+| **Hexagon badge standee** (was the Atlassian logo) | `src/scene/standees.js` — `ACE_SHAPES`; portrait at `docs/images/objects/aceLogo.png` | Original to this fork | Apache-2.0 |
+| **Three-bar board glyph** (was the Jira logomark) on the kanban board texture | `src/scene/kanban.js` — `KB_LOGO_GLYPH_D`; portrait at `docs/images/objects/kanbanBoard.png` | Original to this fork | Apache-2.0 |
 | **Claude Spark** (picker tile) | `src/ui/marks.js` — `claudeMark` | Anthropic press kit, `Claude logos/3 Claude Spark/SVG/Claude Spark - Clay.svg`, from <https://www.anthropic.com/press-kit> | **No permission from Anthropic is held.** Retained on the project owner's decision, accepting that a take-down request would be complied with. Excluded from the grant |
 | **OpenAI Blossom** (picker tile, standing in for Codex) | `src/ui/marks.js` — `codexMark` | OpenAI logo kit, `OpenAI-logos/SVGs/OAI_OpenAI-Blossom_Black.svg`, from <https://openai.com/brand> | **No permission from OpenAI is held.** Retained on the same basis as the Spark. Excluded from the grant |
 
@@ -110,7 +110,6 @@ editor's add-item menu.
 
 | Image | What it reproduces | How to regenerate |
 |---|---|---|
-| `docs/images/panels/source-picker.png` | All five picker marks at once | Screenshot the picker; see [Developing on it](developing.md) on harness pages |
 | `docs/images/objects/rovoLogo.png` | The Rovo standee | `npm run portrait -- --id=rovoLogo` |
 | `docs/images/objects/aceLogo.png` | The Atlassian logo standee | `npm run portrait -- --id=aceLogo` |
 | `docs/images/objects/kanbanBoard.png` | The Jira logomark | `npm run portrait -- --id=kanbanBoard` |

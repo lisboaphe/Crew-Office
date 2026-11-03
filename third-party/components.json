@@ -318,8 +318,7 @@
         "assets/arrivals.svg",
         "assets/breather.svg",
         "assets/curiosity.svg",
-        "assets/ui-theme.css",
-        "docs/images/panels/source-picker.png"
+        "assets/ui-theme.css"
       ],
       "licenseFiles": [],
       "distributions": [

@@ -44,3 +44,6 @@ dist/
 # for no reader. CI rebuilds and verifies it on every push; `pack:plugins:check` guards the
 # committed half.
 plugins/codex/
+
+# Local settings (see .env.example)
+.env

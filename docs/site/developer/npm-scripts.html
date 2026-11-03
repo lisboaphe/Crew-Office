@@ -50,6 +50,9 @@
           <a href="/docs/developer/architecture.html">Architecture</a>
         </li>
         <li>
+          <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
+        </li>
+        <li>
           <a href="/docs/developer/physics.html">The physics of the office</a>
         </li>
         <li>
@@ -468,6 +471,31 @@ next <code>npm run docs</code> will overwrite you. Add a script, add its <code>s
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>npm run host</code></td>
+<td><code>node bin/crew-host.cjs</code></td>
+<td>Host a multiplayer office on this computer for friends on your network (binds 0.0.0.0:8080). The lobby is at /crew.</td>
+</tr>
+<tr>
+<td><code>npm run dedicated</code></td>
+<td><code>node bin/crew-host.cjs --dedicated</code></td>
+<td>The same host, marked as a dedicated server — for a VPS or home server where rooms stay up when their creator leaves.</td>
+</tr>
+<tr>
+<td><code>npm run worker</code></td>
+<td><code>node bin/crew-worker.cjs</code></td>
+<td>Run your AI agents on this machine with your own API keys. First time: <code>-- --host &lt;url&gt; --token &lt;wk_…&gt;</code> from Dashboard → My workers.</td>
+</tr>
+<tr>
+<td><code>npm run demo</code></td>
+<td><code>node bin/crew-demo.cjs</code></td>
+<td>The Alice-and-Bob multiplayer demo against a running host (<code>npm run host</code> first). <code>-- --provider anthropic</code> for real models, <code>-- --manual</code> to approve by hand.</td>
+</tr>
+<tr>
+<td><code>npm run test:crew</code></td>
+<td><code>node --test test/crew-*.test.cjs</code></td>
+<td>Only the multiplayer tests: accounts, rooms, permissions, the message bus, workers, reconnects and the end-to-end demo.</td>
+</tr>
 <tr>
 <td><code>npm run shot</code></td>
 <td><code>node bin/office-shot.js</code></td>

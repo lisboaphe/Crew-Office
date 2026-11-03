@@ -42,6 +42,7 @@ You have the app and a browser.
 - [Rearranging the furniture](https://therovingoffice.com/docs/user/rearranging-furniture.md): Press E, drag the desks about, and watch everybody's route bend round them.
 - [Layouts](https://therovingoffice.com/docs/user/layouts.md): An arrangement of furniture is a thing in its own right: it is kept, it can be named, and it can be handed to somebody else as a file.
 - [Sharing an office](https://therovingoffice.com/docs/user/sharing-an-office.md): Put the sessions running on your laptop into a room somebody else can open.
+- [Multiplayer: host, join, bring your AI team](https://therovingoffice.com/docs/user/multiplayer.md): Crew Office turns the office into a shared, multiplayer workspace.
 - [Jobs: the one idea](https://therovingoffice.com/docs/user/concepts.md): What the office thinks work is, and why it needed its own word for it.
 - [Post, parcels and the bin](https://therovingoffice.com/docs/user/work-and-post.md): How work gets into the room, and how it leaves.
 - [The room, prop by prop](https://therovingoffice.com/docs/user/the-room.md): Every prop is somewhere an agent goes.
@@ -68,6 +69,7 @@ You have a checkout and something to change.
 - [Developing on it](https://therovingoffice.com/docs/developer/developing.md): There is no app build step or npm runtime install.
 - [Every npm script](https://therovingoffice.com/docs/developer/npm-scripts.md): What each command in package.json does, and which of them you actually need.
 - [Architecture](https://therovingoffice.com/docs/developer/architecture.md): How a keystroke in a terminal becomes somebody walking across a room, and where the seams are.
+- [The multiplayer layer](https://therovingoffice.com/docs/developer/multiplayer.md): How the shared office works: rooms, players, owner-side workers, the message bus, the task engine, and the bridge that makes the 3D office show what the agents are doing.
 - [The physics of the office](https://therovingoffice.com/docs/developer/physics.md): How people move, stand, wait and sit, and the rules we keep rediscovering the hard way.
 - [Scene internals](https://therovingoffice.com/docs/developer/scene-internals.md): The code side of the room and the buildings round it: where the constants live, which rules keep the facades still, and the measurements behind the things that look arbitrary.
 - [Job delivery](https://therovingoffice.com/docs/developer/job-delivery.md): The mailbox machinery: how a request gets from a harness into an agent's hands, how finished work leaves again, and what happens to work that fails or is never collected.

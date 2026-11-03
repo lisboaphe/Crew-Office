@@ -1,3 +1,49 @@
+# Crew Office
+
+**A multiplayer office where every player brings their own team of AI employees.** Host an
+office on your computer, invite friends, give the office a project, and the agents plan it,
+message each other across teams, write the files, run the tests, review the work and
+summarise it — on an isometric office floor where every movement is a real backend event.
+
+Crew Office is a fork of [The Roving Office](https://github.com/atlassian-labs/roving-office)
+(Apache-2.0). The 3D office, its characters and its Agent Office Protocol are upstream's;
+the multiplayer host, AI teams, message bus, task engine, workers and dashboard are added
+here. Upstream's documentation follows below the line.
+
+## Quick start
+
+```bash
+npm install            # optional: installs the Anthropic SDK used by workers
+npm run host           # host an office on this computer → http://localhost:8080/crew
+```
+
+Open the lobby, create an account, **Host Office**, then connect a worker for your agents
+(Dashboard → My workers). To watch the whole thing with no API key, in a second terminal:
+
+```bash
+npm run demo           # Alice & Bob, six agents, "Build a simple task management web app"
+```
+
+and sign in as `alice` / `demo-alice-pass`. The demo uses the **scripted test provider**,
+which is not AI — its agents follow fixed scripts and say so. With a key:
+`npm run demo -- --provider anthropic` (reads `ANTHROPIC_API_KEY`).
+
+| | |
+| --- | --- |
+| **[Using it](docs/user/multiplayer.md)** | Hosting, joining, LAN and internet play, workers and keys, projects, approvals |
+| **[How it works](docs/developer/multiplayer.md)** | Architecture, security model, lifecycles, worker protocol, known limits |
+| `.env.example` | Every setting |
+| `docker compose up -d` | Dedicated server (Mode B); `--profile worker` adds an always-on worker |
+
+**What is real and what is not.** Agents call real models (Anthropic via the official SDK,
+OpenAI, or any OpenAI-compatible local server), use real tools, and produce real files; a
+task completes only with evidence the host can check. Not built: a relay for NAT
+traversal (use a VPN mesh, port forwarding, a tunnel or a dedicated server), network
+isolation in the default process sandbox (use `CREW_SANDBOX=docker`), and horizontal
+scaling. Docker deployment is written but was not run in the environment it was built in.
+
+---
+
 # The Roving Office
 
 An office full of characters, and the characters are your AI agents.

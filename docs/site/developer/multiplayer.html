@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The multiplayer layer — The Roving Office</title>
+  <meta name="description" content="How the office is built, and how to change it." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html">For everyone</a>
+      <a href="/docs/developer/index.html" aria-current="page">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="developer documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/index.html">Where to look</a>
+        </li>
+        <li>
+          <a href="/docs/developer/getting-the-code.html">Getting the code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/developing.html">Developing on it</a>
+        </li>
+        <li>
+          <a href="/docs/developer/npm-scripts.html">Every npm script</a>
+        </li>
+      </ul>
+      <h2>How it works</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/architecture.html">Architecture</a>
+        </li>
+        <li>
+          <a href="/docs/developer/multiplayer.html" aria-current="page">The multiplayer layer</a>
+        </li>
+        <li>
+          <a href="/docs/developer/physics.html">The physics of the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/scene-internals.html">Scene internals</a>
+        </li>
+        <li>
+          <a href="/docs/developer/job-delivery.html">Job delivery</a>
+        </li>
+        <li>
+          <a href="/docs/developer/editor.html">The furniture editor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/layout-algorithm.html">The layout algorithm</a>
+        </li>
+        <li>
+          <a href="/docs/developer/tuning-the-layouts.html">Tuning the layout generator</a>
+        </li>
+        <li>
+          <a href="/docs/developer/sources.html">The source model</a>
+        </li>
+        <li>
+          <a href="/docs/developer/test-data.html">The Test Data source</a>
+        </li>
+      </ul>
+      <h2>Changing it</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/extending.html">Extending the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/prop-portraits.html">Photographing a prop</a>
+        </li>
+        <li>
+          <a href="/docs/developer/visual-assets.html">Visual assets and their rights</a>
+        </li>
+        <li>
+          <a href="/docs/developer/coplanar-probe.html">The coplanar-face probe</a>
+        </li>
+        <li>
+          <a href="/docs/developer/plugin-distribution.html">Publishing the plugins</a>
+        </li>
+        <li>
+          <a href="/docs/developer/admin-console.html">The admin console</a>
+        </li>
+      </ul>
+      <h2>The protocol</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/protocol/aop-spec.html">The AOP spec</a>
+        </li>
+        <li>
+          <a href="/docs/developer/protocol/aop-harness-adapters.html">Adapter notes</a>
+        </li>
+        <li>
+          <a href="/agent-setup/">What an agent is told to do <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+      <h2>Adapters</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/adapters/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/muse.html">Muse</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="the-multiplayer-layer" tabindex="-1">The multiplayer layer</h1>
+<p>How the shared office works: rooms, players, owner-side workers, the message bus, the
+task engine, and the bridge that makes the 3D office show what the agents are doing.</p>
+<h2 id="shape" tabindex="-1">Shape</h2>
+<pre><code> browser (player)            room host (server.cjs + lib/crew)            worker (each player's machine)
+ ────────────────            ─────────────────────────────────            ──────────────────────────────
+ /crew lobby  ── HTTP ──▶    accounts, rooms, invites, roles              lib/crew-worker/main.cjs
+ /office/&lt;code&gt;              SQLite: everything durable                   vault: the player's API keys
+   3D office ◀── AOP SSE ─   office bridge → per-room AOP bus             provider adapters (Anthropic SDK,
+   overlay   ◀── crew SSE ─  realtime hub: presence + events                OpenAI-compatible, scripted)
+             ── HTTP ──▶     message bus · projects · tasks · approvals   runner: model ⇄ tools loop
+                             durable job queue (leases) ◀── claim ───────  local tools: sandbox, fetch,
+                             host tools (permission-checked) ◀── RPC ────    private agent memory
+</code></pre>
+<p>The <strong>host is authoritative</strong> for shared state: membership, roles, agent configurations,
+task ownership, approvals, budgets, messages and project files. The <strong>worker is
+authoritative for nothing shared</strong> — it holds what must never leave its owner's machine:
+provider credentials, private agent memory, and resumable checkpoints of jobs it runs.</p>
+<p>Every connection is initiated by a browser or a worker, never by the host, so workers
+behind NAT need no open port. Only the host must be reachable.</p>
+<h2 id="why-these-technologies" tabindex="-1">Why these technologies</h2>
+<ul>
+<li><strong>No new runtime dependencies on the host.</strong> The office was built with none, and the
+multiplayer host keeps it that way: Node's built-in <code>node:sqlite</code> for persistence, plain
+<code>http</code>, Server-Sent Events for realtime. The one dependency is the official Anthropic SDK,
+used only by workers (optional).</li>
+<li><strong>SSE + HTTP rather than WebSockets.</strong> The office already streams AOP over SSE; SSE
+reconnects by itself with <code>Last-Event-ID</code>, passes through proxies, and every write is an
+ordinary authenticated request. The hub keeps a 500-event replay buffer per room and tells
+a client that fell further behind to <code>resync</code> (refetch the snapshot).</li>
+<li><strong>Host-driven visuals through AOP.</strong> <code>lib/crew/office.cjs</code> speaks the Agent Office
+Protocol into each room's existing bus under harness <code>crew</code>. The 3D engine, reducer and
+character behaviours are unchanged: <code>turn.start</code> puts work on a desk, a <code>search</code>/<code>knowledge</code>
+tool sends a character to the bookshelf, <code>permission.request</code> turns them amber, <code>turn.end</code>
+delivers. Speech bubbles and conversation lines have no AOP vocabulary, so they travel on
+the crew hub and the overlay pins them to characters via <code>window.officeView</code>.</li>
+</ul>
+<h2 id="files" tabindex="-1">Files</h2>
+<pre><code>lib/crew/
+  index.cjs        assembly, boot recovery, background sweep
+  db.cjs           SQLite schema (append-only migrations) and helpers
+  auth.cjs         accounts (scrypt), sessions (HttpOnly cookie, digest stored)
+  rooms.cjs        rooms, privacy, password, cap, invites, roles, `can()`
+  hub.cjs          per-room SSE, replay buffer, presence with a reload grace
+  agents.cjs       agent CRUD; owner-only control; availability; usage
+  workers.cjs      worker tokens, liveness, attended vs always-on, nudges
+  bus.cjs          channels, DMs, structured messages, correlation, loop guards
+  jobs.cjs         durable queue: idempotent enqueue, leases, retries, cancel
+  work.cjs         projects, grants, tasks, planning, approvals, files, notes, scheduler
+  host-tools.cjs   shared-state tools executed for workers, after permission checks
+  office.cjs       backend events → AOP → the 3D office
+  api.cjs          HTTP routes (browser and worker)
+  catalog.cjs      permissions, tools, states, prices — shared with workers
+  crash.cjs        crash logs (redacted)
+  lan.cjs          UDP discovery on the local network
+  demo-kit.cjs     driving a room from code (demo script, tests)
+lib/crew-worker/
+  main.cjs         the worker program and its loopback settings page
+  worker.cjs       one host connection: stream, claim, run, reconnect
+  runner.cjs       the bounded, cancellable, resumable model⇄tools loop
+  providers.cjs    Anthropic (SDK), OpenAI / local (OpenAI-compatible), scripted
+  scripted.cjs     the scripted test provider (not AI)
+  schemas.cjs      tool descriptions and JSON Schemas for models
+  local-tools.cjs  sandboxed commands, web fetch, private memory
+  sandbox.cjs      process (Node permission model) or Docker isolation
+  vault.cjs        encrypted credential store
+crew/              lobby and in-office overlay (no build step)
+bin/crew-host.cjs  `npm run host` / `npm run dedicated`
+bin/crew-worker.cjs, bin/crew-demo.cjs
+</code></pre>
+<h2 id="security-model" tabindex="-1">Security model</h2>
+<p><strong>Identity.</strong> Accounts are per host. Browser requests authenticate with a session cookie;
+state-changing requests also need <code>X-Crew: 1</code>, which a cross-origin page cannot send
+without a CORS preflight the host never grants. Workers authenticate with a bearer token
+minted by their owner; the host stores only its SHA-256.</p>
+<p><strong>Ownership.</strong> An agent is controlled by its owner only (<code>agents.owned()</code>), whatever the
+owner's room role. Room roles (<code>guest &lt; member &lt; admin &lt; owner</code>) govern the room: who may
+create agents and projects, invite, manage players, change settings, stop the room.</p>
+<p><strong>Grants.</strong> An owner lends an agent to a project with a subset of its permissions, a
+project budget, and <code>requiresApproval</code>. The tools a job is issued are recomputed on every
+call as <em>agent permissions ∩ grant permissions</em> (<code>host-tools.issuedTools</code>), so revoking a
+grant takes effect mid-job. Assigning work to an agent whose owner did not request it
+creates an approval only that owner can decide — the project creator, the manager agent and
+the room owner cannot bypass it.</p>
+<p><strong>Cross-team communication.</strong> An agent may message or ask another agent only if both are
+granted to the project the job belongs to (or share an owner). Messages are data in the
+recipient's prompt, never authority: the system prompt says so, and nothing in a message
+changes what tools the recipient holds.</p>
+<p><strong>Credentials.</strong> Keys live in the worker's vault (AES-256-GCM, key file beside it) or its
+environment. They are only ever sent to the provider. The end-to-end test asserts a key in a
+worker never appears in the host's database or in any API response. The sandbox child gets
+an empty environment.</p>
+<p><strong>Execution.</strong> <code>run_command</code> runs Node only, parsed without a shell, against a temporary
+copy of the project files, with a 60 s limit and capped output. Default isolation is
+Node's permission model: filesystem confined to the copy, no child processes, no workers, no
+addons — <strong>network is not blocked</strong> at this level. <code>CREW_SANDBOX=docker</code> uses a container
+with no network, 512 MB, one CPU and a process limit. <code>fetch_url</code> refuses private and
+loopback addresses and redirects. Files a command changes are not synced back; deliverables
+are written with <code>write_file</code>, which the host confines to the project directory.</p>
+<p><strong>Approvals.</strong> <code>delete_file</code> always asks; agents set to <code>ask</code> ask before writing files,
+running code, fetching or delegating; <code>request_human_approval</code> asks explicitly. A parked job
+checkpoints its transcript on the worker (it can contain private memory) and is requeued
+with the decision.</p>
+<p><strong>Static files.</strong> The host refuses dotfiles and <code>node_modules</code>, so a <code>.env</code> beside the app
+is never served.</p>
+<h2 id="lifecycle" tabindex="-1">Lifecycle</h2>
+<p>Agent states: <code>IDLE → ASSIGNED → PLANNING | WORKING | REVIEW → (WAITING) → COMPLETED</code>, plus
+<code>FAILED</code>, <code>PAUSED</code>, <code>CANCELLED</code>, <code>BLOCKED</code> (budget) and <code>OFFLINE</code> (no worker / owner away).</p>
+<p>Task states: <code>pending → awaiting_approval → queued → in_progress → (waiting) → completed</code>,
+plus <code>failed</code>, <code>cancelled</code>, <code>blocked</code> (a dependency failed, or budget). The scheduler queues a
+task only when its project is active, its approval is clear, every dependency is completed
+and its grant has budget left. A task job that ends without <code>complete_task</code> is a failed
+attempt; attempts are bounded (<code>max_attempts</code>), and the next attempt is told why the last
+failed. When every work task is settled the manager gets a <code>synthesis</code> task.</p>
+<p>Jobs are leased for 90 s and extended by every heartbeat and tool call. A worker that goes
+quiet for 35 s loses its leases without losing an attempt; a lease that simply runs out
+counts as a failure. On host restart, leased jobs return to the queue.</p>
+<p>Conversation limits: 20 messages a minute per agent, 10 messages between any two agents per
+task, a refusal for repeating the same message, and <code>ask_agent</code> chains at most two deep.</p>
+<h2 id="worker-protocol" tabindex="-1">Worker protocol</h2>
+<p>All <code>POST</code> JSON with <code>Authorization: Bearer wk_…</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET /api/crew/worker/whoami</code></td>
+<td>Which room, which player, which agents</td>
+</tr>
+<tr>
+<td><code>GET /api/crew/worker/stream</code></td>
+<td>SSE nudges (<code>jobs</code>); also keeps the worker online</td>
+</tr>
+<tr>
+<td><code>POST /api/crew/worker/claim</code></td>
+<td>Lease one runnable job for this player's agents; returns its context</td>
+</tr>
+<tr>
+<td><code>POST /api/crew/worker/heartbeat</code></td>
+<td>Extend the lease; learn of cancellation</td>
+</tr>
+<tr>
+<td><code>POST /api/crew/worker/tool</code></td>
+<td>Run a host tool <code>{jobId, name, args}</code></td>
+</tr>
+<tr>
+<td><code>POST /api/crew/worker/authorize</code></td>
+<td>Ask before a local tool <code>{jobId, name, summary}</code></td>
+</tr>
+<tr>
+<td><code>POST /api/crew/worker/usage</code></td>
+<td>Report tokens and cost; the answer may say stop</td>
+</tr>
+<tr>
+<td><code>POST /api/crew/worker/finish</code></td>
+<td><code>done</code>, <code>failed</code>, <code>waiting</code> or <code>cancelled</code></td>
+</tr>
+<tr>
+<td><code>GET /api/crew/worker/files?jobId=</code></td>
+<td>Project files for a sandboxed run (needs <code>files.read</code>)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="testing" tabindex="-1">Testing</h2>
+<pre><code class="language-bash">npm run test:crew     # multiplayer tests only
+npm test              # everything
+</code></pre>
+<p><code>test/crew-e2e.test.cjs</code> is the required demo as a test: a real host process, two players,
+two workers, six agents, plan and assignment approvals, cross-team questions answered on the
+same correlation id, files, a sandboxed test run, a review, the summary, credential
+isolation, and a host restart with nothing lost. It uses the scripted provider, so it runs
+offline. Other <code>test/crew-*.test.cjs</code> files cover permissions, the bus, jobs and leases,
+reconnection, the sandbox and crash logs.</p>
+<h2 id="known-limits" tabindex="-1">Known limits</h2>
+<ul>
+<li>No built-in relay or NAT traversal: remote play needs a VPN mesh, port forwarding, a
+tunnel, or a dedicated server.</li>
+<li>The process sandbox does not block network access; use Docker mode where that matters.</li>
+<li>Agents' sandboxed runs see a copy of the files; their changes are not synced back.</li>
+<li>The host trusts what a worker reports about usage and test runs. A player can only
+misreport their own agents' work, and the reports are labelled with whose worker ran them.</li>
+<li>Only Anthropic models are priced out of the box; OpenAI prices are approximate and local
+models cost $0.</li>
+<li>One host process per data directory; there is no horizontal scaling.</li>
+</ul>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#shape">Shape</a></li>
+<li><a href="#why-these-technologies">Why these technologies</a></li>
+<li><a href="#files">Files</a></li>
+<li><a href="#security-model">Security model</a></li>
+<li><a href="#lifecycle">Lifecycle</a></li>
+<li><a href="#worker-protocol">Worker protocol</a></li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#known-limits">Known limits</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone with a checkout. If you just want to use the thing,
+      <a href="/docs/user/index.html">the user docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

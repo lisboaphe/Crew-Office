@@ -1,0 +1,42 @@
+# Crew Office on a VPS or home server.
+#
+#   cp .env.example .env      # then edit it
+#   docker compose up -d
+#   open http://<server>:8080/crew
+#
+# Put HTTPS in front of it (Caddy, nginx, Traefik) before exposing it to the internet,
+# and set ROVING_OFFICE_TRUST_PROXY=1 when you do.
+
+services:
+  host:
+    build: .
+    image: crew-office:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      CREW_MODE: dedicated
+      # UDP broadcast does not leave a Docker bridge network; LAN discovery is for Mode A.
+      CREW_LAN: "0"
+    ports:
+      - "${CREW_PORT:-8080}:8080"
+    volumes:
+      - crew-data:/data
+
+  # An always-on worker for ONE player's agents, using that player's keys from .env.
+  # Mint its token in the office (Dashboard → My workers → Connect a worker, tick
+  # “Always-on”), put it in CREW_WORKER_TOKEN, then: docker compose --profile worker up -d
+  worker:
+    profiles: ["worker"]
+    image: crew-office:latest
+    restart: unless-stopped
+    depends_on: [host]
+    env_file: .env
+    environment:
+      CREW_WORKER_DIR: /data/worker
+    command: ["node", "lib/crew-worker/main.cjs", "--host", "http://host:8080"]
+    volumes:
+      - worker-data:/data
+
+volumes:
+  crew-data:
+  worker-data:

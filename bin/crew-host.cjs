@@ -10,6 +10,10 @@
 
 'use strict';
 
+// Settings from a .env beside the app, if there is one (see .env.example). Values
+// already in the environment win.
+try { process.loadEnvFile(require('path').join(__dirname, '..', '.env')); } catch { /* no .env */ }
+
 process.env.HOST = process.env.HOST || '0.0.0.0';
 if (process.argv.includes('--dedicated')) {
   process.env.CREW_MODE = 'dedicated';

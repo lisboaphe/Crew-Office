@@ -2,7 +2,6 @@
 
 *One command per harness, then your real sessions walk in through the door.*
 
-<img src="../images/panels/source-picker.png" width="736" alt="The Choose sources dialog: six harness tiles, each with its mark, a one-line description and a badge reading either Connect to use or Ready to explore.">
 
 *A new keycard opens this panel automatically. Press **`D`** to return to it. Test Data is ticked and ready; the rest want a one-line install.*
 

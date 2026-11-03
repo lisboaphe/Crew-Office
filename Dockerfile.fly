@@ -50,6 +50,7 @@ COPY admin ./admin
 # degrade — it breaks the one install route that needs no clone, and reports 404 to
 # something that was told the file is authoritative.
 COPY agent-setup ./agent-setup
+COPY crew ./crew
 
 ENV PORT=8080
 # `server.cjs` binds loopback by default, because on a laptop it serves the whole working

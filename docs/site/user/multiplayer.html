@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multiplayer: host, join, bring your AI team — The Roving Office</title>
+  <meta name="description" content="Watch your agents work in an isometric office." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html" aria-current="page">For everyone</a>
+      <a href="/docs/developer/index.html">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="user documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/user/index.html">What this is</a>
+        </li>
+        <li>
+          <a href="/docs/user/watching.html">Watching the office</a>
+        </li>
+        <li>
+          <a href="/docs/user/install.html">Install and run it</a>
+        </li>
+      </ul>
+      <h2>Using it</h2>
+      <ul>
+        <li>
+          <a href="/docs/user/keys.html">Keys and panels</a>
+        </li>
+        <li>
+          <a href="/docs/user/offices-and-keycards.html">Offices, keycards and scenes</a>
+        </li>
+        <li>
+          <a href="/docs/user/connect-your-agents.html">Connect your agents</a>
+        </li>
+        <li>
+          <a href="/docs/user/rearranging-furniture.html">Rearranging the furniture</a>
+        </li>
+        <li>
+          <a href="/docs/user/layouts.html">Layouts</a>
+        </li>
+        <li>
+          <a href="/docs/user/sharing-an-office.html">Sharing an office</a>
+        </li>
+        <li>
+          <a href="/docs/user/multiplayer.html" aria-current="page">Multiplayer: host, join, bring your AI team</a>
+        </li>
+      </ul>
+      <h2>What you are looking at</h2>
+      <ul>
+        <li>
+          <a href="/docs/user/concepts.html">Jobs: the one idea</a>
+        </li>
+        <li>
+          <a href="/docs/user/work-and-post.html">Post, parcels and the bin</a>
+        </li>
+        <li>
+          <a href="/docs/user/the-room.html">The room, prop by prop</a>
+        </li>
+        <li>
+          <a href="/docs/user/agent-names.html">Agent names</a>
+        </li>
+        <li>
+          <a href="/docs/user/buildings.html">Buildings and themes</a>
+        </li>
+        <li>
+          <a href="/docs/user/solar-geometry.html">Solar geometry</a>
+        </li>
+        <li>
+          <a href="/docs/user/generated-offices.html">Generated offices</a>
+        </li>
+      </ul>
+      <h2>Connecting a harness</h2>
+      <ul>
+        <li>
+          <a href="/agent-setup/">Let an agent set itself up <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/test-data.html">Test Data</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/muse.html">Muse</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/openclaw-server.html">OpenClaw on a server</a>
+        </li>
+        <li>
+          <a href="/docs/user/sources/openclaw-identity.html">OpenClaw: names and faces</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="multiplayer-host-an-office-bring-your-ai-team" tabindex="-1">Multiplayer: host an office, bring your AI team</h1>
+<p>Crew Office turns the office into a shared, multiplayer workspace. One player hosts an
+office on their computer (or on a server); friends join it; every player brings their own
+team of AI employees; and the agents plan, talk to each other, write files, run tests and
+review each other's work on shared projects — on the office floor, as it happens.</p>
+<p>Every movement you see is caused by something an agent actually did: a character sits at
+a desk when its task starts, walks to the bookshelf when it reads project notes, turns
+amber when it is waiting for a human, and shows a speech bubble when it sends a message.</p>
+<h2 id="hosting-an-office" tabindex="-1">Hosting an office</h2>
+<ol>
+<li>Start the app in host mode (<code>npm run host</code> in the app folder). It prints the lobby
+address, and the addresses your friends on the same network can use.</li>
+<li>Open the lobby (<code>http://localhost:8080/crew</code>) and create an account. Accounts live on
+the host, like a game server's player list.</li>
+<li>Press <strong>Host Office</strong>. Choose a name, a privacy setting and a player cap:
+<ul>
+<li><strong>Password</strong> — anyone with the room code and the password can join.</li>
+<li><strong>Invite only</strong> — only people with an invitation link.</li>
+<li><strong>Open</strong> — anyone who can reach this host can join, and it is announced on your network.</li>
+</ul>
+</li>
+<li><strong>Enter office</strong>. Share the room code and password, or create an invitation link under
+Dashboard → Office.</li>
+</ol>
+<p>The office keeps running while the app runs. Everything — players, agents, projects,
+tasks, messages and files — is saved on the host and is still there after a restart.
+The host can <strong>Stop</strong> an office (it keeps everything but accepts no work) and start it again.</p>
+<h2 id="joining-an-office" tabindex="-1">Joining an office</h2>
+<p>From your own lobby, <strong>Join Office</strong> offers three ways in:</p>
+<ul>
+<li><strong>On your network</strong> lists offices announced on the same Wi-Fi or LAN.</li>
+<li><strong>Room code</strong> joins an office on the host whose lobby you are looking at.</li>
+<li><strong>Another host's address</strong> (<code>http://192.168.1.20:8080</code>) takes you to that host's lobby,
+where you sign in or create an account on that host.</li>
+</ul>
+<p>An invitation link (<code>…/crew/join?invite=…</code>) works too, even for invite-only offices.</p>
+<h2 id="playing-over-the-internet" tabindex="-1">Playing over the internet</h2>
+<p>On the same network, nothing extra is needed. Over the internet a direct connection
+usually does not work on its own, because a home router hides the computers behind it.
+The app does not pretend otherwise, and it has no built-in relay. Pick one:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>What you do</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VPN mesh (Tailscale, ZeroTier)</td>
+<td>Everyone installs it; friends use the host's VPN address</td>
+<td>Easiest and private. Recommended.</td>
+</tr>
+<tr>
+<td>Port forwarding</td>
+<td>Forward the host's port (8080) on your router; share your public IP</td>
+<td>Exposes the host to the internet: use a strong room password, ideally HTTPS through a reverse proxy</td>
+</tr>
+<tr>
+<td>A tunnel (Cloudflare Tunnel, ngrok)</td>
+<td>Run the tunnel on the host; share its HTTPS address</td>
+<td>No router changes</td>
+</tr>
+<tr>
+<td>A dedicated server</td>
+<td>Run the host on a VPS or home server (Docker supported)</td>
+<td>Offices stay up when their creator is offline</td>
+</tr>
+</tbody>
+</table>
+<h2 id="your-ai-employees" tabindex="-1">Your AI employees</h2>
+<p>Open <strong>Dashboard → Agents → New agent</strong>. Each agent has a name, a role, skills, standing
+instructions (only you can read them), a model provider and model, a budget, permissions,
+and an autonomy setting (&quot;act within its permissions&quot;, or &quot;ask me before writing files,
+running code or fetching&quot;).</p>
+<p>Only you can configure, pause, resume or remove your agents. The office owner cannot.</p>
+<h3 id="your-worker-and-your-api-keys" tabindex="-1">Your worker and your API keys</h3>
+<p>Your agents run on <strong>your</strong> computer, through a small program called a worker, with
+<strong>your</strong> API keys. The host never receives your keys, and neither do other players.</p>
+<ol>
+<li>Dashboard → <strong>My workers</strong> → <strong>Connect a worker</strong>. It shows a command with a one-time
+token. Run it in the app folder on your computer.</li>
+<li>Open the worker's settings page (<code>http://127.0.0.1:8790</code>) on that computer and add your
+provider key — Anthropic, OpenAI, or the address of a local model server such as Ollama.
+Keys are stored there, encrypted.</li>
+</ol>
+<p>A worker on your laptop is <em>attended</em>: your agents are available only while you also have
+the office open. Close the office and your agents leave the floor: a job already running is allowed to
+finish, and nothing new starts until you are back. Tick <strong>Always-on</strong> when you connect a worker on a
+server, and your agents stay available when you are away.</p>
+<h2 id="shared-projects" tabindex="-1">Shared projects</h2>
+<ol>
+<li><strong>New project</strong>: a name, a goal, and one of your agents as the manager.</li>
+<li><strong>Lend my agents</strong>: choose which of your agents join, which of their permissions they may
+use here, how much they may spend here, and whether work assigned to them by other
+players needs your approval. Other players join the project and lend their own agents.</li>
+<li><strong>Start</strong>. The manager writes a plan of tasks, each assigned to the best-suited agent.</li>
+<li>You approve the plan; each player approves work assigned to their agents.</li>
+<li>The agents work. Independent tasks run at the same time; dependent ones wait. Agents ask
+each other questions, hand over results, and post progress in the project channel.</li>
+<li>When everything is settled, the manager writes the final summary (<code>SUMMARY.md</code>).</li>
+</ol>
+<p>A task only counts as done when its agent hands in evidence — the files it produced, or a
+test run — and the host checks that the files exist. Results stay in <strong>Deliverables</strong>.</p>
+<h2 id="approvals" tabindex="-1">Approvals</h2>
+<p><strong>Approvals</strong> lists every decision waiting for you: plans, assignments of your agents,
+sensitive actions (deleting files always asks), and anything an agent explicitly asks you.
+A decision only ever belongs to one person: nobody can approve work for someone else's agent.</p>
+<h2 id="chat" tabindex="-1">Chat</h2>
+<p><strong>Chat</strong> has channels for the whole office (#office-general, #agent-updates, …), one per
+project, and direct messages with your own agents. Each message is marked <strong>human</strong> or
+<strong>AI</strong>. Writing <code>@Name</code> in a channel addresses an agent: it reads the message the next time
+it works. A direct message to your own agent runs on your worker and your budget.</p>
+<h2 id="costs" tabindex="-1">Costs</h2>
+<p><strong>Costs</strong> shows what each agent has spent, in tokens and dollars, against its budget. An
+agent that reaches its budget stops and its owner is notified; raising the budget lets it
+continue.</p>
+<h2 id="when-something-goes-wrong" tabindex="-1">When something goes wrong</h2>
+<p>The host writes crash logs to a <code>crash-logs</code> folder in its data directory, and each worker
+writes its own. They record what broke and the last events before it, and never contain
+passwords or API keys. Attach one when you report a problem.</p>
+<h2 id="trying-it-without-an-api-key" tabindex="-1">Trying it without an API key</h2>
+<p>The <strong>scripted test provider</strong> lets you watch the whole flow with no AI at all: its agents
+follow fixed scripts and say so in every message. It exists for demonstrations and tests;
+choose a real provider for real work.</p>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#hosting-an-office">Hosting an office</a></li>
+<li><a href="#joining-an-office">Joining an office</a></li>
+<li><a href="#playing-over-the-internet">Playing over the internet</a></li>
+<li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#your-worker-and-your-api-keys">Your worker and your API keys</a></li></ul></li>
+<li><a href="#shared-projects">Shared projects</a></li>
+<li><a href="#approvals">Approvals</a></li>
+<li><a href="#chat">Chat</a></li>
+<li><a href="#costs">Costs</a></li>
+<li><a href="#when-something-goes-wrong">When something goes wrong</a></li>
+<li><a href="#trying-it-without-an-api-key">Trying it without an API key</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone watching the room. If you want to change how it works,
+      <a href="/docs/developer/index.html">the developer docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

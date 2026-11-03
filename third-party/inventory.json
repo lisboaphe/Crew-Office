@@ -555,8 +555,7 @@
         "assets/arrivals.svg",
         "assets/breather.svg",
         "assets/curiosity.svg",
-        "assets/ui-theme.css",
-        "docs/images/panels/source-picker.png"
+        "assets/ui-theme.css"
       ],
       "licenseFiles": [],
       "distributions": [
@@ -612,10 +611,6 @@
         {
           "path": "assets/ui-theme.css",
           "sha256": "9dd81b4a30d5f1f79f89a3deb632478decaf728eeeb05afd8ed6660d3d940100"
-        },
-        {
-          "path": "docs/images/panels/source-picker.png",
-          "sha256": "20f21972c69b1cff2579acef2818a098d0b46a4bdaf4388df8755d98f0d13511"
         },
         {
           "path": "favicon.ico",

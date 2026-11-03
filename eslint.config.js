@@ -35,7 +35,7 @@ export default [
   // the same world — a module the browser loads — and the only reason it lives outside
   // src/ is that the static file server refuses that directory (server.cjs).
   {
-    files: ['src/**/*.js', 'admin/**/*.js'],
+    files: ['src/**/*.js', 'admin/**/*.js', 'crew/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',

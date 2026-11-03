@@ -106,6 +106,11 @@ Not yet filed under a heading above.
 
 | Script | Runs | What for |
 | --- | --- | --- |
+| `npm run host` | `node bin/crew-host.cjs` | Host a multiplayer office on this computer for friends on your network (binds 0.0.0.0:8080). The lobby is at /crew. |
+| `npm run dedicated` | `node bin/crew-host.cjs --dedicated` | The same host, marked as a dedicated server — for a VPS or home server where rooms stay up when their creator leaves. |
+| `npm run worker` | `node bin/crew-worker.cjs` | Run your AI agents on this machine with your own API keys. First time: `-- --host <url> --token <wk_…>` from Dashboard → My workers. |
+| `npm run demo` | `node bin/crew-demo.cjs` | The Alice-and-Bob multiplayer demo against a running host (`npm run host` first). `-- --provider anthropic` for real models, `-- --manual` to approve by hand. |
+| `npm run test:crew` | `node --test test/crew-*.test.cjs` | Only the multiplayer tests: accounts, rooms, permissions, the message bus, workers, reconnects and the end-to-end demo. |
 | `npm run shot` | `node bin/office-shot.js` | Photograph a **running** office for the docs — it waits for people to walk in first, which a load-time screenshot cannot. Needs an office already up. `-- --out=x.png --hide-ui --wait=70000`. |
 | `npm run plan` | `node bin/office-plan.js` | Generate a whole office from a seed and print it as a plan you can read. `-- misty-quay-3100` for one, `-- --from=some.json` to draw a layout somebody made. |
 | `npm run plan:sweep` | `node bin/office-plan.js --sweep=2000 --quiet` | Generate two thousand offices and check every one against the gate and the scorecard. This is the test that the generator cannot make a room that does not work. |
