@@ -5,7 +5,7 @@
 // host; joining by address sends you to another host's lobby, where your account for that
 // host lives.
 
-import { h, api, toast, avatar, BRAND, LOGO, reportErrors } from './common.js';
+import { h, api, toast, avatar, BRAND, reportErrors } from './common.js';
 
 reportErrors('lobby');
 const root = document.getElementById('lobby');
@@ -20,9 +20,8 @@ async function boot() {
 }
 
 function header() {
-  const brand = h('div.brand');
-  brand.innerHTML = LOGO;
-  brand.append(BRAND);
+  // The office's own logo: the isometric room it opens onto.
+  const brand = h('div.brand', h('img', { src: '/assets/logo-256.png', alt: '', width: 44, height: 44 }), BRAND);
   return h('div.top', brand, h('span.grow'),
     me ? h('div.row', avatar(me.displayName, me.color), h('b', me.displayName), h('span.muted', `@${me.username}`),
       h('button.btn.small', { onclick: async () => { await api('POST', '/api/crew/logout'); me = null; render(); } }, 'Sign out')) : null);

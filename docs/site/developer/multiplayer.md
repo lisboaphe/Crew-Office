@@ -68,6 +68,7 @@ lib/crew-worker/
   worker.cjs       one host connection: stream, claim, run, reconnect
   runner.cjs       the bounded, cancellable, resumable model⇄tools loop
   providers.cjs    Anthropic (SDK), OpenAI / local (OpenAI-compatible), scripted
+  cli-providers.cjs  Claude Code and Codex on the owner's subscription, via a JSON tool protocol
   scripted.cjs     the scripted test provider (not AI)
   schemas.cjs      tool descriptions and JSON Schemas for models
   local-tools.cjs  sandboxed commands, web fetch, private memory
@@ -170,6 +171,24 @@ same correlation id, files, a sandboxed test run, a review, the summary, credent
 isolation, and a host restart with nothing lost. It uses the scripted provider, so it runs
 offline. Other `test/crew-*.test.cjs` files cover permissions, the bus, jobs and leases,
 reconnection, the sandbox and crash logs.
+
+## Subscription providers
+
+`claude-cli` and `codex-cli` run the owner's own Claude Code (`claude -p --output-format json
+--tools "" --strict-mcp-config`) or Codex (`codex exec --json --sandbox read-only` in an empty
+temp folder) once per turn, statelessly, with the transcript on stdin. Built-in tools are off
+(Claude Code) or have nothing to act on (Codex); the office's tools are described in the
+prompt and the model answers with one JSON object of tool calls, which the runner executes
+like any provider's. Cost is reported as $0 (the plan's limits apply). `CREW_CLAUDE_CLI` /
+`CREW_CODEX_CLI` override the commands. Tested against stand-in executables
+(`test/crew-cli-providers.test.cjs`), not against signed-in CLIs.
+
+## Pixel-art rendering
+
+`src/main.js` draws the scene at 1/`office.pixelScale` of the screen resolution (default 2,
+from `localStorage`) with anti-aliasing off, and the canvas is upscaled with
+`image-rendering: pixelated`. Status tags come from the host's `activity` hub events
+(`lib/crew/office.cjs`), sent at each job start, tool call, wait and idle.
 
 ## Known limits
 

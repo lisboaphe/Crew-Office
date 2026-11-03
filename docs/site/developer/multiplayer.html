@@ -210,6 +210,7 @@ lib/crew-worker/
   worker.cjs       one host connection: stream, claim, run, reconnect
   runner.cjs       the bounded, cancellable, resumable model⇄tools loop
   providers.cjs    Anthropic (SDK), OpenAI / local (OpenAI-compatible), scripted
+  cli-providers.cjs  Claude Code and Codex on the owner's subscription, via a JSON tool protocol
   scripted.cjs     the scripted test provider (not AI)
   schemas.cjs      tool descriptions and JSON Schemas for models
   local-tools.cjs  sandboxed commands, web fetch, private memory
@@ -326,6 +327,19 @@ same correlation id, files, a sandboxed test run, a review, the summary, credent
 isolation, and a host restart with nothing lost. It uses the scripted provider, so it runs
 offline. Other <code>test/crew-*.test.cjs</code> files cover permissions, the bus, jobs and leases,
 reconnection, the sandbox and crash logs.</p>
+<h2 id="subscription-providers" tabindex="-1">Subscription providers</h2>
+<p><code>claude-cli</code> and <code>codex-cli</code> run the owner's own Claude Code (<code>claude -p --output-format json --tools &quot;&quot; --strict-mcp-config</code>) or Codex (<code>codex exec --json --sandbox read-only</code> in an empty
+temp folder) once per turn, statelessly, with the transcript on stdin. Built-in tools are off
+(Claude Code) or have nothing to act on (Codex); the office's tools are described in the
+prompt and the model answers with one JSON object of tool calls, which the runner executes
+like any provider's. Cost is reported as $0 (the plan's limits apply). <code>CREW_CLAUDE_CLI</code> /
+<code>CREW_CODEX_CLI</code> override the commands. Tested against stand-in executables
+(<code>test/crew-cli-providers.test.cjs</code>), not against signed-in CLIs.</p>
+<h2 id="pixel-art-rendering" tabindex="-1">Pixel-art rendering</h2>
+<p><code>src/main.js</code> draws the scene at 1/<code>office.pixelScale</code> of the screen resolution (default 2,
+from <code>localStorage</code>) with anti-aliasing off, and the canvas is upscaled with
+<code>image-rendering: pixelated</code>. Status tags come from the host's <code>activity</code> hub events
+(<code>lib/crew/office.cjs</code>), sent at each job start, tool call, wait and idle.</p>
 <h2 id="known-limits" tabindex="-1">Known limits</h2>
 <ul>
 <li>No built-in relay or NAT traversal: remote play needs a VPN mesh, port forwarding, a
@@ -350,6 +364,8 @@ models cost $0.</li>
 <li><a href="#lifecycle">Lifecycle</a></li>
 <li><a href="#worker-protocol">Worker protocol</a></li>
 <li><a href="#testing">Testing</a></li>
+<li><a href="#subscription-providers">Subscription providers</a></li>
+<li><a href="#pixel-art-rendering">Pixel-art rendering</a></li>
 <li><a href="#known-limits">Known limits</a></li></ul></nav>
     </aside>
   </div>

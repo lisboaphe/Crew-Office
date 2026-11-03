@@ -79,6 +79,7 @@ function connect() {
   });
   on('bubble', (b) => bubble(b.agentId, b.text, { to: S.agents.find((a) => a.id === b.toAgentId)?.name }));
   on('react', (r) => bubble(r.agentId, r.kind === 'assigned' ? `📥 ${r.text}` : `✅ ${r.text}`, { react: true, ms: 4500 }));
+  on('activity', (a) => { activities.set(a.agentId, a); });
   on('meeting', (m) => { if (m.on) meetings.set(m.agents.join('|'), m.agents); else meetings.delete(m.agents.join('|')); });
   es.onerror = () => { /* EventSource reconnects by itself, with Last-Event-ID */ };
 }
@@ -95,9 +96,10 @@ function buildChrome() {
   ui.dash = h('section.cr.cr-drawer.left.hidden', { 'aria-label': 'Dashboard' });
   ui.side = h('section.cr.cr-drawer.right.hidden', { 'aria-label': 'Chat and agents' });
   bubbleLayer = h('div', { id: 'crew-bubbles' });
+  pillLayer = h('div', { id: 'crew-pills' });
   meetingLayer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   meetingLayer.id = 'crew-meetings';
-  document.body.append(meetingLayer, bubbleLayer, ui.bar, ui.dash, ui.side);
+  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.dash, ui.side);
   render();
 }
 
@@ -113,12 +115,16 @@ function renderBar() {
   const unread = S.notifications.filter((n) => !n.read).length;
   const players = h('div.players', { title: 'Players' }, ...S.members.map((m) => avatar(m.displayName, m.color, { online: m.online, title: `${m.displayName} (${m.role})${m.online ? ' — here' : ''}` })));
   ui.bar.replaceChildren(
-    h('span.pill', { style: { boxShadow: 'var(--cr-shadow)', background: 'var(--cr-panel)', padding: '4px 10px' } }, S.room.name, S.room.status !== 'open' ? ' · stopped' : ''),
+    h('span.room-name', S.room.name, S.room.status !== 'open' ? ' · stopped' : ''),
     players,
     h('button.btn', { onclick: () => toggleDash() }, 'Dashboard'),
     h('button.btn', { onclick: () => openSide('chat') }, 'Chat'),
     h('button.btn', { onclick: () => toggleDash('approvals') }, 'Approvals', pending ? h('span.badge', pending) : null),
     h('button.btn', { onclick: () => toggleDash('notifications') }, '🔔', unread ? h('span.badge', unread) : null),
+    window.officeView ? h('button.btn', {
+      title: 'Pixel size of the office (reloads the page)',
+      onclick: () => window.officeView.setPixelScale({ 1: 2, 2: 3, 3: 1 }[window.officeView.pixelScale] ?? 2),
+    }, window.officeView.pixelScale > 1 ? `▦ ${window.officeView.pixelScale}×` : '▦ smooth') : null,
   );
 }
 
@@ -398,7 +404,15 @@ function agentForm(existing = null) {
     const provider = h('select', ...Object.entries(S.providers).map(([k, p]) => h('option', { value: k, selected: (a.provider ?? 'anthropic') === k }, p.label)));
     const model = h('input', { value: a.model ?? S.providers[a.provider ?? 'anthropic']?.defaultModel ?? '' });
     const models = h('div.hint');
-    const showModels = () => { const p = S.providers[provider.value]; models.textContent = p.models.length ? `Known models: ${p.models.join(', ')}` : 'Use the model name your local server serves.'; if (!existing || provider.value !== a.provider) model.value = p.defaultModel; };
+    const note = h('div.cr-provider-note');
+    const showModels = () => {
+      const p = S.providers[provider.value];
+      models.textContent = p.models.length ? `Models: ${p.models.join(', ')}` : 'Use the model name your local server serves.';
+      note.textContent = p.subscription
+        ? `Runs on your own ${provider.value === 'claude-cli' ? 'Claude' : 'ChatGPT'} subscription through its official app on your worker computer — no API key, no per-token bill; your plan’s usage limits apply. ${p.setup}`
+        : provider.value === 'scripted' ? 'Not an AI model: fixed scripts, for demos and tests.' : 'Uses an API key stored on your worker computer (billed per token by the provider).';
+      if (!existing || provider.value !== a.provider) model.value = p.defaultModel;
+    };
     provider.addEventListener('change', showModels);
     showModels();
     if (existing) model.value = a.model;
@@ -418,7 +432,7 @@ function agentForm(existing = null) {
       } catch (e) { err.textContent = e.message; }
     };
     return h('div', ...field('Name', name), ...field('Role', role), ...field('Skills', skills, 'Comma-separated; used to match tasks.'), ...field('Instructions', instructions),
-      h('div.row', h('div.grow', ...field('Provider', provider)), h('div.grow', ...field('Model', model))), models,
+      h('div.row', h('div.grow', ...field('AI behind this agent', provider)), h('div.grow', ...field('Model', model))), models, note,
       h('div.row', h('div', ...field('Shirt colour', color)), h('div.grow', ...field('Budget (USD, total)', budget)), h('div.grow', ...field('Autonomy', autonomy))),
       h('label', manager, ' Can manage projects (plans and assigns work)'),
       h('label', 'Permissions (projects can narrow these further)'), h('div.cr-checks', ...tools.map((t) => t.el)),
@@ -612,6 +626,25 @@ function searchMessages() {
 // --- bubbles and meetings over the 3D office --------------------------------------
 
 let bubbleLayer = null;
+let pillLayer = null;
+/** agentId -> the latest { emoji, verb, target } the host reported for it. */
+const activities = new Map();
+const pills = new Map();
+
+/** Before any live activity has arrived, the agent's status says what it is doing. */
+const FROM_STATUS = {
+  IDLE: ['💤', 'Idle'], ASSIGNED: ['📥', 'Assigned'], PLANNING: ['🗺️', 'Planning'], WORKING: ['🤔', 'Thinking'], WAITING: ['⏳', 'Waiting'],
+  REVIEW: ['🔍', 'Reviewing'], COMPLETED: ['✅', 'Done'], FAILED: ['⚠️', 'Hit a problem'], PAUSED: ['⏸️', 'Paused'], BLOCKED: ['⛔', 'Out of budget'],
+};
+
+function pillText(a) {
+  const live = activities.get(a.id);
+  if (a.status === 'PAUSED' || a.status === 'BLOCKED' || (!live && FROM_STATUS[a.status])) {
+    const [emoji, verb] = FROM_STATUS[a.status] ?? ['💤', 'Idle'];
+    return { emoji, verb, target: null };
+  }
+  return live ?? { emoji: '💤', verb: 'Idle', target: null };
+}
 let meetingLayer = null;
 const bubbles = [];
 const meetings = new Map();
@@ -636,6 +669,29 @@ function screenOf(agentId, lift = 2.3) {
   return { x: r.left + ((p.x + 1) / 2) * r.width, y: r.top + ((1 - p.y) / 2) * r.height };
 }
 
+function updatePills() {
+  const here = new Set();
+  for (const a of S.agents) {
+    if (!a.available) continue;
+    const at = screenOf(a.id, 2.2);
+    if (!at) continue;
+    here.add(a.id);
+    let p = pills.get(a.id);
+    if (!p) { p = { el: h('div.cr-status'), key: '' }; pills.set(a.id, p); pillLayer.append(p.el); }
+    const t = pillText(a);
+    const key = `${t.emoji}|${t.verb}|${t.target}|${a.color}`;
+    if (key !== p.key) {
+      p.key = key;
+      p.el.style.setProperty('--who', a.color);
+      p.el.replaceChildren(...[h('span.e', t.emoji), h('span', t.verb), t.target ? h('b', ` ${t.target}`) : null].filter(Boolean));
+      p.el.classList.toggle('idle', t.verb === 'Idle');
+    }
+    p.el.style.left = `${Math.round(at.x)}px`;
+    p.el.style.top = `${Math.round(at.y)}px`;
+  }
+  for (const [id, p] of pills) if (!here.has(id)) { p.el.remove(); pills.delete(id); }
+}
+
 function bubble(agentId, text, { to = null, react = false, ms = 7000 } = {}) {
   if (!bubbleLayer) return;
   const a = agentById(agentId);
@@ -648,9 +704,10 @@ function bubble(agentId, text, { to = null, react = false, ms = 7000 } = {}) {
 
 function tick(now) {
   requestAnimationFrame(tick);
+  if (pillLayer) updatePills();
   for (let i = bubbles.length - 1; i >= 0; i--) {
     const b = bubbles[i];
-    const at = screenOf(b.agentId);
+    const at = screenOf(b.agentId, 3.4);
     if (now > b.until || !at) {
       if (now > b.until + 400 || !at) { b.el.remove(); bubbles.splice(i, 1); } else b.el.classList.add('fade');
       continue;

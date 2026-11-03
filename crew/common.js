@@ -80,4 +80,3 @@ export function reportErrors(context) {
   window.addEventListener('unhandledrejection', (e) => send(String(e.reason?.message ?? e.reason), e.reason?.stack));
 }
 
-export const LOGO = `<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="3" y="3" width="42" height="42" rx="12" fill="#3d6fd6"/><circle cx="18" cy="19" r="5.5" fill="#fff"/><circle cx="31" cy="19" r="5.5" fill="#cfe0ff"/><path d="M8.5 37c0-5.5 4.2-9 9.5-9s9.5 3.5 9.5 9" fill="#fff"/><path d="M21.5 37c0-5.5 4.2-9 9.5-9s9.5 3.5 9.5 9" fill="#cfe0ff"/></svg>`;

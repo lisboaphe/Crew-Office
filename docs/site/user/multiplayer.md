@@ -53,11 +53,27 @@ The app does not pretend otherwise, and it has no built-in relay. Pick one:
 ## Your AI employees
 
 Open **Dashboard → Agents → New agent**. Each agent has a name, a role, skills, standing
-instructions (only you can read them), a model provider and model, a budget, permissions,
+instructions (only you can read them), the AI behind it and its model, a budget, permissions,
 and an autonomy setting ("act within its permissions", or "ask me before writing files,
 running code or fetching").
 
 Only you can configure, pause, resume or remove your agents. The office owner cannot.
+
+### Which AI each agent uses
+
+Every agent picks its own AI, so one team can mix them — Paige on Claude, Felix on ChatGPT:
+
+| Choice | What you need on your worker computer | Billing |
+| --- | --- | --- |
+| **Claude subscription (Pro / Max)** | Claude Code installed and signed in once (`claude`, then log in) | Your plan; its usage limits apply |
+| **ChatGPT subscription (Plus / Pro)** | Codex installed and signed in (`codex login`) | Your plan; its usage limits apply |
+| Anthropic API key | A key on the worker's settings page | Per token |
+| OpenAI API key | A key on the worker's settings page | Per token |
+| Local model | An OpenAI-compatible server such as Ollama | Free |
+
+With a subscription the agent works through that app on your computer, signed in as you;
+the office switches off the app's own tools and gives the agent only the office's tools,
+so every permission and approval still applies.
 
 ### Your worker and your API keys
 
@@ -74,6 +90,13 @@ A worker on your laptop is *attended*: your agents are available only while you 
 the office open. Close the office and your agents leave the floor: a job already running is allowed to
 finish, and nothing new starts until you are back. Tick **Always-on** when you connect a worker on a
 server, and your agents stay available when you are away.
+
+## How the office looks
+
+The office is drawn as pixel art by default. The **▦** button in the top bar changes the
+pixel size (2×, 3×, or smooth). Each agent has a status tag above its head — *Thinking*,
+*Reading server.js*, *Asking Boris*, *Waiting for approval*, *Idle* — updated by what it is
+actually doing.
 
 ## Shared projects
 

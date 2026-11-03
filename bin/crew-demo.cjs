@@ -7,6 +7,8 @@
 //   npm run demo                          # in another: scripted provider, no API key needed
 //   npm run demo -- --provider anthropic  # real Claude models (ANTHROPIC_API_KEY in this shell)
 //   npm run demo -- --manual              # leave every approval to you, in the browser
+//   npm run demo -- --alice claude-cli --bob codex-cli   # Alice's team on her Claude
+//                                         # subscription, Bob's on his ChatGPT one
 //
 // Then sign in at the printed address as alice or bob (the passwords are printed) and
 // watch the office. Both players stay "in the office" while this runs, because their
@@ -20,10 +22,12 @@ const { flags } = require('./lib/cli-flags.cjs');
 const { flag, value } = flags(process.argv.slice(2));
 const HOST = value('--host', process.env.CREW_HOST || 'http://127.0.0.1:8080').replace(/\/+$/, '');
 const PROVIDER = value('--provider', 'scripted');
-const MODEL = value('--model', { anthropic: 'claude-opus-5-5', openai: 'gpt-5', local: 'llama3.1', scripted: 'scripted' }[PROVIDER]);
+const DEFAULT_MODEL = { anthropic: 'claude-opus-5-5', openai: 'gpt-5', local: 'llama3.1', scripted: 'scripted', 'claude-cli': 'default', 'codex-cli': 'default' };
+// Each player's team can run on a different AI: --alice / --bob override --provider.
+const TEAM = { alice: value('--alice', PROVIDER), bob: value('--bob', PROVIDER) };
 const MANUAL = flag('--manual');
 // The scripted provider answers instantly; pace it so the office is worth watching.
-if (PROVIDER === 'scripted' && !process.env.CREW_SCRIPTED_DELAY_MS) process.env.CREW_SCRIPTED_DELAY_MS = value('--pace', '2500');
+if (Object.values(TEAM).includes('scripted') && !process.env.CREW_SCRIPTED_DELAY_MS) process.env.CREW_SCRIPTED_DELAY_MS = value('--pace', '2500');
 const PASS = { alice: 'demo-alice-pass', bob: 'demo-bob-pass' };
 
 const say = (s) => console.log(`[demo] ${s}`);
@@ -54,7 +58,9 @@ async function main() {
 
   const tools = ['messaging', 'files.read', 'files.write', 'memory', 'delegate', 'exec'];
   const mk = async (p, name, role, skills, color, extra = {}) => {
-    const r = await p.post(`${R}/agents`, { name, role, skills, color, provider: PROVIDER, model: MODEL, tools, budgetUsd: 20, ...extra });
+    const provider = TEAM[p === alice ? 'alice' : 'bob'];
+    const model = value('--model', DEFAULT_MODEL[provider]);
+    const r = await p.post(`${R}/agents`, { name, role, skills, color, provider, model, tools, budgetUsd: 20, ...extra });
     if (r.status !== 200) throw new Error(r.error);
     return r.agent;
   };
@@ -68,11 +74,13 @@ async function main() {
 
   const wa = await alice.post(`${R}/workers`, { name: 'Alice’s laptop' });
   const wb = await bob.post(`${R}/workers`, { name: 'Bob’s desktop' });
-  const secrets = PROVIDER === 'anthropic' && process.env.ANTHROPIC_API_KEY ? { anthropic: process.env.ANTHROPIC_API_KEY }
-    : PROVIDER === 'openai' && process.env.OPENAI_API_KEY ? { openai: process.env.OPENAI_API_KEY } : {};
+  const secrets = {
+    ...(process.env.ANTHROPIC_API_KEY ? { anthropic: process.env.ANTHROPIC_API_KEY } : {}),
+    ...(process.env.OPENAI_API_KEY ? { openai: process.env.OPENAI_API_KEY } : {}),
+  };
   const log = (s) => console.log(`  ${s}`);
   const workers = [startWorker({ hostUrl: HOST, token: wa.worker.token, secrets, log }), startWorker({ hostUrl: HOST, token: wb.worker.token, secrets, log })];
-  say(`Workers connected (provider: ${PROVIDER}${PROVIDER === 'scripted' ? ' — the scripted test provider, not an AI model' : ''})`);
+  say(`Workers connected — Alice’s team on ${TEAM.alice}, Bob’s on ${TEAM.bob}${Object.values(TEAM).includes('scripted') ? ' (scripted = the test provider, not an AI model)' : ''}`);
 
   const { project } = await alice.post(`${R}/projects`, { name: 'Task app', goal: 'Build a simple working task management web application.', managerAgentId: pm.id });
   const P = `${R}/projects/${project.id}`;

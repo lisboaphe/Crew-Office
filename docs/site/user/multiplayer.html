@@ -213,10 +213,51 @@ The app does not pretend otherwise, and it has no built-in relay. Pick one:</p>
 </table>
 <h2 id="your-ai-employees" tabindex="-1">Your AI employees</h2>
 <p>Open <strong>Dashboard → Agents → New agent</strong>. Each agent has a name, a role, skills, standing
-instructions (only you can read them), a model provider and model, a budget, permissions,
+instructions (only you can read them), the AI behind it and its model, a budget, permissions,
 and an autonomy setting (&quot;act within its permissions&quot;, or &quot;ask me before writing files,
 running code or fetching&quot;).</p>
 <p>Only you can configure, pause, resume or remove your agents. The office owner cannot.</p>
+<h3 id="which-ai-each-agent-uses" tabindex="-1">Which AI each agent uses</h3>
+<p>Every agent picks its own AI, so one team can mix them — Paige on Claude, Felix on ChatGPT:</p>
+<table>
+<thead>
+<tr>
+<th>Choice</th>
+<th>What you need on your worker computer</th>
+<th>Billing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Claude subscription (Pro / Max)</strong></td>
+<td>Claude Code installed and signed in once (<code>claude</code>, then log in)</td>
+<td>Your plan; its usage limits apply</td>
+</tr>
+<tr>
+<td><strong>ChatGPT subscription (Plus / Pro)</strong></td>
+<td>Codex installed and signed in (<code>codex login</code>)</td>
+<td>Your plan; its usage limits apply</td>
+</tr>
+<tr>
+<td>Anthropic API key</td>
+<td>A key on the worker's settings page</td>
+<td>Per token</td>
+</tr>
+<tr>
+<td>OpenAI API key</td>
+<td>A key on the worker's settings page</td>
+<td>Per token</td>
+</tr>
+<tr>
+<td>Local model</td>
+<td>An OpenAI-compatible server such as Ollama</td>
+<td>Free</td>
+</tr>
+</tbody>
+</table>
+<p>With a subscription the agent works through that app on your computer, signed in as you;
+the office switches off the app's own tools and gives the agent only the office's tools,
+so every permission and approval still applies.</p>
 <h3 id="your-worker-and-your-api-keys" tabindex="-1">Your worker and your API keys</h3>
 <p>Your agents run on <strong>your</strong> computer, through a small program called a worker, with
 <strong>your</strong> API keys. The host never receives your keys, and neither do other players.</p>
@@ -231,6 +272,11 @@ Keys are stored there, encrypted.</li>
 the office open. Close the office and your agents leave the floor: a job already running is allowed to
 finish, and nothing new starts until you are back. Tick <strong>Always-on</strong> when you connect a worker on a
 server, and your agents stay available when you are away.</p>
+<h2 id="how-the-office-looks" tabindex="-1">How the office looks</h2>
+<p>The office is drawn as pixel art by default. The <strong>▦</strong> button in the top bar changes the
+pixel size (2×, 3×, or smooth). Each agent has a status tag above its head — <em>Thinking</em>,
+<em>Reading server.js</em>, <em>Asking Boris</em>, <em>Waiting for approval</em>, <em>Idle</em> — updated by what it is
+actually doing.</p>
 <h2 id="shared-projects" tabindex="-1">Shared projects</h2>
 <ol>
 <li><strong>New project</strong>: a name, a goal, and one of your agents as the manager.</li>
@@ -274,7 +320,9 @@ choose a real provider for real work.</p>
       <nav class="toc"><ul><li><a href="#hosting-an-office">Hosting an office</a></li>
 <li><a href="#joining-an-office">Joining an office</a></li>
 <li><a href="#playing-over-the-internet">Playing over the internet</a></li>
-<li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#your-worker-and-your-api-keys">Your worker and your API keys</a></li></ul></li>
+<li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#which-ai-each-agent-uses">Which AI each agent uses</a></li>
+<li><a href="#your-worker-and-your-api-keys">Your worker and your API keys</a></li></ul></li>
+<li><a href="#how-the-office-looks">How the office looks</a></li>
 <li><a href="#shared-projects">Shared projects</a></li>
 <li><a href="#approvals">Approvals</a></li>
 <li><a href="#chat">Chat</a></li>

@@ -28,10 +28,12 @@ import * as THREE from 'three';
  * @param {number} [opts.pixelRatio]  defaults to the display's own, capped at 2 —
  *   past that the extra pixels cost more than they show. The two screenshot pages
  *   pass 1: a headless Chrome's ratio is not what those pictures are sized by.
+ * @param {boolean} [opts.antialias]  off for the pixel-art look, where every edge is
+ *   meant to land on a hard pixel (see `pixelScale` in src/main.js).
  * @returns {THREE.WebGLRenderer}
  */
-export function createRenderer({ canvas, transparent = false, pixelRatio } = {}) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: transparent });
+export function createRenderer({ canvas, transparent = false, pixelRatio, antialias = true } = {}) {
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias, alpha: transparent });
   if (transparent) renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(pixelRatio ?? Math.min(window.devicePixelRatio, 2));
 
