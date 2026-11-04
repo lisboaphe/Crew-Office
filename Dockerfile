@@ -26,6 +26,8 @@ COPY crew ./crew
 
 # Runtime dependencies only: the Anthropic SDK the worker's Claude adapter uses. The host
 # itself has none.
+# Git serves the projects' shared repositories, and agents' clones on an always-on worker.
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
 
 ENV HOST=0.0.0.0 \

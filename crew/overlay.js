@@ -66,7 +66,12 @@ function connect() {
   on('project', (p) => { upsert(S.projects, p); render(); });
   on('task', (t) => { upsert(S.tasks, t); render(); });
   on('approval', (a) => { upsert(S.approvals, a); render(); });
-  on('notification', (n) => { S.notifications.unshift(n); toast(n.text, 5000); render(); });
+  on('notification', (n) => {
+    S.notifications.unshift(n);
+    // Quiet mode holds back news, never decisions or problems: those still appear, and everything stays in the list.
+    if (!quietMode() || n.level !== 'info') toast(n.text, 5000);
+    render();
+  });
   on('channel', (c) => { upsert(S.channels, c); render(); });
   on('room', (r) => { S.room = { ...S.room, ...r, myRole: S.room.myRole }; render(); });
   on('workers', () => api('GET', `/api/crew/rooms/${roomId}/state`).then((s) => { S.workers = s.workers; S.members = s.members; render(); }));
@@ -281,10 +286,16 @@ function dashWorkers(body) {
   body.append(h('h2', 'Your workers'), h('p.hint', 'A worker is a small program on your computer that runs your agents with your own API keys. The office host never receives your keys. Without a connected worker your agents are unavailable.'));
   body.append(h('div.cr-list', ...(S.workers.length ? S.workers.map((w) => h('div.cr-item.row', h('span.dot', { style: { background: w.online ? 'var(--cr-ok)' : '#bbb' } }), h('b.grow', w.name), h('span.muted', w.alwaysOn ? 'always-on' : 'attended (runs while you are here)'), h('span.muted', w.online ? 'online' : 'offline'),
     h('button.btn.small.danger', { onclick: () => act(() => api('DELETE', `/api/crew/rooms/${roomId}/workers/${w.id}`), 'Worker revoked') }, 'Revoke'))) : [h('p.hint', 'No workers yet.')])));
-  body.append(h('div.row', { style: { marginTop: '10px' } }, h('button.btn.primary', { onclick: connectWorker }, 'Connect a worker')));
+  body.append(h('div.row', { style: { marginTop: '10px' } }, h('button.btn.primary', { onclick: connectWorker }, 'Connect a worker'),
+    h('button.btn.danger', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: true }), 'All your agents are paused') }, 'Pause all my agents'),
+    h('button.btn', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: false }), 'Your agents are back') }, 'Resume all')));
+  body.append(h('p.hint', 'Spending, sign-ins, budgets and Test Connection are on your worker’s own page: http://127.0.0.1:8790 on the computer running it. Paid API use is off unless you turn it on there.'));
 }
 
+function quietMode() { try { return localStorage.getItem('crew.quiet') === '1'; } catch { return false; } }
+
 function dashNotifications(body) {
+  body.append(h('label', { style: { fontWeight: 400 } }, h('input', { type: 'checkbox', checked: quietMode(), onchange: (e) => { try { localStorage.setItem('crew.quiet', e.target.checked ? '1' : '0'); } catch {} } }), ' Quiet mode: only pop up what needs me (approvals, blockers, failures)'));
   if (!S.notifications.length) body.append(h('p.hint', 'No notifications.'));
   body.append(h('div.cr-list', ...S.notifications.map((n) => h('div.cr-item', h('span.pill', { class: n.level === 'error' ? 'bad' : n.level === 'warn' ? 'warn' : '' }, n.level), ' ', n.text, h('div.hint', ago(n.createdAt))))));
 }

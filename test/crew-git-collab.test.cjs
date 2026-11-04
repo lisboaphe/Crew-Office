@@ -3,7 +3,7 @@
 // Agents use the scripted provider, so this runs offline: every layer below the model — tool
 // calls, clones, commits, pushes, the host's diff, review, rework, merges — is the real path.
 // It says nothing about subscription connectors; those need real sign-ins (see
-// docs/upgrade/PROVIDERS.md).
+// docs/developer/upgrade-report.md).
 
 'use strict';
 
@@ -253,4 +253,49 @@ test('approval modes change discretionary gates only; merges in Autonomous still
   }, { timeout: 90_000, what: 'manual merge' });
   assert.ok(kinds.includes('repo_sync'), `Manual: pushing asked first (asked: ${kinds.join(', ')})`);
   assert.ok(kinds.includes('merge'), 'Manual: merging asked first');
+});
+
+test('a contract change reaches only the linked project, whose agent adapts on its own branch', { timeout: 120_000 }, async (t) => {
+  // Website repo: when the bot's src/bot.js changes on main, the app project must adapt.
+  const o = await office(t, { approval: 'autonomous' });
+  const mk = async (p, name, role, skills, extra = {}) => (await p.post(`${o.R}/agents`, { name, role, skills, provider: 'scripted', model: 'scripted', tools: TOOLS, budgetUsd: 20, ...extra })).agent;
+  const lead = await mk(o.bob, 'Lena', 'Lead', ['planning'], { isManager: true });
+  const integrator = await mk(o.bob, 'Ivan', 'Integration Developer', ['api', 'integration']);
+  const appReviewer = await mk(o.alice, 'Vera', 'Code Reviewer', ['review']);
+  const { project: app } = await o.bob.post(`${o.R}/projects`, { name: 'App', goal: 'Desktop app that uses the bot.', managerAgentId: lead.id });
+  const A = `${o.R}/projects/${app.id}`;
+  await o.bob.post(`${A}/grants`, { agentId: lead.id, budgetUsd: 10, requiresApproval: false, tools: TOOLS });
+  await o.bob.post(`${A}/grants`, { agentId: integrator.id, budgetUsd: 10, requiresApproval: false, tools: TOOLS });
+  await o.alice.post(`${A}/join`);
+  await o.alice.post(`${A}/grants`, { agentId: appReviewer.id, budgetUsd: 10, requiresApproval: false, tools: TOOLS });
+  const appRepo = await o.bob.post(`${A}/repos`, { name: 'app' });
+  await o.bob.req('PUT', `${o.R}/rules/project/${app.id}`, { rules: { approvalMode: 'autonomous' } });
+  assert.strictEqual((await o.alice.post(`${o.R}/contracts`, { dependentProjectId: app.id, providerRepoId: o.repo.id, contractPath: 'src/bot.js' })).status, 403, 'only the dependent project’s creator links it');
+  assert.strictEqual((await o.bob.post(`${o.R}/contracts`, { dependentProjectId: app.id, providerRepoId: o.repo.id, contractPath: 'src/bot.js' })).status, 200);
+  await o.bob.req('PUT', `${o.R}/rules/project/${app.id}`, { rules: { approvalMode: 'autonomous' } });
+  // The app project goes active so it can take the adaptation work.
+  const startApp = await o.bob.post(`${A}/tasks`, { title: 'Set up the app', agentId: lead.id });
+  assert.strictEqual(startApp.status, 200);
+
+  await o.alice.post(`${o.P}/start`);
+  const done = await waitFor(async () => {
+    await approveAll(o.alice, o.R);
+    await approveAll(o.bob, o.R);
+    const g = await o.bob.get(`${A}/git`);
+    return g.merges.find((m) => m.authorName === 'Ivan' && m.status === 'merged') ? g : null;
+  }, { timeout: 100_000, what: 'the adaptation merged' });
+  // The app project may have finished before the contract changed. Late work reopened it, and
+  // once settled it is summarised again and completed, not left hanging.
+  await waitFor(async () => (await o.bob.get(A)).project.status === 'completed', { timeout: 60_000, what: 'the app project completing again' });
+  const tasks = (await o.bob.get(A)).tasks;
+  const adapt = tasks.find((x) => x.title.startsWith('Adapt to bot contract'));
+  assert.ok(adapt, 'the dependent project got a targeted task');
+  assert.match(adapt.description, /src\/bot\.js/);
+  assert.strictEqual(adapt.assignedAgentName, 'Ivan');
+  const mr = done.merges.find((m) => m.authorName === 'Ivan');
+  assert.match(mr.branch, /^agent\/ivan\//, 'it worked on its own branch');
+  assert.strictEqual(mr.tests, 'passed');
+  assert.strictEqual(mr.repoName, appRepo.repo.name);
+  // The provider project was not given any task about its own contract.
+  assert.ok(!(await o.alice.get(o.P)).tasks.some((x) => x.title.startsWith('Adapt to')));
 });

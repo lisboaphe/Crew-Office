@@ -1,6 +1,6 @@
 // Conflicts, rollback, contract dependencies, budgets, billing protection, provider states,
 // handoff, resumable uploads. Each maps to an acceptance item in the upgrade prompt; see
-// docs/upgrade/UPGRADE_REPORT.md.
+// docs/developer/upgrade-report.md.
 
 'use strict';
 
