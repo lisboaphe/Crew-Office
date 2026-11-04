@@ -147,7 +147,7 @@ export function filesTab(body, ctx) {
 }
 
 /** SHA-256 in plain JS for plain-http LAN pages, where crypto.subtle does not exist. */
-function sha256Fallback(bytes) {
+export function sha256Fallback(bytes) {
   const K = [];
   const isPrime = (n) => { for (let i = 2; i * i <= n; i++) if (n % i === 0) return false; return true; };
   const frac = (x) => ((x - Math.floor(x)) * 2 ** 32) | 0;

@@ -470,4 +470,12 @@ test('a worker with paid API off leaves such jobs queued, and the room sees why'
   assert.strictEqual(d.agent.tokensIn, 0);
 });
 
+test('the browser’s fallback SHA-256 matches the host’s, for the plain-HTTP LAN pages that need it', async () => {
+  const { sha256Fallback } = await import('../crew/workspace.js');
+  for (const size of [0, 1, 55, 56, 63, 64, 65, 1000, 70_000]) {
+    const bytes = crypto.randomBytes(size);
+    assert.strictEqual(sha256Fallback(new Uint8Array(bytes)), crypto.createHash('sha256').update(bytes).digest('hex'), `size ${size}`);
+  }
+});
+
 void present; void workerFor;

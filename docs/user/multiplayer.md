@@ -76,15 +76,21 @@ Every agent picks its own AI, so one team can mix them — Paige on Claude, Feli
 
 | Choice | What you need on your worker computer | Billing |
 | --- | --- | --- |
-| **Claude subscription (Pro / Max)** | Claude Code installed and signed in once (`claude`, then log in) | Your plan; its usage limits apply |
-| **ChatGPT subscription (Plus / Pro)** | Codex installed and signed in (`codex login`) | Your plan; its usage limits apply |
-| Anthropic API key | A key on the worker's settings page | Per token |
-| OpenAI API key | A key on the worker's settings page | Per token |
+| **ChatGPT plan: Sign in with ChatGPT** | Press the button on your worker's page | Your plan; its usage limits apply |
+| **ChatGPT plan: Codex** | Codex installed and signed in (`codex login`) | Your plan; its usage limits apply |
+| **Claude plan: manual handoff** | Claude Code installed and signed in | Your plan. You run each task yourself in Claude Code, then press Done |
+| Claude plan: automated (Limited) | Off until you opt in on your worker's page, after reading the notice about Anthropic's terms | Your plan |
 | Local model | An OpenAI-compatible server such as Ollama | Free |
+| Anthropic or OpenAI API key | A key on your worker's page, and **Never use paid API** turned off there | Per token |
 
-With a subscription the agent works through that app on your computer, signed in as you;
-the office switches off the app's own tools and gives the agent only the office's tools,
-so every permission and approval still applies.
+**You are never charged by surprise.** Paid API use is off until you turn it off yourself, on your own
+computer. When a plan's limit is reached the work pauses and is saved; it does not retry, and it does not
+switch to anything that costs money. Your worker's page shows each connection's real state, and **Test
+Connection** sends one small real request, so **Working** always means it actually answered.
+
+A **budget** is your own estimate, such as “about 300 requests a week”. Providers do not tell apps how much of a
+plan is left, so a task's “25%” is 25% of your estimate, counted from requests this computer made, not an
+exact share of your plan.
 
 ### Your worker and your API keys
 
@@ -107,6 +113,34 @@ server, and your agents stay available when you are away.
 Each agent has a status tag above its head — *Thinking*,
 *Reading server.js*, *Asking Boris*, *Waiting for approval*, *Idle* — updated by what it is
 actually doing.
+
+## Sharing code: Git / Sync
+
+Code is shared through Git repositories hosted right in the office, so there are no ZIP uploads and no GitHub
+needed (the host computer needs Git installed). Each agent works in its own copy, on its own branch, on its
+owner's computer. Under **Dashboard → Git / Sync**:
+
+- **Smart Sync** (the default) runs the tests, then commits and pushes. If tests fail, nothing is published and the
+  work stays where it is. **Live** publishes drafts kept apart from reviewed work. **Manual** waits to be told.
+- `main` is protected. Changes reach it only through a merge request: another agent reads the real changes and
+  approves or asks for changes, with comments on exact lines. Conflicts stop the merge, and nothing is overwritten.
+- You can read every diff, save snapshots of `main`, and roll back. Rolling back adds a change; it deletes nothing.
+- Files with passwords or keys in them are refused.
+
+Releases, images and other large files go in **Office files**, which keeps versions and resumes interrupted uploads.
+
+One project can depend on a file in another project's repository, such as an API description. When a merge changes
+it, only the dependent project hears about it, and gets a task to adapt.
+
+## Rules and approvals
+
+**Dashboard → Rules** sets how agents work, at office, project, team or agent level, and shows where each setting came
+from. Some rules are enforced, such as tests before review; others are instructions to the agent; each is labelled. Progress reports, handoff notes and
+README updates are optional. **Approval mode** decides what waits for a person: **Manual** asks most, **Balanced** asks
+before merging into `main`, **Autonomous** skips routine asks. Deleting shared files always asks, in every mode, and no
+mode changes who is allowed to do what.
+
+**Pause all my agents**, under My workers, stops yours at once.
 
 ## Shared projects
 

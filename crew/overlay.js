@@ -121,7 +121,16 @@ let renderQueued = false;
 function render() {
   if (renderQueued || !ui.bar) return;
   renderQueued = true;
-  requestAnimationFrame(() => { renderQueued = false; renderBar(); if (!ui.dash.classList.contains('hidden')) renderDash(); if (!ui.side.classList.contains('hidden')) renderSide(); });
+  const draw = () => {
+    if (!renderQueued) return;
+    renderQueued = false;
+    renderBar();
+    if (!ui.dash.classList.contains('hidden')) renderDash();
+    if (!ui.side.classList.contains('hidden')) renderSide();
+  };
+  // A frame when one is coming; the timer for a hidden or background window, which gets none.
+  requestAnimationFrame(draw);
+  setTimeout(draw, 250);
 }
 
 function renderBar() {
@@ -283,7 +292,7 @@ function dashCosts(body) {
 }
 
 function dashWorkers(body) {
-  body.append(h('h2', 'Your workers'), h('p.hint', 'A worker is a small program on your computer that runs your agents with your own API keys. The office host never receives your keys. Without a connected worker your agents are unavailable.'));
+  body.append(h('h2', 'Your workers'), h('p.hint', 'A worker is a small program on your computer that runs your agents with your own sign-ins and keys. The office host never receives them. Without a connected worker your agents are unavailable.'));
   body.append(h('div.cr-list', ...(S.workers.length ? S.workers.map((w) => h('div.cr-item.row', h('span.dot', { style: { background: w.online ? 'var(--cr-ok)' : '#bbb' } }), h('b.grow', w.name), h('span.muted', w.alwaysOn ? 'always-on' : 'attended (runs while you are here)'), h('span.muted', w.online ? 'online' : 'offline'),
     h('button.btn.small.danger', { onclick: () => act(() => api('DELETE', `/api/crew/rooms/${roomId}/workers/${w.id}`), 'Worker revoked') }, 'Revoke'))) : [h('p.hint', 'No workers yet.')])));
   body.append(h('div.row', { style: { marginTop: '10px' } }, h('button.btn.primary', { onclick: connectWorker }, 'Connect a worker'),

@@ -131,6 +131,7 @@ export const NAV = {
       pages: [
         { url: '/developer/architecture.html', title: 'Architecture' },
         { url: '/developer/multiplayer.html', title: 'The multiplayer layer' },
+        { url: '/developer/upgrade-report.html', title: 'Upgrade report: Git, rules, budgets' },
         { url: '/developer/physics.html', title: 'The physics of the office' },
         { url: '/developer/scene-internals.html', title: 'Scene internals' },
         { url: '/developer/job-delivery.html', title: 'Job delivery' },

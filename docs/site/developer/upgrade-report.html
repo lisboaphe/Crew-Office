@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upgrade report: Git, rules, budgets — The Roving Office</title>
+  <meta name="description" content="How the office is built, and how to change it." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html">For everyone</a>
+      <a href="/docs/developer/index.html" aria-current="page">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="developer documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/index.html">Where to look</a>
+        </li>
+        <li>
+          <a href="/docs/developer/getting-the-code.html">Getting the code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/developing.html">Developing on it</a>
+        </li>
+        <li>
+          <a href="/docs/developer/npm-scripts.html">Every npm script</a>
+        </li>
+      </ul>
+      <h2>How it works</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/architecture.html">Architecture</a>
+        </li>
+        <li>
+          <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
+        </li>
+        <li>
+          <a href="/docs/developer/upgrade-report.html" aria-current="page">Upgrade report: Git, rules, budgets</a>
+        </li>
+        <li>
+          <a href="/docs/developer/physics.html">The physics of the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/scene-internals.html">Scene internals</a>
+        </li>
+        <li>
+          <a href="/docs/developer/job-delivery.html">Job delivery</a>
+        </li>
+        <li>
+          <a href="/docs/developer/editor.html">The furniture editor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/layout-algorithm.html">The layout algorithm</a>
+        </li>
+        <li>
+          <a href="/docs/developer/tuning-the-layouts.html">Tuning the layout generator</a>
+        </li>
+        <li>
+          <a href="/docs/developer/sources.html">The source model</a>
+        </li>
+        <li>
+          <a href="/docs/developer/test-data.html">The Test Data source</a>
+        </li>
+      </ul>
+      <h2>Changing it</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/extending.html">Extending the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/prop-portraits.html">Photographing a prop</a>
+        </li>
+        <li>
+          <a href="/docs/developer/visual-assets.html">Visual assets and their rights</a>
+        </li>
+        <li>
+          <a href="/docs/developer/coplanar-probe.html">The coplanar-face probe</a>
+        </li>
+        <li>
+          <a href="/docs/developer/plugin-distribution.html">Publishing the plugins</a>
+        </li>
+        <li>
+          <a href="/docs/developer/admin-console.html">The admin console</a>
+        </li>
+      </ul>
+      <h2>The protocol</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/protocol/aop-spec.html">The AOP spec</a>
+        </li>
+        <li>
+          <a href="/docs/developer/protocol/aop-harness-adapters.html">Adapter notes</a>
+        </li>
+        <li>
+          <a href="/agent-setup/">What an agent is told to do <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+      <h2>Adapters</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/adapters/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/muse.html">Muse</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="upgrade-report-collaboration-git-rules-and-budgets" tabindex="-1">Upgrade report: collaboration, Git, rules and budgets</h1>
+<p>The state of the upgrade described in the upgrade prompt and change register: what works, what was tested and how, what is not built, and what provider rules block. Status words mean what they say: <strong>Works</strong> was run in a test or by hand as described; <strong>Partial</strong> is usable with the stated gap; <strong>Missing</strong> is not built; <strong>Blocked</strong> depends on a third party.</p>
+<p>Recovery point: the Git tag <code>checkpoint/pre-upgrade-2026-11-03</code>, on the branch <code>upgrade/collab-git-budgets</code>.</p>
+<h2 id="requirement-matrix" tabindex="-1">Requirement matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Status</th>
+<th>Evidence</th>
+<th>Gap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Host / Join, invitations, roles, room password, LAN discovery</td>
+<td>Works</td>
+<td><code>lib/crew/rooms.cjs</code>, <code>lan.cjs</code>, <code>test/crew-permissions.test.cjs</code></td>
+<td>Two real PCs not tried; tests use separate processes and data folders on one machine</td>
+</tr>
+<tr>
+<td>Host online vs owner's worker online</td>
+<td>Works</td>
+<td><code>workers.cjs</code>, agent panel, <code>test/crew-reliability.test.cjs</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Worker runs provider calls and tools on the owner's device</td>
+<td>Works</td>
+<td><code>lib/crew-worker/</code>, <code>test/crew-git-collab.test.cjs</code> checks clones land on the owner's worker only</td>
+<td></td>
+</tr>
+<tr>
+<td>Durable bus, correlation IDs, loop limits</td>
+<td>Works</td>
+<td><code>bus.cjs</code>, <code>test/crew-e2e.test.cjs</code></td>
+<td>Message retries are job retries; no separate redelivery queue</td>
+</tr>
+<tr>
+<td>Project → task → job, dependencies, parallelism, retries</td>
+<td>Works</td>
+<td><code>work.cjs</code>, <code>jobs.cjs</code></td>
+<td>Milestones are a label on tasks, not their own screen</td>
+</tr>
+<tr>
+<td>Self-hosted Git remotes, auth per repository</td>
+<td>Works</td>
+<td><code>git.cjs</code>, &quot;the host refuses&quot; test</td>
+<td>Needs Git installed on the host (the app says so if not)</td>
+</tr>
+<tr>
+<td>Protected main, no force-push, no deletes, secret scan</td>
+<td>Works</td>
+<td><code>git-hook.cjs</code>, same test</td>
+<td>Scanning is pattern-based; it will not catch every secret</td>
+</tr>
+<tr>
+<td>Isolated clone per agent per task</td>
+<td>Works</td>
+<td><code>git-local.cjs</code></td>
+<td>Clones, not <code>git worktree</code>, for simpler isolation; same guarantee</td>
+</tr>
+<tr>
+<td>Smart / Live / Manual sync</td>
+<td>Partial</td>
+<td>Smart is covered by tests. Manual and Live are implemented in <code>repo_sync</code></td>
+<td>Live has no file watcher: it publishes drafts at each sync, not on every save. Live and Manual have no end-to-end test</td>
+</tr>
+<tr>
+<td>Review with file and line comments, rework, independent reviewer</td>
+<td>Works</td>
+<td><code>reviews.cjs</code>, review loop test</td>
+<td></td>
+</tr>
+<tr>
+<td>Merge conflict detection, no overwrite</td>
+<td>Works</td>
+<td><code>test/crew-upgrade.test.cjs</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Snapshots and rollback</td>
+<td>Works</td>
+<td>same</td>
+<td></td>
+</tr>
+<tr>
+<td>Definition of Done</td>
+<td>Works</td>
+<td><code>completeTask</code>, <code>reviews.request</code></td>
+<td>Fixed checks driven by rules; no per-task custom checklist</td>
+</tr>
+<tr>
+<td>Agent rules with inheritance, versions, presets</td>
+<td>Works</td>
+<td><code>policies.cjs</code>, Rules tab</td>
+<td>Task-level rules exist in the API, not yet in the UI</td>
+</tr>
+<tr>
+<td>Optional progress, handoff and README documents</td>
+<td>Works</td>
+<td>Progress on/off is tested. Handoff and README checks are implemented, not end-to-end tested</td>
+<td></td>
+</tr>
+<tr>
+<td>Approval modes</td>
+<td>Works</td>
+<td>Autonomous and Manual tested; Balanced in the review loop</td>
+<td></td>
+</tr>
+<tr>
+<td>Audit record</td>
+<td>Works</td>
+<td><code>audit</code> table, written for approvals, permissions and rules</td>
+<td>No audit viewer in the UI yet</td>
+</tr>
+<tr>
+<td>Shared file store: chunks, resume, hash, versions, quota</td>
+<td>Works</td>
+<td><code>files.cjs</code>, uploads test, Office files tab</td>
+<td>No inline preview; agents' <code>publish_file</code> has no end-to-end test</td>
+</tr>
+<tr>
+<td>Contract dependencies, targeted notification, adaptation</td>
+<td>Works</td>
+<td><code>contracts.cjs</code>, contract tests</td>
+<td>Breaking-change detection understands OpenAPI only; other formats are reported as &quot;changed&quot;</td>
+</tr>
+<tr>
+<td>Never Use Paid API default, no fallback</td>
+<td>Works</td>
+<td>Billing tests</td>
+<td></td>
+</tr>
+<tr>
+<td>Budget Manager, estimates, reserve, concurrency, warnings</td>
+<td>Works</td>
+<td><code>budget.cjs</code>, budget tests</td>
+<td>Lives on the worker's page, not the office HUD, by design: the host must not see it. Team, project and agent scopes are not separate; owner/provider and task are</td>
+</tr>
+<tr>
+<td>Provider status, Test Connection</td>
+<td>Works</td>
+<td><code>provider-status.cjs</code></td>
+<td></td>
+</tr>
+<tr>
+<td>ChatGPT plan via Sign in with ChatGPT</td>
+<td>Partial</td>
+<td><code>chatgpt-plan.cjs</code>, tested against a stand-in server</td>
+<td><strong>Never run against the real service.</strong> See below</td>
+</tr>
+<tr>
+<td>ChatGPT plan via the Codex CLI</td>
+<td>Partial</td>
+<td><code>cli-providers.cjs</code>, tested against a stand-in</td>
+<td>Not run against a real CLI or account</td>
+</tr>
+<tr>
+<td>Claude plan: manual handoff</td>
+<td>Works</td>
+<td><code>handoff.cjs</code>, handoff test</td>
+<td>Inherently manual</td>
+</tr>
+<tr>
+<td>Claude plan: automated (opt-in)</td>
+<td>Limited</td>
+<td>Off by default</td>
+<td>See below</td>
+</tr>
+<tr>
+<td>Backups</td>
+<td>Partial</td>
+<td><code>createBackup</code>, tested for creation</td>
+<td>Restoring is manual: stop the host and unpack the archive over its data folder. No restore test</td>
+</tr>
+<tr>
+<td>Agent panel</td>
+<td>Partial</td>
+<td>Status, connection, tasks, messages, logs</td>
+<td>Rules and files are in dashboard tabs rather than the panel</td>
+</tr>
+<tr>
+<td>Activity feed, Kanban</td>
+<td>Partial</td>
+<td>Live feed, Task board, Git history</td>
+<td>No dependency graph drawing</td>
+</tr>
+<tr>
+<td>Notifications, quiet mode</td>
+<td>Partial</td>
+<td>Quiet mode in the browser</td>
+<td>Quiet hours and per-kind preferences are missing</td>
+</tr>
+<tr>
+<td>One-click sandboxed preview</td>
+<td>Missing</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Dedicated relay / NAT traversal</td>
+<td>Missing</td>
+<td>The lobby explains VPN, port forwarding, tunnels</td>
+<td></td>
+</tr>
+<tr>
+<td>Meeting visuals</td>
+<td>Partial</td>
+<td>A line between talking agents</td>
+<td>Polish phase, as agreed</td>
+</tr>
+</tbody>
+</table>
+<h2 id="provider-rules-as-read-on-2026-11-03" tabindex="-1">Provider rules, as read on 2026-11-03</h2>
+<p><strong>OpenAI.</strong> The Sign in with ChatGPT documents say plan usage &quot;is available to all open-source partners and selected private clients&quot;, through OAuth with PKCE, a <code>127.0.0.1</code> loopback callback, a dynamic client registration, and the scopes <code>offline_access resource.invoke chatgpt.tokens.use.direct</code>. Requests go to <code>POST /v1/responses</code> with <code>store: false</code> and <code>stream: true</code>; function tools are allowed. On <code>subscription_sharing_usage_limit_exceeded</code> the app must pause and point to ChatGPT Settings → Usage, and the documents say OpenAI does not silently switch billing paths. This project is Apache-2.0 and runs locally, which is why this route was chosen.</p>
+<p>What is unverified: nothing has been sent to the real service, because that needs your account. The documents do not show the token refresh request, so the standard OAuth <code>refresh_token</code> grant is used. They do not say whether an open-source client needs any further approval, nor whether unattended multi-agent use fits the program; a pause on <code>subscription_sharing_user_not_eligible</code> will say so if not. Check it with <strong>Sign in with ChatGPT</strong>, then <strong>Test Connection</strong>, on the worker's page. The help-centre article on plan usage could not be fetched (403), so its details on the weekly cap are from the prompt, not verified.</p>
+<p><strong>Anthropic.</strong> The Claude Code legal page says developers &quot;should use API key authentication&quot; and that Anthropic &quot;does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests through Free, Pro, Max, or Ultra plan credentials on behalf of their users&quot;. It also says this does not prevent &quot;an end user from signing in to the unmodified Claude Code binary with their own Claude subscription&quot;, and that running Claude Code in a product requires agreeing to the Commercial Terms, leaving the binary unmodified, and each user authenticating themselves.</p>
+<p>So: <strong>manual handoff is the default</strong>. The app prepares the task; you run it yourself in your own Claude Code and press Done. The automated route (<code>claude-cli</code>) drives your own unmodified Claude Code, but is <strong>off unless you opt in on your own worker</strong>, and is labelled Limited, because whether unattended orchestration counts as routing requests on your behalf is not something this project can settle. If you need certainty, ask Anthropic, or use an API key, which is permitted and billed separately. The app never handles a Claude sign-in.</p>
+<p><strong>Billing protection, either way.</strong> Paid API is off by default and enforced in <code>createProvider</code>, which every model call passes through. The worker removes <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code> and similar from the environment of subscription CLIs, because Claude Code prefers an API key over a signed-in plan when it finds one. Limits pause work; they never trigger a retry or another provider.</p>
+<h2 id="budget-honesty" tabindex="-1">Budget honesty</h2>
+<p>Providers do not tell apps how much of a subscription remains. So a percentage is of a capacity <strong>you</strong> estimate, counted in requests <strong>this worker</strong> made. The worker's page labels requests as measured, the percentage as an estimate, and remaining allowance as unavailable. Enforced for real: the requests counted, the reserve, simultaneous jobs, and pausing at the estimate. Not enforceable: an exact share of your real plan.</p>
+<h2 id="tests" tabindex="-1">Tests</h2>
+<pre><code class="language-bash">npm run test:crew      # the multiplayer suite: 46 tests
+npm test               # everything
+</code></pre>
+<p>Agents in these tests use the <strong>scripted provider</strong>: fixed scripts, not AI. Everything below the model is real: tool calls, clones, commits, pushes through smart HTTP, the host's diffs, merges, sandboxed test runs. The scripted reviewer does read the real diff to decide. These tests prove the collaboration machinery and say nothing about how well a real model uses it.</p>
+<table>
+<thead>
+<tr>
+<th>Acceptance test</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Host and join with independent teams; office, HUD and tutorial work</td>
+<td>Passes on one PC with separate processes and data folders; two real PCs not tried</td>
+</tr>
+<tr>
+<td>2. Agent edits on its own branch, tests, pushes; host records it; reviewer reads it</td>
+<td>Passes</td>
+</tr>
+<tr>
+<td>3. Changes requested, new commit, review, merge, QA, Definition of Done</td>
+<td>Passes (<code>review loop</code>)</td>
+</tr>
+<tr>
+<td>4. Progress documents on and off</td>
+<td>Passes. The README toggle is implemented and not end-to-end tested</td>
+</tr>
+<tr>
+<td>5. Permission gates across owners</td>
+<td>Passes (<code>the host refuses</code>, <code>crew-permissions</code>)</td>
+</tr>
+<tr>
+<td>6. Contract change, targeted notification, adaptation on its own branch</td>
+<td>Passes. The scripted agent's adaptation is a fixed test file, so this shows the routing, not the judgement</td>
+</tr>
+<tr>
+<td>7. Manual / Balanced / Autonomous</td>
+<td>Passes</td>
+</tr>
+<tr>
+<td>8. Quota exhaustion pauses with no paid fallback; overlapping estimates warn</td>
+<td>Passes against a stand-in provider returning OpenAI's documented error</td>
+</tr>
+<tr>
+<td>9. Network loss during upload resumes; overlapping edits conflict</td>
+<td>Passes. Upload resume is tested by stopping and continuing, not by cutting a real connection</td>
+</tr>
+<tr>
+<td>10. Real OpenAI and Claude integrations</td>
+<td><strong>Not done: needs your accounts.</strong> See the checklist</td>
+</tr>
+<tr>
+<td>11. Build and launch the desktop app</td>
+<td>The installer is rebuilt and its install script tested into a temporary folder. The <code>.exe</code> itself has not been run. The app is a local server and browser page, not a native window</td>
+</tr>
+</tbody>
+</table>
+<h2 id="checklist-for-real-connections" tabindex="-1">Checklist for real connections</h2>
+<ol>
+<li>Install the app on your PC. Open the office and connect a worker (Dashboard → My workers).</li>
+<li>Open the worker's page, <code>http://127.0.0.1:8790</code>.</li>
+<li><strong>ChatGPT:</strong> press Sign in with ChatGPT, then Test Connection. Working means a real answer came back.</li>
+<li><strong>Codex:</strong> install it, run <code>codex login</code>, press Test Connection.</li>
+<li><strong>Claude:</strong> install Claude Code and sign in. Give an agent the manual handoff, assign it a task, and follow the worker's page.</li>
+<li>Tell the agent's task to do something small, and read what it did under Git / Sync.</li>
+<li>If anything fails, its error is on the worker's page, and in the crash logs in <code>~/.crew-worker/crash-logs</code>.</li>
+</ol>
+<h2 id="example-settings" tabindex="-1">Example settings</h2>
+<p>The bot demo (<code>npm run demo:bot</code>: three players, five agents) applies these project rules:</p>
+<pre><code class="language-json">{ &quot;approvalMode&quot;: &quot;balanced&quot;, &quot;syncMode&quot;: &quot;smart&quot;, &quot;testsBeforeDone&quot;: true, &quot;requireReview&quot;: true,
+  &quot;progressReports&quot;: true, &quot;handoffNotes&quot;: true, &quot;updateReadme&quot;: false }
+</code></pre>
+<p>It also sets a 25% estimated budget on each task, with paid API left off. For that percentage to bite, set a capacity for the connection on the worker's page; without one, only the provider's own limits apply.</p>
+<h2 id="security-notes" tabindex="-1">Security notes</h2>
+<p>The Git host trusts a worker's commit trailers for test results, so a player could misreport their own agent's tests; it cannot do so for another player's. <code>run_command</code> remains Node-only, and the default process sandbox does not block network access; <code>CREW_SANDBOX=docker</code> does. Python projects therefore cannot run their tests in the default sandbox yet. Self-hosted traffic is plain HTTP unless you put HTTPS in front of it, so on anything but a trusted network use a VPN or a reverse proxy.</p>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#requirement-matrix">Requirement matrix</a></li>
+<li><a href="#provider-rules-as-read-on-2026-11-03">Provider rules, as read on 2026-11-03</a></li>
+<li><a href="#budget-honesty">Budget honesty</a></li>
+<li><a href="#tests">Tests</a></li>
+<li><a href="#checklist-for-real-connections">Checklist for real connections</a></li>
+<li><a href="#example-settings">Example settings</a></li>
+<li><a href="#security-notes">Security notes</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone with a checkout. If you just want to use the thing,
+      <a href="/docs/user/index.html">the user docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

@@ -237,35 +237,44 @@ running code or fetching&quot;).</p>
 </thead>
 <tbody>
 <tr>
-<td><strong>Claude subscription (Pro / Max)</strong></td>
-<td>Claude Code installed and signed in once (<code>claude</code>, then log in)</td>
+<td><strong>ChatGPT plan: Sign in with ChatGPT</strong></td>
+<td>Press the button on your worker's page</td>
 <td>Your plan; its usage limits apply</td>
 </tr>
 <tr>
-<td><strong>ChatGPT subscription (Plus / Pro)</strong></td>
+<td><strong>ChatGPT plan: Codex</strong></td>
 <td>Codex installed and signed in (<code>codex login</code>)</td>
 <td>Your plan; its usage limits apply</td>
 </tr>
 <tr>
-<td>Anthropic API key</td>
-<td>A key on the worker's settings page</td>
-<td>Per token</td>
+<td><strong>Claude plan: manual handoff</strong></td>
+<td>Claude Code installed and signed in</td>
+<td>Your plan. You run each task yourself in Claude Code, then press Done</td>
 </tr>
 <tr>
-<td>OpenAI API key</td>
-<td>A key on the worker's settings page</td>
-<td>Per token</td>
+<td>Claude plan: automated (Limited)</td>
+<td>Off until you opt in on your worker's page, after reading the notice about Anthropic's terms</td>
+<td>Your plan</td>
 </tr>
 <tr>
 <td>Local model</td>
 <td>An OpenAI-compatible server such as Ollama</td>
 <td>Free</td>
 </tr>
+<tr>
+<td>Anthropic or OpenAI API key</td>
+<td>A key on your worker's page, and <strong>Never use paid API</strong> turned off there</td>
+<td>Per token</td>
+</tr>
 </tbody>
 </table>
-<p>With a subscription the agent works through that app on your computer, signed in as you;
-the office switches off the app's own tools and gives the agent only the office's tools,
-so every permission and approval still applies.</p>
+<p><strong>You are never charged by surprise.</strong> Paid API use is off until you turn it off yourself, on your own
+computer. When a plan's limit is reached the work pauses and is saved; it does not retry, and it does not
+switch to anything that costs money. Your worker's page shows each connection's real state, and <strong>Test
+Connection</strong> sends one small real request, so <strong>Working</strong> always means it actually answered.</p>
+<p>A <strong>budget</strong> is your own estimate, such as “about 300 requests a week”. Providers do not tell apps how much of a
+plan is left, so a task's “25%” is 25% of your estimate, counted from requests this computer made, not an
+exact share of your plan.</p>
 <h3 id="your-worker-and-your-api-keys" tabindex="-1">Your worker and your API keys</h3>
 <p>Your agents run on <strong>your</strong> computer, through a small program called a worker, with
 <strong>your</strong> API keys. The host never receives your keys, and neither do other players.</p>
@@ -284,6 +293,28 @@ server, and your agents stay available when you are away.</p>
 <p>Each agent has a status tag above its head — <em>Thinking</em>,
 <em>Reading server.js</em>, <em>Asking Boris</em>, <em>Waiting for approval</em>, <em>Idle</em> — updated by what it is
 actually doing.</p>
+<h2 id="sharing-code-git-sync" tabindex="-1">Sharing code: Git / Sync</h2>
+<p>Code is shared through Git repositories hosted right in the office, so there are no ZIP uploads and no GitHub
+needed (the host computer needs Git installed). Each agent works in its own copy, on its own branch, on its
+owner's computer. Under <strong>Dashboard → Git / Sync</strong>:</p>
+<ul>
+<li><strong>Smart Sync</strong> (the default) runs the tests, then commits and pushes. If tests fail, nothing is published and the
+work stays where it is. <strong>Live</strong> publishes drafts kept apart from reviewed work. <strong>Manual</strong> waits to be told.</li>
+<li><code>main</code> is protected. Changes reach it only through a merge request: another agent reads the real changes and
+approves or asks for changes, with comments on exact lines. Conflicts stop the merge, and nothing is overwritten.</li>
+<li>You can read every diff, save snapshots of <code>main</code>, and roll back. Rolling back adds a change; it deletes nothing.</li>
+<li>Files with passwords or keys in them are refused.</li>
+</ul>
+<p>Releases, images and other large files go in <strong>Office files</strong>, which keeps versions and resumes interrupted uploads.</p>
+<p>One project can depend on a file in another project's repository, such as an API description. When a merge changes
+it, only the dependent project hears about it, and gets a task to adapt.</p>
+<h2 id="rules-and-approvals" tabindex="-1">Rules and approvals</h2>
+<p><strong>Dashboard → Rules</strong> sets how agents work, at office, project, team or agent level, and shows where each setting came
+from. Some rules are enforced, such as tests before review; others are instructions to the agent; each is labelled. Progress reports, handoff notes and
+README updates are optional. <strong>Approval mode</strong> decides what waits for a person: <strong>Manual</strong> asks most, <strong>Balanced</strong> asks
+before merging into <code>main</code>, <strong>Autonomous</strong> skips routine asks. Deleting shared files always asks, in every mode, and no
+mode changes who is allowed to do what.</p>
+<p><strong>Pause all my agents</strong>, under My workers, stops yours at once.</p>
 <h2 id="shared-projects" tabindex="-1">Shared projects</h2>
 <ol>
 <li><strong>New project</strong>: a name, a goal, and one of your agents as the manager.</li>
@@ -331,6 +362,8 @@ choose a real provider for real work.</p>
 <li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#which-ai-each-agent-uses">Which AI each agent uses</a></li>
 <li><a href="#your-worker-and-your-api-keys">Your worker and your API keys</a></li></ul></li>
 <li><a href="#how-the-office-looks">How the office looks</a></li>
+<li><a href="#sharing-code-git-sync">Sharing code: Git / Sync</a></li>
+<li><a href="#rules-and-approvals">Rules and approvals</a></li>
 <li><a href="#shared-projects">Shared projects</a></li>
 <li><a href="#approvals">Approvals</a></li>
 <li><a href="#chat">Chat</a></li>

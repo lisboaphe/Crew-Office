@@ -53,6 +53,9 @@
           <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
         </li>
         <li>
+          <a href="/docs/developer/upgrade-report.html">Upgrade report: Git, rules, budgets</a>
+        </li>
+        <li>
           <a href="/docs/developer/physics.html">The physics of the office</a>
         </li>
         <li>
@@ -490,6 +493,11 @@ next <code>npm run docs</code> will overwrite you. Add a script, add its <code>s
 <td><code>npm run demo</code></td>
 <td><code>node bin/crew-demo.cjs</code></td>
 <td>The Alice-and-Bob multiplayer demo against a running host (<code>npm run host</code> first). <code>-- --provider anthropic</code> for real models, <code>-- --manual</code> to approve by hand.</td>
+</tr>
+<tr>
+<td><code>npm run demo:bot</code></td>
+<td><code>node bin/crew-demo-bot.cjs</code></td>
+<td>Three players, five agents, one hosted Git repository: real clones, Smart Sync, review with rework, progress reports, a 25% estimated task budget. Scripted provider unless <code>-- --provider</code> says otherwise.</td>
 </tr>
 <tr>
 <td><code>npm run app</code></td>
