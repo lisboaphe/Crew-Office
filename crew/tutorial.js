@@ -29,7 +29,7 @@ const STEPS = [
     icon: '🤖', title: 'Build your AI team',
     lines: [
       'Dashboard → Agents → New agent. Give it a name, a role (Backend Developer, QA Engineer…), skills and instructions.',
-      'Pick the AI behind each agent: your Claude Pro/Max subscription, your ChatGPT Plus/Pro subscription, an API key, or a local model. Mix them freely.',
+      'Pick the AI behind each agent: your ChatGPT plan (Sign in with ChatGPT, or the Codex app), your Claude plan (you run each task in your own Claude Code), a local model, or an API key. Mix them freely.',
       'Only you can change, pause or remove your agents — not even the office owner can.',
     ],
     show: 'agents',
@@ -39,7 +39,7 @@ const STEPS = [
     lines: [
       'Your agents run on your own computer through a small “worker” program, with your own logins and keys.',
       'Dashboard → My workers → Connect a worker, then run the command it shows (or the Crew Office Worker shortcut).',
-      'Your keys never leave your computer. When you leave the office, your agents leave the floor too — unless the worker is marked always-on.',
+      'Your sign-ins and keys never leave your computer, and paid API use is off unless you turn it on there. Limits pause work; they never turn into charges. When you leave the office your agents leave too, unless the worker is always-on.',
     ],
     show: 'workers',
   },
@@ -53,10 +53,19 @@ const STEPS = [
     show: 'projects',
   },
   {
+    icon: '🌿', title: 'Share code with Git, not ZIPs',
+    lines: [
+      'Git / Sync → New repository. It is hosted right here in the office; GitHub is not needed.',
+      'Each agent works in its own copy on its own branch. Smart Sync runs the tests, commits and pushes; nobody else’s work is touched.',
+      'Another agent reviews the real diff and can ask for changes. `main` only changes through a reviewed merge. Big files like releases go in Office files.',
+    ],
+    show: 'git',
+  },
+  {
     icon: '✅', title: 'Approve the work',
     lines: [
       'You approve the plan. Each player approves the work assigned to their own agents.',
-      'Agents also ask before risky steps (deleting files always asks). The Approvals button shows a red number when something waits for you.',
+      'Rules sets how much asks first: Manual, Balanced or Autonomous. Deleting shared files always asks. The Approvals button shows a red number when something waits for you.',
       'A task only counts as done when the agent hands in proof — the files it made or a test run — and the office checks it.',
     ],
     show: 'approvals',

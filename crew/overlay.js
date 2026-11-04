@@ -7,6 +7,7 @@
 
 import { h, api, toast, modal, avatar, ago, money, BRAND, reportErrors } from './common.js';
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
+import { gitTab, filesTab, rulesTab } from './workspace.js';
 
 const code = (location.pathname.match(/^\/office\/([^/]+)/) ?? [])[1];
 const S = { room: null, me: null, members: [], agents: [], projects: [], tasks: [], channels: [], approvals: [], notifications: [], workers: [], feed: [], artifacts: [], permissions: {}, providers: {}, host: {} };
@@ -47,6 +48,7 @@ async function boot() {
 async function refresh() {
   const snap = await api('GET', `/api/crew/rooms/${roomId}/state`);
   Object.assign(S, snap);
+  S.providers_ = snap.providerStates ?? {};
   if (!ui.channelId) ui.channelId = S.channels.find((c) => c.name === 'office-general')?.id ?? S.channels[0]?.id;
   ui.messages.clear();
   render();
@@ -81,6 +83,11 @@ function connect() {
   });
   on('bubble', (b) => bubble(b.agentId, b.text, { to: S.agents.find((a) => a.id === b.toAgentId)?.name }));
   on('react', (r) => bubble(r.agentId, r.kind === 'assigned' ? `📥 ${r.text}` : `✅ ${r.text}`, { react: true, ms: 4500 }));
+  on('git', () => { ui.reloadGit?.(); });
+  on('merge', (m) => { upsert(S.merges ??= [], m); ui.reloadGit?.(); });
+  on('file', () => { ui.reloadFiles?.(); });
+  on('rules', () => { ui.rules = null; render(); });
+  on('providers', ({ userId, providers }) => { (S.providers_ ??= {})[userId] = providers; render(); });
   on('activity', (a) => { activities.set(a.agentId, a); });
   on('meeting', (m) => { if (m.on) meetings.set(m.agents.join('|'), m.agents); else meetings.delete(m.agents.join('|')); });
   es.onerror = () => { /* EventSource reconnects by itself, with Last-Event-ID */ };
@@ -144,11 +151,12 @@ function toggleDash(tab) {
 
 // --- dashboard --------------------------------------------------------------
 
-const TABS = [['projects', 'Projects'], ['board', 'Task board'], ['agents', 'Agents'], ['teams', 'Teams'], ['feed', 'Live feed'], ['deliverables', 'Deliverables'], ['approvals', 'Approvals'], ['costs', 'Costs'], ['workers', 'My workers'], ['notifications', 'Notifications'], ['room', 'Office']];
+const TABS = [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['agents', 'Agents'], ['teams', 'Teams'], ['feed', 'Live feed'], ['deliverables', 'Deliverables'], ['approvals', 'Approvals'], ['rules', 'Rules'], ['costs', 'Costs'], ['workers', 'My workers'], ['notifications', 'Notifications'], ['room', 'Office']];
 
 function renderDash() {
   const body = h('div.body');
-  ({ projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, workers: dashWorkers, notifications: dashNotifications, room: dashRoom })[ui.tab](body);
+  const wsCtx = { S, roomId, ui, render, taskDetail };
+  ({ git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, workers: dashWorkers, notifications: dashNotifications, room: dashRoom })[ui.tab](body);
   ui.dash.replaceChildren(
     h('header', h('h2', 'Dashboard'), h('button.btn.small', { onclick: () => ui.dash.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
     h('nav.cr-tabs', ...TABS.map(([k, label]) => h('button', { class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; render(); } }, label))),
@@ -242,11 +250,13 @@ function dashApprovals(body) {
 function approvalView(a, canDecide) {
   const d = a.detail ?? {};
   const who = userById(a.approverId)?.displayName ?? '?';
-  const what = a.kind === 'plan' ? `Approve the plan for “${d.project}”` : a.kind === 'assignment' ? `Let ${d.agentName} work on “${d.title}” (${d.project})` : a.kind === 'tool' ? `${d.agentName} wants to ${d.summary}` : `${d.agentName}: ${d.reason}`;
+  const what = a.kind === 'merge' ? `Merge ${d.repo}/${d.branch} into main (${d.agentName}; ${d.why ?? ''})` : a.kind === 'plan' ? `Approve the plan for “${d.project}”` : a.kind === 'assignment' ? `Let ${d.agentName} work on “${d.title}” (${d.project})` : a.kind === 'tool' ? `${d.agentName} wants to ${d.summary}` : `${d.agentName}: ${d.reason}`;
   const note = h('input', { placeholder: 'Optional note to the agent' });
   return h('div.cr-item', { style: { marginBottom: '8px' } },
     h('div.row', h('b.grow', what), h('span.pill', a.kind), h('span.pill', { class: a.status === 'approved' ? 'ok' : a.status === 'rejected' ? 'bad' : 'warn' }, a.status)),
     a.kind === 'plan' && d.tasks ? h('ol', ...d.tasks.map((t) => h('li', t.title, ' → ', h('b', t.assignee ?? 'unassigned')))) : null,
+    d.summary && a.kind === 'merge' ? h('p.hint', d.summary) : null,
+    d.reason ? h('p.hint', d.reason) : null,
     h('p.hint', `Decision belongs to ${who} · ${ago(a.createdAt)}`),
     canDecide ? h('div.row', h('div.grow', note),
       h('button.btn.small.primary', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/approvals/${a.id}`, { decision: 'approved', note: note.value }), 'Approved') }, 'Approve'),
@@ -367,12 +377,14 @@ function renderAgent() {
     h('dl.cr-kv',
       h('dt', 'Owner'), h('dd', `${a.ownerName}${mine ? ' (you)' : ''}`),
       h('dt', 'Model'), h('dd', `${S.providers[a.provider]?.label ?? a.provider} · ${a.model}`),
+      h('dt', 'Connection'), h('dd', S.providers_?.[a.ownerId]?.[a.provider] ? `${S.providers_[a.ownerId][a.provider].state}: ${S.providers_[a.ownerId][a.provider].reason}` : 'No report from the owner’s worker yet'),
       h('dt', 'Assigned task'), h('dd', task ? task.title : '—'),
       h('dt', 'Skills'), h('dd', a.skills.join(', ') || '—'),
       h('dt', 'Tools'), h('dd', a.tools.join(', ') || '—'),
       h('dt', 'Autonomy'), h('dd', a.autonomy === 'ask' ? 'asks before writing files, running code or fetching' : 'acts within its permissions'),
       h('dt', 'Usage'), h('dd', `${money(a.spentUsd)} of ${money(a.budgetUsd)} · ${(a.tokensIn + a.tokensOut).toLocaleString()} tokens`),
-      h('dt', 'Availability'), h('dd', a.available ? 'on the floor' : a.paused ? 'paused' : 'unavailable — owner’s worker offline or owner away')),
+      h('dt', 'Availability'), h('dd', a.available ? 'on the floor' : a.paused ? 'paused' : 'unavailable — owner’s worker offline or owner away'),
+      h('dt', 'Host'), h('dd', 'online (you are connected to it)')),
     h('div.cr-actions',
       h('button.btn.primary', { onclick: () => assignTask(a) }, 'Assign Task'),
       mine ? h('button.btn', { onclick: () => { ui.channelId = d?.dmChannelId; if (ui.channelId) { if (!S.channels.find((c) => c.id === ui.channelId)) S.channels.push({ id: ui.channelId, kind: 'dm', name: 'dm', dmAgentId: a.id }); openSide('chat'); } } }, 'Chat') : null,
@@ -407,16 +419,17 @@ function agentForm(existing = null) {
     const role = h('input', { value: a.role ?? '', placeholder: 'e.g. Backend Developer' });
     const skills = h('input', { value: (a.skills ?? []).join(', '), placeholder: 'node, api, testing' });
     const instructions = h('textarea', { value: a.instructions ?? '', placeholder: 'Standing instructions: how this agent should work. Only you can see these.' });
-    const provider = h('select', ...Object.entries(S.providers).map(([k, p]) => h('option', { value: k, selected: (a.provider ?? 'anthropic') === k }, p.label)));
-    const model = h('input', { value: a.model ?? S.providers[a.provider ?? 'anthropic']?.defaultModel ?? '' });
+    const provider = h('select', ...Object.entries(S.providers).map(([k, p]) => h('option', { value: k, selected: (a.provider ?? 'chatgpt-plan') === k }, p.label)));
+    const model = h('input', { value: a.model ?? S.providers[a.provider ?? 'chatgpt-plan']?.defaultModel ?? '' });
     const models = h('div.hint');
     const note = h('div.cr-provider-note');
     const showModels = () => {
       const p = S.providers[provider.value];
       models.textContent = p.models.length ? `Models: ${p.models.join(', ')}` : 'Use the model name your local server serves.';
       note.textContent = p.subscription
-        ? `Runs on your own ${provider.value === 'claude-cli' ? 'Claude' : 'ChatGPT'} subscription through its official app on your worker computer — no API key, no per-token bill; your plan’s usage limits apply. ${p.setup}`
-        : provider.value === 'scripted' ? 'Not an AI model: fixed scripts, for demos and tests.' : 'Uses an API key stored on your worker computer (billed per token by the provider).';
+        ? `Your own plan, on your own computer; no per-token bill, and your plan’s limits apply. ${p.setup}`
+        : p.billing === 'paid' ? 'Billed per token to your API key. Agents on this will not run until you turn off “Never use paid API” on your own worker. It is on by default.'
+          : provider.value === 'scripted' ? 'Not an AI model: fixed scripts, for demos and tests.' : 'A model running on your own computer.';
       if (!existing || provider.value !== a.provider) model.value = p.defaultModel;
     };
     provider.addEventListener('change', showModels);
@@ -426,7 +439,17 @@ function agentForm(existing = null) {
     const budget = h('input', { type: 'number', min: 0, step: 0.5, value: a.budgetUsd ?? 5 });
     const autonomy = h('select', h('option', { value: 'auto', selected: a.autonomy !== 'ask' }, 'Act within its permissions'), h('option', { value: 'ask', selected: a.autonomy === 'ask' }, 'Ask me before writing files, running code or fetching'));
     const manager = h('input', { type: 'checkbox', checked: Boolean(a.isManager) });
-    const tools = Object.entries(S.permissions).map(([k, label]) => { const c = h('input', { type: 'checkbox', value: k, checked: (a.tools ?? ['messaging', 'files.read', 'files.write', 'memory']).includes(k) }); return { k, c, el: h('label', c, h('span', h('b', k), ' — ', label)) }; });
+    const tools = Object.entries(S.permissions).map(([k, label]) => { const c = h('input', { type: 'checkbox', value: k, checked: (a.tools ?? ['messaging', 'files.read', 'files.write', 'memory', 'git']).includes(k) }); return { k, c, el: h('label', c, h('span', h('b', k), ' — ', label)) }; });
+    const presetSel = h('select', { onchange: (e) => {
+      const pr = presets.find((x) => x.id === e.target.value);
+      if (!pr) return;
+      role.value = pr.role; skills.value = pr.skills.join(', '); instructions.value = pr.instructions;
+      for (const t of tools) t.c.checked = pr.tools.includes(t.k);
+      manager.checked = pr.name === 'Project Manager';
+      if (!name.value) name.value = pr.name;
+    } }, h('option', { value: '' }, 'Start from a preset…'));
+    let presets = [];
+    api('GET', `/api/crew/rooms/${roomId}/presets`).then((r) => { presets = r.presets; presetSel.append(...presets.map((x) => h('option', { value: x.id }, x.name))); }).catch(() => {});
     const err = h('p.error');
     const save = async () => {
       const body = { name: name.value, role: role.value, skills: skills.value, instructions: instructions.value, provider: provider.value, model: model.value, color: color.value, budgetUsd: Number(budget.value), autonomy: autonomy.value, isManager: manager.checked, tools: tools.filter((t) => t.c.checked).map((t) => t.k) };
@@ -437,7 +460,7 @@ function agentForm(existing = null) {
         toast(existing ? 'Saved' : `${body.name} joins your team. It appears on the floor once your worker is connected.`);
       } catch (e) { err.textContent = e.message; }
     };
-    return h('div', ...field('Name', name), ...field('Role', role), ...field('Skills', skills, 'Comma-separated; used to match tasks.'), ...field('Instructions', instructions),
+    return h('div', existing ? null : presetSel, ...field('Name', name), ...field('Role', role), ...field('Skills', skills, 'Comma-separated; used to match tasks.'), ...field('Instructions', instructions),
       h('div.row', h('div.grow', ...field('AI behind this agent', provider)), h('div.grow', ...field('Model', model))), models, note,
       h('div.row', h('div', ...field('Shirt colour', color)), h('div.grow', ...field('Budget (USD, total)', budget)), h('div.grow', ...field('Autonomy', autonomy))),
       h('label', manager, ' Can manage projects (plans and assigns work)'),
@@ -535,7 +558,10 @@ function taskDetail(t) {
     t.deliverables.length ? h('p.hint', `Expected: ${t.deliverables.join(', ')}`) : null,
     t.resultSummary ? [h('h3', 'Result'), h('pre', t.resultSummary)] : null,
     t.artifacts.length ? [h('h3', 'Files'), ...t.artifacts.map((f) => h('div', h('button.btn.small', { onclick: () => { close(); viewFile(t.projectId, f.path); } }, f.path)))] : null,
+    t.pausedReason ? h('p', h('b', 'Paused: '), t.pausedReason) : null,
     h('p.hint', `Attempts ${t.attempts}/${t.maxAttempts} · ${t.tokens.toLocaleString()} tokens · ${money(t.actualCost)}`),
+    h('label', 'Estimated budget for this task'),
+    h('div.row', h('input', { type: 'number', min: 1, max: 100, value: t.budgetPct ?? '', placeholder: 'none', style: { width: '90px' }, onchange: (e) => act(() => api('POST', `/api/crew/rooms/${roomId}/tasks/${t.id}/budget`, { pct: e.target.value || null }), 'Saved') }), h('span.hint', '% of the owner’s own estimate. Best effort: providers do not report remaining allowance, so this is not an exact ceiling.')),
     h('div.actions',
       ['failed', 'blocked', 'cancelled'].includes(t.status) ? h('button.btn', { onclick: () => { close(); act(() => api('POST', `/api/crew/rooms/${roomId}/tasks/${t.id}/retry`), 'Retrying'); } }, 'Retry') : null,
       !['completed', 'failed', 'cancelled'].includes(t.status) ? h('button.btn.danger', { onclick: () => { close(); act(() => api('POST', `/api/crew/rooms/${roomId}/tasks/${t.id}/cancel`), 'Cancelled'); } }, 'Cancel task') : null,

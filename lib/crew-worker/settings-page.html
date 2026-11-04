@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent worker</title>
+<style>
+  :root { color-scheme: light dark; --ink:#1c2230; --soft:#5a6272; --bg:#f5f6f8; --card:#fff; --line:#dfe2e9; --accent:#3d6fd6; --ok:#2a8a4a; --warn:#b27a10; --bad:#b04030; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#eef0f5; --soft:#a4abba; --bg:#14171e; --card:#1f232d; --line:#343a48; --accent:#6d97f0; --ok:#57c07a; --warn:#e0b050; --bad:#e8806f; } }
+  body { font: 15px/1.5 system-ui, sans-serif; max-width: 860px; margin: 28px auto; padding: 0 16px; background: var(--bg); color: var(--ink); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 14px 0; }
+  h1 { margin: 0 0 4px; } h2 { font-size: 17px; margin: 0 0 8px; }
+  input, select { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: inherit; font: inherit; max-width: 100%; }
+  button { padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; } td, th { text-align: left; padding: 6px 6px 6px 0; border-top: 1px solid var(--line); vertical-align: top; font-size: 14px; }
+  th { border: 0; color: var(--soft); font-weight: 600; }
+  code { background: rgba(127,127,127,.15); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
+  .state { font-weight: 600; white-space: nowrap; } .Working { color: var(--ok); } .Connected { color: var(--accent); } .Limited { color: var(--warn); }
+  .Requires { color: var(--bad); } .Not { color: var(--soft); }
+  .hint { color: var(--soft); font-size: 13px; } .notice { border-left: 3px solid var(--warn); padding: 6px 10px; margin: 8px 0; font-size: 14px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; } label { font-size: 14px; }
+</style>
+</head>
+<body>
+<h1>Agent worker</h1>
+<p class="hint">This program runs your AI agents on this computer. Your sign-ins and keys are stored here, encrypted, and go only to the AI provider — never to the office host or other players. This page is only reachable from this computer.</p>
+
+<section><h2>Offices</h2><div id="conns">…</div></section>
+
+<section>
+  <h2>Spending safety</h2>
+  <label class="row"><input type="checkbox" id="neverPaid"> <b>Never use paid API</b> (on by default)</label>
+  <p class="hint">While this is on, agents set to an Anthropic or OpenAI API key do not run. They wait; nothing falls back to them, and subscription limits never turn into charges. A key in your shell cannot switch Claude Code or Codex to API billing either: the worker removes it before starting them.</p>
+</section>
+
+<section>
+  <h2>AI connections</h2>
+  <table id="providers"></table>
+  <p class="hint"><b>Working</b> means a real test request got an answer. <b>Connected</b> means set up but not proven yet.</p>
+</section>
+
+<section>
+  <h2>Sign in with ChatGPT</h2>
+  <div id="chatgpt"></div>
+  <p class="hint">Uses OpenAI’s own sign-in page. Usage comes from your ChatGPT plan. OpenAI lets you cap this app in ChatGPT Settings → Usage; that cap is for the whole app, not per task. If a limit is reached, work pauses. It never switches to API billing.</p>
+</section>
+
+<section>
+  <h2>Claude</h2>
+  <div class="notice">Anthropic’s terms say third-party apps may not “route requests through Free, Pro, Max, or Ultra plan credentials on behalf of their users”, while you may sign in to the unmodified Claude Code with your own subscription. So the default here is a <b>manual handoff</b>: the app prepares each task, you run it yourself in your own Claude Code, and press Done.</div>
+  <div id="handoffs"></div>
+  <label class="row"><input type="checkbox" id="claudeAuto"> Let this worker start my own Claude Code automatically (Limited)</label>
+  <p class="hint">Off by default. Turning it on is your decision and your responsibility under Anthropic’s terms; if in doubt leave it off, or use a Claude API key, which is billed separately. It runs your installed, unmodified Claude Code with your own sign-in; the app never sees that sign-in.</p>
+</section>
+
+<section>
+  <h2>Budget manager</h2>
+  <p class="hint">No provider tells apps how much of a subscription is left, so these are <b>your estimates</b>, counted from requests this worker actually made. They pause work conservatively; they are not provider quotas. Leave capacity empty to rely only on the provider’s own limits.</p>
+  <table id="budgets"></table>
+  <div class="row"><label>Default per-task share <input id="taskDefault" type="number" min="1" max="100" style="width:80px"> % of the estimate (empty = none)</label> <button onclick="saveDefault()">Save</button></div>
+</section>
+
+<section>
+  <h2>API keys and local models</h2>
+  <div class="row"><label style="width:170px">Anthropic API key</label><input id="anthropic" type="password" autocomplete="off" placeholder="paid per token"><button onclick="saveKey('anthropic','apiKey','anthropic')">Save</button></div>
+  <div class="row"><label style="width:170px">OpenAI API key</label><input id="openai" type="password" autocomplete="off" placeholder="paid per token"><button onclick="saveKey('openai','apiKey','openai')">Save</button></div>
+  <div class="row"><label style="width:170px">Local model server</label><input id="localurl" placeholder="http://127.0.0.1:11434/v1 (Ollama)"><button onclick="saveKey('local','baseUrl','localurl')">Save</button></div>
+  <div id="vault" class="hint"></div>
+</section>
+
+<script>
+const H = { 'Content-Type': 'application/json', 'X-Crew': '1' };
+const post = (p, b) => fetch(p, { method: 'POST', headers: H, body: JSON.stringify(b ?? {}) }).then((r) => r.json());
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let editing = false;
+
+async function load() {
+  if (editing) return;
+  const s = await (await fetch('/status')).json();
+  document.getElementById('neverPaid').checked = s.budget.neverPaidApi;
+  document.getElementById('claudeAuto').checked = s.budget.allowClaudeAutomation;
+  if (document.activeElement.id !== 'taskDefault') document.getElementById('taskDefault').value = s.budget.taskDefaultPct ?? '';
+  document.getElementById('conns').innerHTML = s.connections.length ? s.connections.map((c) => '<div><b>' + esc(c.room ? c.room.name : c.host) + '</b> — ' + (c.connected ? 'connected' : 'not connected') + ' · running ' + c.running + ' · finished ' + c.completed + (c.lastError ? ' · ' + esc(c.lastError) : '') + '</div>').join('') : 'No office yet. In the office open Dashboard → My workers → Connect a worker, and run the command it shows.';
+  document.getElementById('providers').innerHTML = '<tr><th>Connection</th><th>State</th><th>Why</th><th></th></tr>' + Object.entries(s.providers).filter(([k]) => k !== 'scripted').map(([k, p]) => '<tr><td>' + esc(p.label) + '<br><span class="hint">' + esc(p.billing) + '</span></td><td class="state ' + esc(p.state.split(' ')[0]) + '">' + esc(p.state) + '</td><td class="hint">' + esc(p.reason) + '</td><td>' + (k === 'claude-handoff' ? '' : '<button onclick="testConn(\'' + k + '\', this)">Test Connection</button>') + '</td></tr>').join('');
+  const g = s.chatgpt;
+  document.getElementById('chatgpt').innerHTML = g.signedIn ? '<div class="row">Signed in' + (g.planScope ? ' with plan usage allowed.' : ', but plan usage was not allowed.') + ' <button onclick="chatgptOut()">Sign out</button></div>' : '<button class="primary" onclick="chatgptIn()">Sign in with ChatGPT</button>';
+  document.getElementById('handoffs').innerHTML = s.handoffs.length ? '<h3>Waiting for you</h3>' + s.handoffs.map((h) => '<div class="row" style="display:block;border-top:1px solid var(--line);padding:8px 0"><b>' + esc(h.agent) + ': ' + esc(h.title) + '</b><br><span class="hint">Open a terminal here and run <code>claude</code>:</span> <code>' + esc(h.workDir) + '</code><br><span class="hint">The brief:</span> <code>' + esc(h.folder) + '\\HANDOFF.md</code><br><button class="primary" onclick="handoffDone(\'' + esc(h.jobId) + '\')">Done</button></div>').join('') : '<p class="hint">No handoffs waiting.</p>';
+  const names = ['chatgpt-plan', 'codex-cli', 'claude-cli', 'local'];
+  document.getElementById('budgets').innerHTML = '<tr><th>Connection</th><th>Your estimate</th><th>Window</th><th>Keep for me</th><th>Jobs at once</th><th>Used (measured)</th><th></th></tr>' + names.map((n) => {
+    const b = s.budget.providers[n] ?? { window: 'weekly', capacity: null, reservePct: 20, maxConcurrent: 2, requestsInWindow: 0 };
+    return '<tr data-p="' + n + '"><td>' + n + '</td><td><input class="cap" type="number" min="1" style="width:90px" value="' + (b.capacity ?? '') + '" placeholder="requests"></td><td><select class="win">' + ['session5h', 'daily', 'weekly'].map((w) => '<option value="' + w + '"' + (b.window === w ? ' selected' : '') + '>' + ({ session5h: '5-hour', daily: 'daily (your own)', weekly: 'weekly' }[w]) + '</option>').join('') + '</select></td><td><input class="res" type="number" min="0" max="95" style="width:60px" value="' + b.reservePct + '">%</td><td><input class="con" type="number" min="1" style="width:60px" value="' + b.maxConcurrent + '"></td><td>' + b.requestsInWindow + ' requests' + (b.estimatedPct != null ? ' (about ' + b.estimatedPct + '% of your estimate)' : '') + '</td><td><button onclick="saveBudget(this)">Save</button></td></tr>';
+  }).join('');
+  document.getElementById('vault').textContent = Object.entries(s.vault).map(([p, v]) => p + ': ' + (v.apiKey ? 'key set' : 'no key') + (v.baseUrl ? ' · ' + v.baseUrl : '')).join('   ');
+}
+
+document.getElementById('neverPaid').onchange = async (e) => {
+  if (!e.target.checked && !confirm('Agents set to an API key will then spend money on that key, billed per token by the provider. Turn off “Never use paid API”?')) { e.target.checked = true; return; }
+  await post('/settings', { neverPaidApi: e.target.checked }); load();
+};
+document.getElementById('claudeAuto').onchange = async (e) => {
+  if (e.target.checked && !confirm('Anthropic does not allow third-party apps to route requests through Claude plan credentials on behalf of users. This runs your own unmodified Claude Code unattended, on your own subscription. Turn it on, on your own responsibility?')) { e.target.checked = false; return; }
+  await post('/settings', { allowClaudeAutomation: e.target.checked }); load();
+};
+async function testConn(p, btn) { btn.disabled = true; btn.textContent = 'Testing…'; const r = await post('/test', { provider: p }); alert(r.reason || (r.ok ? 'It answered.' : 'It did not answer.')); load(); }
+async function chatgptIn() { const r = await post('/chatgpt/login'); if (r.url) window.open(r.url, '_blank'); else alert(r.error); }
+async function chatgptOut() { await post('/chatgpt/logout'); load(); }
+async function handoffDone(jobId) { const r = await post('/handoff/done', { jobId }); if (r.error) alert(r.error); load(); }
+async function saveKey(p, f, id) { const el = document.getElementById(id); await post('/keys', { provider: p, [f]: el.value }); el.value = ''; load(); }
+async function saveDefault() { await post('/settings', { taskDefaultPct: document.getElementById('taskDefault').value || null }); load(); }
+async function saveBudget(btn) {
+  const tr = btn.closest('tr');
+  await post('/settings', { provider: { name: tr.dataset.p, capacity: tr.querySelector('.cap').value || null, window: tr.querySelector('.win').value, reservePct: tr.querySelector('.res').value, maxConcurrent: tr.querySelector('.con').value } });
+  editing = false; load();
+}
+document.addEventListener('focusin', (e) => { editing = Boolean(e.target.closest('#budgets')); });
+document.addEventListener('focusout', () => { setTimeout(() => { if (!document.activeElement.closest?.('#budgets')) editing = false; }, 200); });
+load(); setInterval(load, 4000);
+</script>
+</body>
+</html>
