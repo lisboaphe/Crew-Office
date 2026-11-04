@@ -105,3 +105,4 @@ docker-compose.yml
 .env
 .env.example
 CHANGELOG.md
+installer
