@@ -24,7 +24,7 @@ const field = (label, el, hint) => h('div.cr-field', h('label', label), el, hint
 const check = (checked, label, hint) => { const c = h('input', { type: 'checkbox', checked: Boolean(checked) }); const row = h('label.cr-check', c, h('span', label, hint ? h('span.hint', ` ${hint}`) : null)); row.box = c; return row; };
 
 export function createAgentEditor(ctx) {
-  const { S, roomId, ui } = ctx;
+  const { S, roomId } = ctx;
   const R = `/api/crew/rooms/${roomId}`;
   let agentId = null;
   let tab = 'overview';

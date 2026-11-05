@@ -19,7 +19,7 @@ Code an agent writes or receives runs through `lib/crew-worker/sandbox.cjs`, on 
 This is why the choice is not left to the agent or the host:
 
 - **Your own solo project:** process level, unless you set `CREW_SANDBOX=docker`.
-- **A project shared with anyone, or on a host this worker does not run itself:** Docker when it is installed. Without Docker the command is **refused**, and the agent is told so.
+- **A project shared with anyone, or on a host this worker does not run itself:** Docker when it is installed and set to Linux containers, the Docker Desktop default. Without that the command is **refused**, and the agent is told so.
 - **Exception:** a worker's owner can accept the process level for others' code, on the Connections page. It warns them. It is off by default.
 
 So on a computer without Docker, other players' code does not run at all. Tests in a shared project report that they did not run, and the push carries that fact. Install Docker Desktop to run shared tests.

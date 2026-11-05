@@ -104,6 +104,14 @@ test('Test 2 and 3: another player’s agent reaches neither files outside the p
   assert.ok((await audit(o)).some((e) => e.outcome === 'denied' && /read_file|write_file/.test(e.resource ?? '')), 'recorded');
 });
 
+test('a Docker running Windows containers does not count as a sandbox', () => {
+  const sandbox = require('../lib/crew-worker/sandbox.cjs');
+  assert.strictEqual(sandbox.runsLinux({ status: 0, stdout: 'linux\n' }), true);
+  assert.strictEqual(sandbox.runsLinux({ status: 0, stdout: 'windows\n' }), false, 'it would refuse every run with exit code 125');
+  assert.strictEqual(sandbox.runsLinux({ status: 1, stdout: '' }), false, 'the engine is not running');
+  assert.strictEqual(sandbox.runsLinux({ error: new Error('ENOENT') }), false, 'Docker is not installed');
+});
+
 test('the sandbox refuses another player’s code without Docker, unless its owner accepted that', async (t) => {
   const was = process.env.CREW_ALLOW_WEAK_SANDBOX;
   delete process.env.CREW_ALLOW_WEAK_SANDBOX;
@@ -293,7 +301,7 @@ test('Test 6: STOP ALL AI ACTIVITY stops everything, stays stopped, and only a p
   o.host.stop = again.stop;
   assert.strictEqual((await o.call(token, 'claim', {})).job ?? null, null, 'a restart does not clear it');
   assert.strictEqual((await o.b.post(`${o.R}/emergency-resume`)).status, 403, 'a member cannot resume');
-  assert.strictEqual((await o.a.post(`${o.R}/emergency-resume`)).status, undefined === 0 ? 0 : 200);
+  assert.strictEqual((await o.a.post(`${o.R}/emergency-resume`)).status, 200);
   assert.ok((await audit(o, o.a)).some((e) => e.action === 'emergency.stop'), 'on the record');
   await again.stop();
 });
