@@ -212,7 +212,7 @@ docker compose -f deploy/relay/docker-compose.yml up -d --build
 curl https://relay.example.org/_relay/info
 </code></pre>
 <p>Caddy gets each office's certificate from Let's Encrypt the first time it is asked for, after checking with the relay that the office exists. There is no wildcard certificate, so no DNS API credentials. Let's Encrypt limits how many certificates a domain may get per week, and each new office uses one, so a very busy service needs a wildcard certificate instead.</p>
-<p>These recipes have not been run: Docker was not available where they were written. Do the checks below on the first deployment.</p>
+<p>CI builds the image and runs it under the limits the compose file sets, and checks that the compose file and Caddy configuration are valid. That is <code>test/relay-image.test.cjs</code>. It cannot try real DNS, a real certificate or a whole deployment, none of which has been done yet, so do the checks below on the first deployment.</p>
 <h3 id="without-docker" tabindex="-1">Without Docker</h3>
 <pre><code class="language-bash">CREW_RELAY_OPEN=1 CREW_RELAY_DOMAIN=relay.example.org CREW_RELAY_TRUST_PROXY=1 node bin/crew-relay.cjs 8443
 </code></pre>

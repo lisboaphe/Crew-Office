@@ -45,7 +45,7 @@ Agents use the scripted provider, so tool calls are real and the decisions are f
 
 | Requirement | What is missing |
 |---|---|
-| Docker sandbox | Docker is not on the test machine. Arguments reviewed, never run |
+| Docker sandbox | Runs in CI on Linux, where a sandboxed test run has to pass. Not run under Docker Desktop on Windows or macOS |
 | Emergency stop reaching a live worker's stream | Tested at the host and at the sandbox separately, not one real stop through a real worker's stream |
 | Security Center UI | Its routes are tested, and stop and resume were pressed once in a real office. No automated test covers the screen |
 | New lobby | Host, Join and the hosted page were looked at in a computer-only office. The online states have not been seen on screen |

@@ -37,7 +37,7 @@ curl https://relay.example.org/_relay/info
 
 Caddy gets each office's certificate from Let's Encrypt the first time it is asked for, after checking with the relay that the office exists. There is no wildcard certificate, so no DNS API credentials. Let's Encrypt limits how many certificates a domain may get per week, and each new office uses one, so a very busy service needs a wildcard certificate instead.
 
-These recipes have not been run: Docker was not available where they were written. Do the checks below on the first deployment.
+CI builds the image and runs it under the limits the compose file sets, and checks that the compose file and Caddy configuration are valid. That is `test/relay-image.test.cjs`. It cannot try real DNS, a real certificate or a whole deployment, none of which has been done yet, so do the checks below on the first deployment.
 
 ### Without Docker
 

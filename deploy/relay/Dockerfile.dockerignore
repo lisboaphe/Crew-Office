@@ -1,0 +1,5 @@
+# Used instead of the root .dockerignore when building this Dockerfile. That one describes the office's
+# image and leaves out bin, which is where this service lives. Only what the COPY lines take goes up.
+*
+!bin/crew-relay.cjs
+!lib/relay

@@ -2,6 +2,9 @@
 # It holds no office data, so it has no volume. Build from the repository root:
 #
 #   docker build -f deploy/relay/Dockerfile -t crew-relay .
+#
+# Dockerfile.dockerignore beside this file replaces the root one for this build, and needs a Docker
+# with BuildKit, the default since version 23. test/relay-image.test.cjs builds and runs all of it.
 
 FROM node:22-alpine
 WORKDIR /relay
