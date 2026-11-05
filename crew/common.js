@@ -148,7 +148,7 @@ function updateDialog(first) {
       if (u.needsSignIn) {
         body.replaceChildren(h('p', 'This app’s updates come from a private repository, so GitHub needs to know it is you.'),
           h('p.hint', `${have} Sign in once with an account that can see ${u.repo}. It uses the official GitHub CLI, in its own window, and nothing here sees your password.`), err,
-          h('div.actions', cancel('Not now'), again(), h('button.btn.primary', { onclick: async () => { err.textContent = ''; try { await api('POST', '/api/crew/update/sign-in'); err.textContent = 'Finish in the window that opened, then press Check again. If none opened, install GitHub CLI from cli.github.com first.'; } catch (e) { err.textContent = e.message; } } }, 'Sign in to GitHub')));
+          h('div.actions', cancel('Not now'), again(), h('button.btn.primary', { onclick: async () => { err.textContent = ''; try { const r = await api('POST', '/api/crew/update/sign-in'); err.textContent = r.command ? `Run this in a terminal, then press Check again: ${r.command}` : 'A black window opened with a one-time code. Copy the code, press Enter there, and paste it into the GitHub page that opens. Then press Check again. If no window opened, install GitHub CLI from cli.github.com first.'; } catch (e) { err.textContent = e.message; } } }, 'Sign in to GitHub')));
         return;
       }
       if (u.error) { body.replaceChildren(h('p', 'Could not check for updates.'), h('p.hint', u.error), h('div.actions', cancel('Close'), again())); return; }
