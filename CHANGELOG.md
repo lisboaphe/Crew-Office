@@ -19,6 +19,9 @@
 ### Fixed
 
 - The tour no longer says internet play needs a VPN.
+- **Chat channels** wrap instead of being cut off at the panel's edge, and project channels no longer show their internal ID.
+- **On a phone**, the dock has its own row instead of covering the open panel.
+- **Updates** now work on a copy built without a Git remote. A copy that already has this problem needs the new installer once.
 
 ## Automatic internet invitations
 

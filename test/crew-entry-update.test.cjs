@@ -229,6 +229,33 @@ async function fakeGitHub({ tag = 'build-7', zip = Buffer.from('the new app'), c
   return { base: `http://127.0.0.1:${server.address().port}`, close: () => server.close() };
 }
 
+test('a copy with no repository in its stamp still finds its updates, from package.json', async () => {
+  const github = await fakeGitHub();
+  try {
+    const root = installedCopy({ build: 0, commit: 'abc', repo: null });
+    fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ repository: { type: 'git', url: 'https://github.com/me/app.git' } }));
+    const s = await createUpdater({ root, apiBase: github.base, platform: 'win32' }).status();
+    assert.equal(s.enabled, true);
+    assert.equal(s.repo, 'me/app');
+    assert.equal(s.available, true, 'and it is offered the release');
+
+    const fork = installedCopy({ build: 0, commit: 'abc', repo: 'a-fork/project' });
+    fs.writeFileSync(path.join(fork, 'package.json'), JSON.stringify({ repository: 'https://github.com/someone/project' }));
+    assert.equal((await createUpdater({ root: fork, apiBase: github.base, platform: 'win32' }).status()).repo, 'a-fork/project', 'a fork’s stamp wins');
+
+    const lost = installedCopy({ build: 0, commit: 'abc', repo: null });
+    const nowhere = await createUpdater({ root: lost, apiBase: github.base, platform: 'win32' }).status();
+    assert.equal(nowhere.enabled, false);
+    assert.match(nowhere.reason, /Download the latest version/, 'and with neither, it says what to do');
+  } finally { github.close(); }
+});
+
+test('this project’s own package.json names where its releases are', () => {
+  const root = installedCopy({ build: 0, repo: null });
+  fs.copyFileSync(path.join(__dirname, '..', 'package.json'), path.join(root, 'package.json'));
+  assert.equal(createUpdater({ root }).build.repo, 'lisboaphe/Crew-Office');
+});
+
 test('the updater offers only a newer build, and says so plainly when it cannot look', async () => {
   const root = installedCopy({ build: 6, commit: 'abc', repo: 'me/app' });
   const newer = await fakeGitHub();
