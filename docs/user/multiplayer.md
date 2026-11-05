@@ -243,10 +243,59 @@ Where a figure exists you can choose warnings at 50, 75, 90 and 100%, and a leve
 tasks pause. A reading is only as new as the last run, so this is not a hard cap. Plan usage,
 tokens, API costs and task budgets are separate, and never converted into each other.
 
+## Getting around
+
+The dock on the left edge of the office is the menu. Rest the mouse on it and it opens, then it stays open until you
+click somewhere else, press Esc, or choose a destination. With a keyboard, Tab to the dock and press Enter, then use the
+arrow keys. Chat stays on the right, and the office stays visible behind everything.
+
+Preferences has the appearance, animation and quiet-mode choices.
+
+## Memory & Knowledge
+
+This is what your team has learned, and a map of your code. Find it under **AI Management → Memory & Knowledge**.
+
+**Who can see a memory** is chosen when you write it:
+
+- **Only me:** you, and your own agents when they work for you.
+- **My team:** you and all your agents.
+- **The project:** everyone on the project, and agents lent to it with the memory permission.
+
+Each agent also has its own private memory, which stays on its owner's computer and shows in the agent editor.
+
+Other players and their agents cannot see your private or team memories. They are still stored on the computer hosting
+the office, and whoever runs that computer could read that file. Do not save passwords or keys here. Things that look
+like them are removed when you save, but a pattern can miss one.
+
+**Switching it on:** under *What is on, per project*, a project can have **Memory for agents** and **Code graph**, each on
+or off, both off to begin with. Only the project's creator, or the office's owner or an admin, can change these.
+
+- With memory on, agents on that project get relevant memories before they start, and can search and add to them.
+- With the code graph on, you get an interactive map of the project's code. Click anything to see what it uses and what
+  uses it, and agents can look things up in it. It is rebuilt from what has been merged into `main`, never from unreviewed
+  work, and it says which version it was built from.
+
+Anything an agent reads from here is treated as information. It cannot change what the agent is allowed to do, even if
+someone writes that it can.
+
+### The optional plugins
+
+Memory works with nothing extra, and search matches words. Both plugins below are free, run on the computer hosting the
+office, and use no paid service. Neither is included in the download, because they need Python. **Settings → Plugins**
+shows what it found on this computer.
+
+- **Mem0** finds memories by meaning. Install Python 3.10 or newer, then `python -m pip install mem0ai fastembed` (on
+  Windows, `py -m pip install mem0ai fastembed`), press Check again, and choose a local embedding model such as
+  `BAAI/bge-small-en-v1.5`. The first use downloads that model.
+- **Graphify** builds the code graph. Install it with `python -m pip install graphifyy` (on Windows, `py -m pip install
+  graphifyy`) and press Check again. It only reads code, with no AI model, so nothing leaves the computer.
+
 ## The Orchestrator
 
 A playbook is a saved plan of who does what, and in what order. Open **Orchestrator**, start from
 a template, and connect the pieces:
+
+The first time you open it, a guided tour points at each real control while you try it. **How it works** on that page starts it again, and it can open a template as a draft to follow along with.
 
 - **Lead Agent** owns the run and writes the final summary. It has to be one of yours.
 - **Worker Agent** does the steps it is connected to.

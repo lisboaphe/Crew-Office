@@ -1,46 +1,53 @@
 /* The multiplayer layer: lobby, dashboard, chat, agent panel, bubbles.
-   Frosted glass over the office: translucent panels that blur what is behind them, a thin
-   lit edge, and rounded controls. The tokens carry almost all of it. */
+   Dark glass over the office: translucent navy panels that blur what is behind them, a soft
+   blue-violet sheen, a thin lit edge. The tokens carry almost all of it, so the office stays
+   the main thing on screen and these float over it. */
 
 :root {
-  --cr-bg: #f2f3f7;
-  --cr-panel: rgba(250, 251, 254, 0.9);
-  --cr-solid: #f7f8fb;
-  --cr-control: rgba(255, 255, 255, 0.55);
-  --cr-control-hover: rgba(255, 255, 255, 0.85);
-  --cr-well: rgba(120, 130, 155, 0.13);
-  --cr-ink: #161b26;
-  --cr-ink-2: #3f4757;
-  --cr-ink-3: #626b7c;
-  --cr-line: rgba(60, 70, 95, 0.14);
-  --cr-accent: #2f6be8;
+  --cr-bg: #0a0e1a;
+  --cr-panel: rgba(16, 21, 37, 0.78);
+  --cr-solid: #151b2e;
+  --cr-control: rgba(255, 255, 255, 0.075);
+  --cr-control-hover: rgba(255, 255, 255, 0.15);
+  --cr-well: rgba(6, 10, 22, 0.38);
+  --cr-ink: #eef1f9;
+  --cr-ink-2: #c7cde0;
+  --cr-ink-3: #9aa4bc;
+  --cr-line: rgba(170, 185, 230, 0.17);
+  --cr-accent: #6a8dff;
+  --cr-accent-2: #a07bff;
   --cr-accent-ink: #ffffff;
-  --cr-ok: #1f8a43;
-  --cr-warn: #b06f08;
-  --cr-bad: #c8352a;
-  --cr-ai: #6c4fd1;
-  --cr-human: #1f8a70;
+  --cr-ok: #4fd08a;
+  --cr-warn: #f0b44a;
+  --cr-bad: #ff7a70;
+  --cr-ai: #b9a2ff;
+  --cr-human: #52d6bb;
   --cr-radius: 20px;
   --cr-radius-inner: 14px;
-  --cr-glass: blur(14px) saturate(140%);
-  --cr-accent-2: #7a5cf0;
+  --cr-glass: blur(22px) saturate(165%);
   --cr-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
+  --cr-fast: 160ms;
+  --cr-med: 220ms;
+  --cr-edge: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 0 0.5px rgba(190, 205, 255, 0.15);
+  --cr-shadow: 0 24px 60px rgba(3, 6, 18, 0.55), 0 2px 8px rgba(3, 6, 18, 0.35);
+  --cr-glow: 0 0 0 1px color-mix(in srgb, var(--cr-accent) 45%, transparent), 0 6px 22px color-mix(in srgb, var(--cr-accent) 28%, transparent);
+  --cr-sheen: linear-gradient(155deg, rgba(106, 141, 255, 0.14) 0%, rgba(160, 123, 255, 0.075) 36%, rgba(12, 16, 30, 0) 72%);
+  --cr-active: linear-gradient(135deg, var(--cr-accent), var(--cr-accent-2));
+  --cr-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --cr-bg: #eef0f8; --cr-panel: rgba(250, 251, 254, 0.86); --cr-solid: #f7f8fb; --cr-control: rgba(255, 255, 255, 0.55); --cr-control-hover: rgba(255, 255, 255, 0.85); --cr-well: rgba(120, 130, 155, 0.13);
+  --cr-ink: #161b26; --cr-ink-2: #3f4757; --cr-ink-3: #626b7c; --cr-line: rgba(60, 70, 95, 0.14);
+  --cr-accent: #2f6be8; --cr-accent-2: #7a5cf0; --cr-ok: #1f8a43; --cr-warn: #b06f08; --cr-bad: #c8352a; --cr-ai: #6c4fd1; --cr-human: #1f8a70;
   --cr-edge: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 0 0 0.5px rgba(255, 255, 255, 0.35);
   --cr-shadow: 0 18px 50px rgba(20, 28, 45, 0.18), 0 2px 6px rgba(20, 28, 45, 0.07);
-  --cr-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --cr-bg: #0e1016; --cr-accent-2: #9a7dff; --cr-panel: rgba(23, 26, 35, 0.9); --cr-solid: #1b1f29; --cr-control: rgba(255, 255, 255, 0.09); --cr-control-hover: rgba(255, 255, 255, 0.17); --cr-well: rgba(0, 0, 0, 0.24);
-    --cr-ink: #f2f4f8; --cr-ink-2: #cdd2dd; --cr-ink-3: #a0a7b6;
-    --cr-line: rgba(255, 255, 255, 0.12); --cr-accent: #5d8df5; --cr-ok: #4cc472; --cr-warn: #e6a93c; --cr-bad: #f0695e;
-    --cr-edge: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-    --cr-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
-  }
+  --cr-sheen: linear-gradient(155deg, rgba(47, 107, 232, 0.09) 0%, rgba(122, 92, 240, 0.05) 36%, rgba(255, 255, 255, 0) 72%);
+  color-scheme: light;
 }
 /* Windows' and macOS's "reduce transparency" setting means it. */
 @media (prefers-reduced-transparency: reduce) {
-  :root { --cr-panel: var(--cr-solid); --cr-glass: none; }
+  :root { --cr-panel: var(--cr-solid); --cr-glass: none; --cr-sheen: none; }
 }
 
 .cr, .cr * { box-sizing: border-box; }
@@ -92,16 +99,17 @@
 #agent-panel, #inspector, #dev-panel, #scene-panel, #editor-panel { background: var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); color: var(--cr-ink); border: 0; border-radius: var(--cr-radius); box-shadow: var(--cr-edge), var(--cr-shadow); font-family: var(--cr-font); overflow-x: hidden; }
 
 /* --- in-office overlay --- */
-#crew-bar { position: fixed; top: 58px; right: 12px; z-index: 40; display: flex; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 24px); gap: 6px; align-items: center; pointer-events: auto; }
+#crew-bar { position: fixed; top: 12px; right: 12px; z-index: 40; display: flex; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 500px); gap: 6px; align-items: center; pointer-events: auto; }
 #crew-bar .btn { background: var(--cr-panel); box-shadow: var(--cr-edge), var(--cr-shadow); position: relative; }
 #crew-bar .btn.primary { background: var(--cr-accent); }
 #crew-bar .badge { position: absolute; top: -6px; right: -6px; background: var(--cr-bad); color: #fff; border-radius: 99px; font-size: 11px; padding: 0 5px; min-width: 18px; text-align: center; }
 #crew-bar .players { display: flex; gap: -4px; background: var(--cr-panel); padding: 4px 8px 4px 12px; border-radius: 99px; box-shadow: var(--cr-edge), var(--cr-shadow); }
 #crew-bar .players .avatar { margin-left: -4px; border: 2px solid var(--cr-solid); }
-.cr-drawer { position: fixed; top: 104px; bottom: 12px; z-index: 39; background: var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: var(--cr-radius); box-shadow: var(--cr-edge), var(--cr-shadow); display: flex; flex-direction: column; overflow: hidden; }
-.cr-drawer.left { left: 12px; width: min(1040px, calc(100vw - 24px)); flex-direction: row; }
+.cr-drawer { position: fixed; top: 64px; bottom: 12px; z-index: 39; background: var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: var(--cr-radius); box-shadow: var(--cr-edge), var(--cr-shadow); display: flex; flex-direction: column; overflow: hidden; }
+.cr-drawer.left { left: 68px; width: min(1040px, calc(100vw - 80px)); flex-direction: row; }
+body.cr-chat-open .cr-drawer.left { width: min(1040px, max(520px, calc(100vw - 80px - 432px))); }
 .cr-drawer.right { right: 12px; width: min(420px, calc(100vw - 24px)); }
-.cr-drawer { transition: opacity 0.2s var(--cr-ease), transform 0.24s var(--cr-ease), visibility 0.24s; }
+.cr-drawer { transition: opacity var(--cr-fast) var(--cr-ease), transform var(--cr-med) var(--cr-ease), width var(--cr-med) var(--cr-ease), visibility var(--cr-med); }
 .cr-drawer.hidden { visibility: hidden; opacity: 0; pointer-events: none; }
 .cr-drawer.left.hidden { transform: translateX(-16px); }
 .cr-drawer.right.hidden { transform: translateX(16px); }
@@ -111,7 +119,7 @@
 .cr-tabs { display: flex; flex-wrap: wrap; gap: 3px; padding: 0 10px 10px; border-bottom: 0.5px solid var(--cr-line); flex: none; }
 .cr-tabs button { border: 0; background: none; padding: 5px 11px; border-radius: 99px; cursor: pointer; color: var(--cr-ink-2); white-space: nowrap; font-weight: 500; transition: background 0.15s; }
 .cr-tabs button:hover { background: var(--cr-well); }
-.cr-tabs button.on { color: var(--cr-accent-ink); background: var(--cr-accent); font-weight: 600; }
+.cr-tabs button.on { color: var(--cr-accent-ink); background: var(--cr-active); font-weight: 600; box-shadow: 0 3px 12px color-mix(in srgb, var(--cr-accent) 30%, transparent); }
 .cr-list { display: flex; flex-direction: column; gap: 8px; }
 .cr-item { border-radius: var(--cr-radius-inner); padding: 10px 13px; background: var(--cr-well); transition: background 0.15s; }
 .cr-item.click { cursor: pointer; }
@@ -128,10 +136,6 @@
 .cr-msg .meta b { color: var(--cr-ink); }
 .cr-msg .text { white-space: pre-wrap; word-break: break-word; }
 .cr-msg.system .text { color: var(--cr-ink-3); font-style: italic; }
-.cr-composer { display: flex; gap: 6px; padding: 10px; border-top: 0.5px solid var(--cr-line); }
-.cr-channels { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px 10px; border-bottom: 0.5px solid var(--cr-line); }
-.cr-channels button { border: 0; background: var(--cr-well); border-radius: 99px; padding: 3px 11px; cursor: pointer; font-size: 12.5px; }
-.cr-channels button.on { background: var(--cr-accent); color: #fff; }
 .cr-modal-back { position: fixed; inset: 0; background: rgba(15, 20, 30, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
 /* Over a blurred page it needs more body than a drawer does, or its text swims. */
 .cr-modal { background: color-mix(in srgb, var(--cr-solid) 82%, transparent); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: 24px; box-shadow: var(--cr-edge), var(--cr-shadow); width: min(560px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 22px 24px; }
@@ -201,8 +205,8 @@
 
 /* lobby */
 /* Glass needs something to be glass over. */
-body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; background-color: var(--cr-bg); background-image: radial-gradient(900px 620px at 12% -8%, #bcd2ff 0, transparent 62%), radial-gradient(760px 560px at 96% 6%, #e6c9ff 0, transparent 60%), radial-gradient(860px 620px at 62% 108%, #ffd9c2 0, transparent 60%); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body.cr-lobby { background-image: radial-gradient(900px 620px at 12% -8%, #1f3a78 0, transparent 62%), radial-gradient(760px 560px at 96% 6%, #4a2a78 0, transparent 60%), radial-gradient(860px 620px at 62% 108%, #5e3322 0, transparent 60%); } }
+body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; background-color: var(--cr-bg); background-image: radial-gradient(1000px 680px at 10% -10%, #1d3a86 0, transparent 62%), radial-gradient(820px 600px at 96% 4%, #43297f 0, transparent 60%), radial-gradient(900px 640px at 58% 110%, #17255e 0, transparent 62%); }
+:root[data-theme="light"] body.cr-lobby { background-image: radial-gradient(900px 620px at 12% -8%, #bcd2ff 0, transparent 62%), radial-gradient(760px 560px at 96% 6%, #dccbff 0, transparent 60%), radial-gradient(860px 620px at 62% 108%, #c9d6ff 0, transparent 60%); }
 .cr-lobby main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 60px; }
 .cr-lobby .top { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
 .cr-lobby .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; display: flex; gap: 10px; align-items: center; }
@@ -216,11 +220,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-lobby .code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 700; letter-spacing: 0.08em; font-size: 15px; }
 
 /* --- navigation --- */
-.cr-rail { flex: none; width: 84px; display: flex; flex-direction: column; gap: 2px; padding: 10px 6px; border-right: 0.5px solid var(--cr-line); overflow-y: auto; }
-.cr-rail button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 2px; border: 0; background: none; border-radius: 12px; color: var(--cr-ink-2); cursor: pointer; font-size: 11px; font-weight: 500; transition: background 0.15s, color 0.15s; }
-.cr-rail button:hover { background: var(--cr-well); color: var(--cr-ink); }
-.cr-rail button.on { background: linear-gradient(135deg, color-mix(in srgb, var(--cr-accent) 24%, transparent), color-mix(in srgb, var(--cr-accent-2) 24%, transparent)); color: var(--cr-ink); font-weight: 650; }
-.cr-rail button:focus-visible, .cr-tabs button:focus-visible, .cr-editor-tabs button:focus-visible, .cr-item:focus-visible, .cr-node:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 1px; }
+.cr-tabs button:focus-visible, .cr-editor-tabs button:focus-visible, .cr-item:focus-visible, .cr-node:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 1px; }
 .cr-icon { display: inline-flex; }
 .cr-dash-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
 .cr-dash-main > header { display: flex; align-items: center; gap: 8px; padding: 12px 14px 8px; }
@@ -244,7 +244,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr h4 { font-size: 12px; margin: 12px 0 4px; color: var(--cr-ink-3); text-transform: uppercase; letter-spacing: 0.04em; }
 
 /* --- agent editor --- */
-.cr-editor { --cr-editor-width: 480px; position: fixed; top: 96px; right: 12px; bottom: 12px; z-index: 45; width: min(var(--cr-editor-width), calc(100vw - 24px)); display: flex; flex-direction: column; background: var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: var(--cr-radius); box-shadow: var(--cr-edge), var(--cr-shadow); transform: translateX(calc(100% + 24px)); visibility: hidden; transition: transform 0.26s var(--cr-ease), visibility 0.26s, width 0.2s var(--cr-ease); }
+.cr-editor { --cr-editor-width: 480px; position: fixed; top: 64px; right: 12px; bottom: 12px; z-index: 45; width: min(var(--cr-editor-width), calc(100vw - 24px)); display: flex; flex-direction: column; background: var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: var(--cr-radius); box-shadow: var(--cr-edge), var(--cr-shadow); transform: translateX(calc(100% + 24px)); visibility: hidden; transition: transform 0.26s var(--cr-ease), visibility 0.26s, width 0.2s var(--cr-ease); }
 .cr-editor.open { transform: none; visibility: visible; }
 .cr-editor.expanded { width: min(1100px, calc(100vw - 24px)); }
 .cr-editor.resizing { transition: none; user-select: none; }
@@ -256,7 +256,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-editor-tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 10px 8px; border-bottom: 0.5px solid var(--cr-line); }
 .cr-editor-tabs button { border: 0; background: none; padding: 5px 10px; border-radius: 99px; cursor: pointer; color: var(--cr-ink-2); font-size: 12.5px; font-weight: 500; transition: background 0.15s; }
 .cr-editor-tabs button:hover { background: var(--cr-well); }
-.cr-editor-tabs button.on { background: var(--cr-accent); color: #fff; font-weight: 600; }
+.cr-editor-tabs button.on { background: var(--cr-active); color: #fff; font-weight: 600; }
 .cr-editor-body { flex: 1; overflow: auto; padding: 14px; }
 .cr-kv.tight { margin: 6px 0; }
 
@@ -345,7 +345,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-stat-tile b { font-size: 20px; line-height: 1.2; }
 .cr-stat-tile.ok b { color: var(--cr-ok); } .cr-stat-tile.run b { color: var(--cr-accent); } .cr-stat-tile.wait b { color: var(--cr-warn); } .cr-stat-tile.bad b { color: var(--cr-bad); }
 .cr-run-canvas { height: 340px; display: flex; margin: 10px 0; }
-@media (max-width: 760px) { .cr-board-main { flex-direction: column; } .cr-inspector { width: auto; } .cr-rail { width: 62px; } .cr-rail button span:not(.cr-icon) { font-size: 9.5px; } }
+@media (max-width: 760px) { .cr-board-main { flex-direction: column; } .cr-inspector { width: auto; } }
 /* Reduced motion: everything lands at once. */
 @media (prefers-reduced-motion: reduce) {
   .cr *, .cr-editor, .cr-drawer, .cr-toast, .cr-modal, .cr-fade { animation: none !important; transition: none !important; }
@@ -393,12 +393,143 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-usage-class.paid { background: rgba(248, 113, 113, .18); color: #fca5a5; }
 .cr-models-wrap { max-height: 46vh; overflow: auto; border: 1px solid rgba(148, 163, 184, .18); border-radius: 10px; margin: 8px 0; }
 .cr-models table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-.cr-models th { position: sticky; top: 0; text-align: left; padding: 7px 9px; background: #171b24; white-space: nowrap; }
+.cr-models th { position: sticky; top: 0; text-align: left; padding: 7px 9px; background: var(--cr-solid); white-space: nowrap; }
 .cr-models td { padding: 7px 9px; border-top: 1px solid rgba(148, 163, 184, .12); vertical-align: top; }
 .cr-models tr.blocked td { opacity: .55; }
 .cr-connect ol, .cr-verify p { margin: 6px 0 10px; }
 .cr-configure details { margin-top: 14px; }
 .cr-modal:has(.cr-models table) { width: min(1120px, 94vw); max-width: 94vw; }
 .cr-usage-class { white-space: nowrap; }
-.cr-models td:last-child { position: sticky; right: 0; background: #171b24; }
+.cr-models td:last-child { position: sticky; right: 0; background: var(--cr-solid); }
 @media (max-width: 640px) { .cr-models th:nth-child(4), .cr-models td:nth-child(4), .cr-models th:nth-child(5), .cr-models td:nth-child(5), .cr-models th:nth-child(8), .cr-models td:nth-child(8) { display: none; } }
+
+/* --- glass surfaces: the sheen sits over each panel's translucent colour --- */
+.cr-drawer, .cr-editor, .cr-lobby .big, .cr-bigaction, .cr-nav-panel { background: var(--cr-sheen), var(--cr-panel); }
+.cr-modal { background: var(--cr-sheen), color-mix(in srgb, var(--cr-solid) 86%, transparent); }
+.cr-modal-back { background: rgba(5, 8, 20, 0.42); }
+.cr-bigaction { -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); }
+.cr-bigaction:hover { box-shadow: var(--cr-glow), var(--cr-shadow); }
+.cr .btn { transition: background var(--cr-fast), transform var(--cr-fast), box-shadow var(--cr-fast), filter var(--cr-fast); }
+.cr .btn.primary { background: var(--cr-active); }
+#crew-bar .btn.primary { background: var(--cr-active); }
+.cr input:focus-visible, .cr select:focus-visible, .cr textarea:focus-visible { outline: 0; box-shadow: inset 0 0 0 1px var(--cr-accent), 0 0 0 3px color-mix(in srgb, var(--cr-accent) 26%, transparent); }
+.cr-item.click:hover { background: var(--cr-control); box-shadow: inset 0 0 0 0.5px var(--cr-line); }
+.cr-progress > div { background: var(--cr-active); }
+.cr-toast { box-shadow: var(--cr-edge), var(--cr-shadow), 0 0 22px color-mix(in srgb, var(--cr-accent) 18%, transparent); }
+.cr ::-webkit-scrollbar { width: 9px; height: 9px; }
+.cr ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--cr-ink-3) 32%, transparent); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+.cr ::-webkit-scrollbar-track { background: transparent; }
+
+/* --- top row: what is true now, and the few things that cannot wait --- */
+#crew-bar .room-name, #crew-bar .players, #crew-bar .btn, #crew-bar .cr-link { -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); }
+#crew-bar .btn { padding: 6px 13px; }
+#crew-bar .btn.cr-icon-btn { padding: 6px 9px; }
+#crew-bar .btn.cr-stop { padding: 6px 13px; font-size: 12.5px; }
+#crew-bar .btn.on { background: var(--cr-active); color: #fff; }
+#crew-bar .cr-link { background: var(--cr-panel); }
+
+/* --- navigation --- */
+.cr-nav { position: fixed; left: 12px; top: 64px; z-index: 50; display: flex; align-items: flex-start; gap: 8px; pointer-events: none; }
+.cr-nav-dock { pointer-events: auto; display: flex; flex-direction: column; gap: 4px; padding: 6px; border-radius: 18px; background: var(--cr-sheen), var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); box-shadow: var(--cr-edge), var(--cr-shadow); }
+.cr-nav-dock-btn { position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: none; color: var(--cr-ink-2); cursor: pointer; transition: background var(--cr-fast), color var(--cr-fast), transform var(--cr-fast); }
+.cr-nav-dock-btn:hover { background: var(--cr-control); color: var(--cr-ink); }
+.cr-nav-dock-btn.on { background: var(--cr-active); color: #fff; box-shadow: 0 4px 14px color-mix(in srgb, var(--cr-accent) 35%, transparent); }
+.cr-nav-dock-btn:focus-visible, .cr-nav-item:focus-visible, .cr-nav-group-head:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 1px; }
+/* The tooltip only says something while the dock is all there is. */
+.cr-nav:not(.open) .cr-nav-dock-btn::after { content: attr(data-tip); position: absolute; left: calc(100% + 12px); top: 50%; transform: translate(-4px, -50%); padding: 4px 10px; border-radius: 9px; white-space: nowrap; font-size: 12px; font-weight: 550; color: var(--cr-ink); background: var(--cr-solid); box-shadow: var(--cr-edge), var(--cr-shadow); opacity: 0; pointer-events: none; transition: opacity var(--cr-fast), transform var(--cr-fast); }
+.cr-nav:not(.open) .cr-nav-dock-btn:hover::after, .cr-nav:not(.open) .cr-nav-dock-btn:focus-visible::after { opacity: 1; transform: translate(0, -50%); }
+.cr-nav-panel { pointer-events: none; width: 260px; max-height: calc(100vh - 80px); overflow-y: auto; padding: 8px; border-radius: var(--cr-radius); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); box-shadow: var(--cr-edge), var(--cr-shadow); opacity: 0; visibility: hidden; transform: translateX(-10px) scale(0.985); transform-origin: left top; transition: opacity var(--cr-fast) var(--cr-ease), transform var(--cr-med) var(--cr-ease), visibility var(--cr-med); }
+.cr-nav.open .cr-nav-panel { pointer-events: auto; opacity: 1; visibility: visible; transform: none; }
+.cr-nav-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 8px 8px; }
+.cr-nav-head b { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--cr-ink-3); }
+.cr-nav-group-head { width: 100%; display: flex; align-items: center; gap: 9px; padding: 8px; border: 0; border-radius: 11px; background: none; color: var(--cr-ink); font-weight: 620; text-align: left; cursor: pointer; transition: background var(--cr-fast); }
+.cr-nav-group-head:hover { background: var(--cr-control); }
+.cr-nav-caret { font-size: 16px; line-height: 1; color: var(--cr-ink-3); transition: transform var(--cr-med) var(--cr-ease); }
+.cr-nav-group.on .cr-nav-caret { transform: rotate(90deg); }
+/* Grid rows animate to the height of whatever is inside, with no measuring. */
+.cr-nav-items { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--cr-med) var(--cr-ease); }
+.cr-nav-items > div { overflow: hidden; min-height: 0; }
+.cr-nav-group.on .cr-nav-items { grid-template-rows: 1fr; }
+.cr-nav-item { width: 100%; display: flex; align-items: center; gap: 9px; padding: 7px 8px 7px 16px; border: 0; border-radius: 11px; background: none; color: var(--cr-ink-2); text-align: left; cursor: pointer; transition: background var(--cr-fast), color var(--cr-fast); }
+.cr-nav-item .cr-icon svg { width: 17px; height: 17px; }
+.cr-nav-item:hover { background: var(--cr-control); color: var(--cr-ink); }
+.cr-nav-item.on { color: var(--cr-ink); background: linear-gradient(135deg, color-mix(in srgb, var(--cr-accent) 30%, transparent), color-mix(in srgb, var(--cr-accent-2) 26%, transparent)); box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--cr-accent) 50%, transparent); font-weight: 600; }
+.cr-nav-badge { min-width: 19px; padding: 0 6px; border-radius: 99px; text-align: center; font-size: 11px; font-weight: 700; color: #fff; background: var(--cr-bad); }
+
+/* --- chat: on the right, always --- */
+.cr-chat-head { padding: 12px 12px 8px 16px !important; }
+.cr-chat-head .cr-chat-where { font-size: 12px; color: var(--cr-ink-3); font-weight: 500; }
+.cr-chat-tools { padding: 0 12px 8px; }
+.cr-channels { display: flex; gap: 5px; overflow-x: auto; padding: 2px 12px 10px; scrollbar-width: none; flex: none; border-bottom: 0.5px solid var(--cr-line); }
+.cr-channels::-webkit-scrollbar { display: none; }
+.cr-channels button { flex: none; position: relative; border: 0; background: var(--cr-control); color: var(--cr-ink-2); border-radius: 99px; padding: 4px 12px; cursor: pointer; font-size: 12.5px; font-weight: 520; box-shadow: inset 0 0 0 0.5px var(--cr-line); transition: background var(--cr-fast), color var(--cr-fast), box-shadow var(--cr-fast); }
+.cr-channels button:hover { background: var(--cr-control-hover); color: var(--cr-ink); }
+.cr-channels button:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 1px; }
+.cr-channels button.on { background: var(--cr-active); color: #fff; font-weight: 620; box-shadow: 0 3px 12px color-mix(in srgb, var(--cr-accent) 32%, transparent); }
+.cr-channels .cr-unread { display: inline-block; min-width: 16px; margin-left: 5px; padding: 0 4px; border-radius: 99px; font-size: 10.5px; line-height: 16px; font-weight: 700; text-align: center; color: #fff; background: var(--cr-accent); }
+.cr-channels button.on .cr-unread { background: rgba(255, 255, 255, 0.28); }
+.cr-msgs { padding: 12px 14px; gap: 12px; }
+.cr-msg .text { background: var(--cr-control); margin-top: 3px; padding: 7px 11px; border-radius: 4px 13px 13px 13px; box-shadow: inset 0 0 0 0.5px var(--cr-line); width: fit-content; max-width: 100%; }
+.cr-msg.mine { flex-direction: row-reverse; }
+.cr-msg.mine .meta { justify-content: flex-end; }
+.cr-msg.mine .grow { display: flex; flex-direction: column; align-items: flex-end; }
+.cr-msg.mine .text { border-radius: 13px 4px 13px 13px; background: linear-gradient(135deg, color-mix(in srgb, var(--cr-accent) 38%, transparent), color-mix(in srgb, var(--cr-accent-2) 34%, transparent)); }
+.cr-msg.system .text { background: none; box-shadow: none; padding: 0 2px; font-size: 12.5px; }
+.cr-composer { display: flex; align-items: center; gap: 6px; margin: 10px 12px 12px; padding: 5px 5px 5px 14px; border-radius: 99px; background: var(--cr-well); box-shadow: inset 0 0 0 0.5px var(--cr-line); flex: none; transition: box-shadow var(--cr-fast); }
+.cr-composer:focus-within { box-shadow: inset 0 0 0 1px var(--cr-accent), 0 0 0 3px color-mix(in srgb, var(--cr-accent) 22%, transparent); }
+.cr .cr-composer input { background: none; box-shadow: none; padding: 5px 0; border-radius: 0; }
+.cr .cr-composer input:focus-visible { box-shadow: none; }
+.cr-composer .btn.primary { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 50%; flex: none; }
+.cr-composer .btn.primary .cr-icon svg { width: 16px; height: 16px; }
+#crew-bar .cr-count { min-width: 17px; margin-left: 2px; padding: 0 5px; border-radius: 99px; font-size: 11px; line-height: 17px; font-weight: 700; text-align: center; color: #fff; background: var(--cr-accent); }
+
+@media (max-width: 760px) {
+  #crew-bar { max-width: calc(100vw - 24px); top: 94px; left: 12px; justify-content: flex-start; }
+  #crew-bar .room-name { display: none; }
+  .cr-nav { top: 178px; }
+  .cr-drawer, .cr-editor { top: 178px; }
+  .cr-drawer.left, body.cr-chat-open .cr-drawer.left { left: 12px; width: calc(100vw - 24px); z-index: 41; }
+  .cr-nav:not(.open) { opacity: 0.96; }
+}
+/* A person's own choice in Preferences, on top of the system's setting. */
+:root[data-motion="off"] .cr, :root[data-motion="off"] .cr * { animation: none !important; transition: none !important; }
+
+/* --- the guided tour: a ring around the real control, and a card beside it --- */
+.cr-spot { position: fixed; z-index: 58; border-radius: 16px; pointer-events: none; opacity: 0; box-shadow: 0 0 0 2px var(--cr-accent), 0 0 0 6px color-mix(in srgb, var(--cr-accent) 25%, transparent), 0 0 34px color-mix(in srgb, var(--cr-accent-2) 45%, transparent); transition: opacity var(--cr-fast), left var(--cr-med) var(--cr-ease), top var(--cr-med) var(--cr-ease), width var(--cr-med) var(--cr-ease), height var(--cr-med) var(--cr-ease); }
+.cr-spot.on { opacity: 1; }
+.cr-guide { position: fixed; z-index: 59; width: min(390px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; padding: 16px 18px; border-radius: 20px; background: var(--cr-sheen), color-mix(in srgb, var(--cr-solid) 92%, transparent); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); box-shadow: var(--cr-edge), var(--cr-shadow); animation: cr-pop var(--cr-med) var(--cr-ease); }
+.cr-guide h2 { margin: 8px 0 6px; }
+.cr-guide .actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.cr-guide .cr-tour-lines { font-size: 13.5px; }
+
+/* --- memory & knowledge --- */
+.cr-know { display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
+.cr-know h2 { margin: 0; }
+.cr-know-filter select { flex: 0 1 170px; width: auto; }
+.cr-know-switches { background: var(--cr-well); border-radius: var(--cr-radius-inner); padding: 10px 13px; }
+.cr-know-switches .cr-item { background: var(--cr-control); margin-top: 8px; }
+.cr .cr-switch-row { display: inline-flex; gap: 6px; align-items: center; margin: 0; font-weight: 500; color: var(--cr-ink); cursor: pointer; }
+.cr-switch-row input:disabled + * { opacity: 0.6; }
+.cr-memory { background: var(--cr-well); border-radius: var(--cr-radius-inner); padding: 11px 14px; box-shadow: inset 0 0 0 0.5px var(--cr-line); animation: cr-fade var(--cr-fast) var(--cr-ease); }
+.cr-memory-body { margin: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--cr-ink-2); }
+.cr-moved { color: var(--cr-warn); }
+.cr-setup { margin: 4px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--cr-ink-2); display: flex; flex-direction: column; gap: 3px; }
+.cr-fill { display: flex; flex-direction: column; }
+.cr-fill > .cr-know { flex: 1; min-height: 0; }
+.cr-graph-stage { flex: 1; min-height: 340px; display: flex; flex-direction: column; gap: 8px; position: relative; }
+.cr-graph-tools select { flex: 0 1 170px; width: auto; }
+.cr-graph-results { display: flex; flex-direction: column; gap: 2px; }
+.cr-graph-results:empty { display: none; }
+.cr-graph-results button { border: 0; text-align: left; padding: 6px 10px; border-radius: 10px; background: var(--cr-control); cursor: pointer; }
+.cr-graph-results button:hover { background: var(--cr-control-hover); }
+.cr-graph-main { flex: 1; min-height: 0; display: flex; gap: 8px; }
+.cr-graph-wrap { flex: 1; min-width: 0; position: relative; border-radius: var(--cr-radius-inner); overflow: hidden; background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--cr-accent) 12%, transparent), transparent 55%), var(--cr-well); box-shadow: inset 0 0 0 0.5px var(--cr-line); }
+.cr-graph { position: absolute; inset: 0; display: block; cursor: grab; touch-action: none; }
+.cr-graph:active { cursor: grabbing; }
+.cr-graph:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: -2px; }
+.cr-graph-details { flex: none; width: 280px; overflow: auto; background: var(--cr-well); border-radius: var(--cr-radius-inner); padding: 12px; overflow-wrap: anywhere; }
+.cr-graph-details h3 { margin-top: 0; }
+.cr-graph-links { display: flex; flex-direction: column; gap: 2px; }
+.cr-graph-links button { border: 0; background: none; color: var(--cr-ink); text-align: left; padding: 3px 6px; border-radius: 8px; cursor: pointer; font-size: 12.5px; overflow-wrap: anywhere; }
+.cr-graph-links button:hover { background: var(--cr-control); }
+@media (max-width: 760px) { .cr-graph-main { flex-direction: column; } .cr-graph-details { width: auto; max-height: 40%; } .cr-graph-wrap { min-height: 300px; } }

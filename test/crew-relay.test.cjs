@@ -100,7 +100,7 @@ test('a friend who only knows the relay joins, and their agent does real work th
   git(['add', '-A'], path.join(dir, 'w'));
   git(['commit', '-qm', 'Data'], path.join(dir, 'w'));
   const me = (await friend.get('/api/crew/me')).user.id;
-  const push = git(['push', '--quiet', 'origin', `HEAD:refs/heads/user/${me.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}/data`], path.join(dir, 'w'));
+  const push = git(['push', '--quiet', 'origin', `HEAD:refs/heads/user/${me.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/data`], path.join(dir, 'w'));
   assert.strictEqual(push.status, 0, `a 3 MB push through the relay: ${push.stderr}`);
   assert.notStrictEqual(git(['push', 'origin', 'HEAD:refs/heads/main'], path.join(dir, 'w')).status, 0, 'and main is as protected from here as anywhere');
 });

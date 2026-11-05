@@ -13,6 +13,8 @@ import { createOrchestrator } from './orchestrator.js';
 import { addWorkerWizard } from './wizard.js';
 import { createSecurityCenter } from './security.js';
 import { workerLink, connectionsView, usageView, usageBar } from './connections.js';
+import { createNav } from './nav.js';
+import { createKnowledge } from './knowledge.js';
 
 const code = (location.pathname.match(/^\/office\/([^/]+)/) ?? [])[1];
 const S = { room: null, me: null, members: [], agents: [], projects: [], tasks: [], channels: [], approvals: [], notifications: [], workers: [], feed: [], artifacts: [], permissions: {}, providers: {}, host: {} };
@@ -22,8 +24,17 @@ const ui = { dash: null, side: null, bar: null, tab: 'projects', sideMode: 'chat
 
 boot().catch((err) => console.error('[crew]', err));
 
+/** The person's own choices from Preferences. Dark glass is the default. */
+function applyAppearance() {
+  const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const root = document.documentElement;
+  if (stored('crew.theme') === 'light') root.dataset.theme = 'light'; else delete root.dataset.theme;
+  if (stored('crew.motion') === 'off') root.dataset.motion = 'off'; else delete root.dataset.motion;
+}
+
 async function boot() {
   if (!code) return;
+  applyAppearance();
   let info;
   try { info = await api('GET', `/api/crew/rooms/by-code/${encodeURIComponent(code)}`); } catch { return; } // not a crew office
   reportErrors('office');
@@ -71,6 +82,7 @@ function connect() {
   // The owner gets the agent twice — the public view, then their own with the brief — in that order.
   on('agent', (a) => { upsert(S.agents, a); render(); });
   on('playbooks', () => ui.orchestrator?.changed());
+  on('knowledge', (what) => ui.knowledge?.changed(what));
   on('safety', () => refresh());
   on('agent.removed', ({ id }) => { S.agents = S.agents.filter((a) => a.id !== id); render(); });
   on('room.deleted', () => { location.href = '/crew'; });
@@ -95,6 +107,9 @@ function connect() {
   on('message', (m) => {
     const list = ui.messages.get(m.channelId);
     if (list && !list.some((x) => x.id === m.id)) list.push(m);
+    // Unread: anything on another channel, or anything at all while the chat is closed. Not mine.
+    const watching = !ui.side.classList.contains('hidden') && ui.channelId === m.channelId;
+    if (!watching && m.senderId !== S.me.id && m.senderType !== 'system') (ui.unread ??= new Map()).set(m.channelId, (ui.unread.get(m.channelId) ?? 0) + 1);
     if (m.senderType === 'agent') { S.feed.push(m); if (S.feed.length > 200) S.feed.shift(); }
     render();
   });
@@ -128,7 +143,14 @@ function buildChrome() {
   ui.orchestrator = createOrchestrator(editorContext());
   ui.editor = createAgentEditor(editorContext());
   ui.security = createSecurityCenter(editorContext());
-  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.dash, ui.side, ui.editor.el);
+  ui.knowledge = createKnowledge({ ...editorContext(), setTab: (tab) => { ui.tab = tab; render(); } });
+  ui.nav = createNav({
+    groups: NAV,
+    current: () => (ui.dash.classList.contains('hidden') ? 'office3d' : navKeyFor(ui.tab)),
+    badgeOf: (key) => (key === 'approvals' ? S.approvals.filter((a) => a.status === 'pending' && a.approverId === S.me.id).length : 0),
+    onGo: goTo,
+  });
+  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.nav.el, ui.dash, ui.side, ui.editor.el);
   render();
 }
 
@@ -140,6 +162,7 @@ function render() {
     if (!renderQueued) return;
     renderQueued = false;
     renderBar();
+    ui.nav.refresh();
     if (!ui.dash.classList.contains('hidden')) renderDash();
     if (!ui.side.classList.contains('hidden')) renderSide();
     ui.editor?.refresh();
@@ -158,17 +181,62 @@ function renderBar() {
     connectionPill(),
     players,
     updateNotice(),
-    h('button.btn', { onclick: () => toggleDash() }, 'Dashboard'),
-    h('button.btn', { onclick: () => toggleDash('crew') }, 'My Crew'),
-    h('button.btn', { onclick: () => toggleDash('playbooks') }, 'Orchestrator'),
-    h('button.btn', { onclick: () => openSide('chat') }, 'Chat'),
-    h('button.btn', { onclick: () => toggleDash('approvals') }, 'Approvals', pending ? h('span.badge', pending) : null),
-    h('button.btn', { onclick: () => toggleDash('notifications') }, '🔔', unread ? h('span.badge', unread) : null),
-    h('button.btn', { onclick: () => toggleDash('security') }, 'Security'),
+    h('button.btn.cr-icon-btn', { onclick: () => toggleDash('approvals'), title: 'Approvals', 'aria-label': pending ? `Approvals, ${pending} waiting` : 'Approvals' }, icon('check'), pending ? h('span.badge', pending) : null),
+    h('button.btn.cr-icon-btn', { onclick: () => toggleDash('notifications'), title: 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications' }, icon('bell'), unread ? h('span.badge', unread) : null),
+    h('button.btn', { class: ui.side.classList.contains('hidden') ? '' : 'on', onclick: toggleChat, 'aria-pressed': ui.side.classList.contains('hidden') ? 'false' : 'true' }, icon('chat'), 'Chat', unreadTotal() ? h('span.cr-count', unreadTotal()) : null),
     stopButton(),
-    h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'A short tour of how the office works' }, '📘 How it works'),
+    h('button.btn.cr-icon-btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'How it works: a short tour', 'aria-label': 'How it works' }, '?'),
   );
 }
+
+// Where the launcher goes. Each destination is an existing tab of the dashboard, so nothing here
+// is a second way of doing anything; `office3d` is the office itself, with everything put away.
+const NAV = [
+  { key: 'workspace', label: 'Workspace', icon: 'workspace', items: [
+    { key: 'office3d', label: '3D Office', icon: 'building', hint: 'Close the panels and watch the floor' },
+    { key: 'projects', label: 'Projects', icon: 'folder' },
+    { key: 'board', label: 'Task Board', icon: 'board' },
+    { key: 'files', label: 'Files', icon: 'file' },
+    { key: 'git', label: 'Git & Sync', icon: 'git' },
+  ] },
+  { key: 'ai', label: 'AI Management', icon: 'ai', items: [
+    { key: 'agents', label: 'Agents', icon: 'agents' },
+    { key: 'playbooks', label: 'Orchestrator', icon: 'orchestrator' },
+    { key: 'connections', label: 'AI Connections', icon: 'connections' },
+    { key: 'usage', label: 'Usage & Quotas', icon: 'usage' },
+    { key: 'memory', label: 'Memory & Knowledge', icon: 'memory' },
+  ] },
+  { key: 'multiplayer', label: 'Multiplayer', icon: 'multiplayer', items: [
+    { key: 'room', label: 'Host / Join', icon: 'door', hint: 'This office, its code, invitations and settings' },
+    { key: 'friends', label: 'Friends', icon: 'multiplayer', hint: 'Who is in this office, and inviting more' },
+    { key: 'teams', label: 'Shared Teams', icon: 'agents' },
+    { key: 'security', label: 'Office Security', icon: 'security' },
+  ] },
+  { key: 'settings', label: 'Settings', icon: 'settings', items: [
+    { key: 'plugins', label: 'Plugins', icon: 'plugin', hint: 'Mem0 and Graphify: what is installed, and what is on' },
+    { key: 'rules', label: 'Working Rules', icon: 'rules' },
+    { key: 'prefs', label: 'Preferences', icon: 'sliders' },
+    { key: 'feed', label: 'Activity Logs', icon: 'logs' },
+    { key: 'approvals', label: 'Approvals', icon: 'check' },
+  ] },
+];
+const NAV_KEYS = new Set(NAV.flatMap((g) => g.items.map((i) => i.key)));
+/** A tab with no entry of its own lights up the entry for the page it lives on. */
+const NAV_PARENT = { crew: 'agents', runs: 'playbooks', costs: 'usage', deliverables: 'projects', graph: 'memory', notifications: 'approvals' };
+const navKeyFor = (tab) => (NAV_KEYS.has(tab) ? tab : NAV_PARENT[tab] ?? null);
+
+function goTo(key) {
+  if (key === 'office3d') { ui.dash.classList.add('hidden'); ui.editor.close?.(); render(); return; }
+  toggleDash(key);
+}
+
+function toggleChat() {
+  if (ui.side.classList.contains('hidden')) openSide('chat');
+  else { ui.side.classList.add('hidden'); document.body.classList.remove('cr-chat-open'); render(); }
+}
+
+/** Messages that arrived while their channel was not on screen. */
+const unreadTotal = () => [...(ui.unread?.values() ?? [])].reduce((a, b) => a + b, 0);
 
 /** "Show me" from the tour: open the dashboard on the tab that step is about. */
 function tourShowMe(tab) {
@@ -189,10 +257,13 @@ function toggleDash(tab) {
 
 // Six places to go, with what belongs together inside each. Each remembers which tab was open.
 const SECTIONS = [
-  { key: 'office', label: 'Office', tabs: [['room', 'Overview'], ['feed', 'Live feed'], ['approvals', 'Approvals'], ['notifications', 'Notifications'], ['rules', 'Rules & settings'], ['teams', 'Teams']] },
+  { key: 'office', label: 'Office', tabs: [['room', 'Overview'], ['friends', 'Friends'], ['teams', 'Teams'], ['rules', 'Working rules']] },
+  { key: 'activity', label: 'Activity', tabs: [['feed', 'Live feed'], ['approvals', 'Approvals'], ['notifications', 'Notifications']] },
+  { key: 'prefs', label: 'Preferences', tabs: [['prefs', 'Preferences']] },
   { key: 'agents', label: 'Agents', tabs: [['agents', 'Directory'], ['crew', 'My Crew']] },
   { key: 'orchestrator', label: 'Orchestrator', tabs: [['playbooks', 'Playbooks'], ['runs', 'Runs']] },
   { key: 'projects', label: 'Projects', tabs: [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['deliverables', 'Deliverables']] },
+  { key: 'knowledge', label: 'Memory & Knowledge', tabs: [['memory', 'Memory'], ['graph', 'Code graph'], ['plugins', 'Plugins']] },
   { key: 'connections', label: 'Connections', tabs: [['connections', 'AI connections']] },
   { key: 'usage', label: 'Usage', tabs: [['usage', 'Plan usage'], ['costs', 'Task costs']] },
   { key: 'security', label: 'Security', tabs: [['security', 'Security Center']] },
@@ -204,18 +275,17 @@ const localWorker = () => workerLink(`http://127.0.0.1:${S.host?.workerPort ?? 8
 function renderDash() {
   // These hold their own state and update themselves. A half-drawn playbook, its zoom and a
   // connection card's progress all survive the office's updates by simply not being redrawn.
-  if (['playbooks', 'runs', 'connections', 'usage', 'security'].includes(ui.tab) && ui.dash.dataset.tab === ui.tab) return;
+  if (['playbooks', 'runs', 'connections', 'usage', 'security', 'memory', 'graph', 'plugins'].includes(ui.tab) && ui.dash.dataset.tab === ui.tab) return;
   const body = h('div.body');
   const wsCtx = { S, roomId, ui, render, taskDetail };
   const section = sectionOf(ui.tab);
   (ui.lastTab ??= {})[section.key] = ui.tab;
-  ({ git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()), security: (b) => b.append(ui.security.show()) })[ui.tab](body);
+  ({ memory: (b) => b.append(ui.knowledge.showMemory()), graph: (b) => { b.classList.add('cr-fill'); b.append(ui.knowledge.showGraph()); }, plugins: (b) => b.append(ui.knowledge.showPlugins()), friends: dashFriends, prefs: dashPrefs, git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()), security: (b) => b.append(ui.security.show()) })[ui.tab](body);
   // Only a real change of place animates: the office repaints this on every event.
   if (ui.drawnTab !== ui.tab) { body.classList.add('cr-fade'); ui.drawnTab = ui.tab; }
   const scroll = ui.dash.querySelector('.body')?.scrollTop ?? 0;
   ui.dash.dataset.tab = ui.tab;
   ui.dash.replaceChildren(
-    h('nav.cr-rail', { 'aria-label': 'Sections' }, ...SECTIONS.map((s) => h('button', { class: s === section ? 'on' : '', title: s.label, 'aria-current': s === section ? 'page' : null, onclick: () => { ui.tab = ui.lastTab[s.key] ?? s.tabs[0][0]; render(); } }, icon(s.key), h('span', s.label)))),
     h('div.cr-dash-main',
       h('header', h('h2', section.label), h('button.btn.small', { onclick: () => ui.dash.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
       section.tabs.length > 1 ? h('nav.cr-tabs', { role: 'tablist' }, ...section.tabs.map(([k, label]) => h('button', { role: 'tab', 'aria-selected': ui.tab === k ? 'true' : 'false', class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; render(); } }, label))) : null,
@@ -423,6 +493,28 @@ function dashNotifications(body) {
   body.append(h('div.cr-list', ...S.notifications.map((n) => h('div.cr-item', h('span.pill', { class: n.level === 'error' ? 'bad' : n.level === 'warn' ? 'warn' : '' }, n.level), ' ', n.text, h('div.hint', ago(n.createdAt))))));
 }
 
+function dashFriends(body) {
+  const admin = ['owner', 'admin'].includes(S.room.myRole);
+  body.append(h('div.row', h('h2.grow', 'Friends in this office'), admin ? h('button.btn.primary', { onclick: invite }, 'Invite a friend') : null));
+  body.append(h('p.hint', 'Everyone here brings their own AI team, on their own computer, with their own sign-ins.'));
+  body.append(h('div.cr-list', ...S.members.map((m) => {
+    const agents = S.agents.filter((a) => a.ownerId === m.userId);
+    return h('div.cr-item.row', avatar(m.displayName, m.color, { online: m.online }), h('div.grow', h('b', m.displayName, m.userId === S.me.id ? ' (you)' : ''), h('div.hint', `${agents.length} agent${agents.length === 1 ? '' : 's'} · ${m.online ? 'here now' : 'away'} · worker ${m.workerOnline ? 'online' : 'offline'}`)), h('span.pill.human', m.role));
+  })));
+}
+
+function dashPrefs(body) {
+  const stored = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const keep = (k, v) => { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch { /* this browser will not remember it */ } };
+  body.append(h('h2', 'Preferences'), h('p.hint', 'These are kept in this browser only.'));
+  body.append(h('label', 'Appearance'), h('select', { onchange: (e) => { keep('crew.theme', e.target.value === 'light' ? 'light' : ''); applyAppearance(); } },
+    h('option', { value: '', selected: stored('crew.theme') !== 'light' }, 'Dark glass'), h('option', { value: 'light', selected: stored('crew.theme') === 'light' }, 'Light glass')));
+  body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: stored('crew.motion') === 'off', onchange: (e) => { keep('crew.motion', e.target.checked ? 'off' : ''); applyAppearance(); } }), ' Turn off interface animation (your system’s reduced motion setting always applies)'));
+  body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: quietMode(), onchange: (e) => keep('crew.quiet', e.target.checked ? '1' : '0') }), ' Quiet mode: only pop up what needs me (approvals, blockers, failures)'));
+  body.append(h('h3', 'Tours'), h('div.row', h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }) }, 'How the office works'), h('button.btn', { onclick: () => { goTo('playbooks'); setTimeout(() => ui.orchestrator.tour(), 250); } }, 'How the Orchestrator works')));
+  body.append(h('h3', 'Profile'), h('div.row', h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
+}
+
 function dashRoom(body) {
   const r = S.room;
   const admin = ['owner', 'admin'].includes(r.myRole);
@@ -447,6 +539,7 @@ function dashRoom(body) {
 function openSide(mode) {
   ui.sideMode = mode;
   ui.side.classList.remove('hidden');
+  document.body.classList.add('cr-chat-open');
   render();
 }
 
@@ -503,12 +596,22 @@ function renderSide() {
     ui.messages.set(ch.id, msgs);
     api('GET', `/api/crew/rooms/${roomId}/channels/${ch.id}/messages`).then((r) => { msgs.splice(0, msgs.length, ...r.messages); render(); });
   }
+  ui.unread?.delete(ch.id);
+  // The panel is redrawn on every event in the office, so what was being typed, where the cursor
+  // was, and how far up someone had scrolled all have to survive that.
+  const oldList = ui.side.querySelector('.cr-msgs');
+  const wasReading = oldList && ui.drawnChannel === ch.id && oldList.scrollHeight - oldList.scrollTop - oldList.clientHeight > 40;
+  const oldScroll = oldList?.scrollTop ?? 0;
+  const oldInput = ui.side.querySelector('.cr-composer input');
+  const hadFocus = oldInput && document.activeElement === oldInput;
+  const caret = hadFocus ? oldInput.selectionStart : null;
   const list = h('div.cr-msgs', ...msgs.map(messageView));
-  const input = h('input.grow', { placeholder: ch.kind === 'dm' ? 'Message your agent…' : `Message #${ch.name} — @Name addresses an agent` });
+  const input = h('input.grow', { 'aria-label': `Message ${ch.name}`, placeholder: ch.kind === 'dm' ? 'Message your agent…' : `Message #${ch.name.replace(/-[a-z0-9]{4}$/, '')}, @Name for an agent`, value: (ui.drafts ??= new Map()).get(ch.id) ?? '', oninput: (e) => ui.drafts.set(ch.id, e.target.value) });
   const send = async () => {
     const text = input.value.trim();
     if (!text) return;
     input.value = '';
+    ui.drafts.delete(ch.id);
     try {
       if (ch.kind === 'dm') await api('POST', `/api/crew/rooms/${roomId}/agents/${ch.dmAgentId}/chat`, { text });
       else await api('POST', `/api/crew/rooms/${roomId}/channels/${ch.id}/messages`, { body: text });
@@ -517,17 +620,23 @@ function renderSide() {
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
   const label = (c) => (c.kind === 'dm' ? `@${agentById(c.dmAgentId)?.name ?? 'agent'}` : `#${c.name.replace(/-[a-z0-9]{4}$/, c.kind === 'project' ? '' : '$&')}`);
   ui.side.replaceChildren(
-    h('header', h('h2', 'Chat'), h('button.btn.small', { onclick: searchMessages }, 'Search'), h('button.btn.small', { onclick: () => ui.side.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
-    h('div.cr-channels', ...S.channels.map((c) => h('button', { class: c.id === ch.id ? 'on' : '', onclick: () => { ui.channelId = c.id; render(); } }, label(c))),
-      h('button', { onclick: newChannel, title: 'New channel' }, '+')),
+    h('header.cr-chat-head', h('h2', 'Chat', ' ', h('span.cr-chat-where', label(ch))), h('button.btn.small.cr-icon-btn', { onclick: searchMessages, title: 'Search messages', 'aria-label': 'Search messages' }, icon('search')), h('button.btn.small', { onclick: toggleChat, 'aria-label': 'Close chat' }, '✕')),
+    h('div.cr-channels', { role: 'tablist', 'aria-label': 'Channels' }, ...S.channels.map((c) => {
+      const n = ui.unread?.get(c.id) ?? 0;
+      return h('button', { role: 'tab', 'aria-selected': c.id === ch.id ? 'true' : 'false', class: c.id === ch.id ? 'on' : '', 'aria-label': n ? `${label(c)}, ${n} unread` : label(c), onclick: () => { ui.channelId = c.id; render(); } }, label(c), n ? h('span.cr-unread', n > 99 ? '99+' : n) : null);
+    }),
+      h('button', { onclick: newChannel, title: 'New channel', 'aria-label': 'New channel' }, '+')),
     list,
-    h('div.cr-composer', input, h('button.btn.primary', { onclick: send }, 'Send')));
-  list.scrollTop = list.scrollHeight;
+    h('div.cr-composer', input, h('button.btn.primary', { onclick: send, title: 'Send', 'aria-label': 'Send message' }, icon('send'))));
+  list.scrollTop = wasReading ? oldScroll : list.scrollHeight;
+  ui.drawnChannel = ch.id;
+  if (hadFocus) { input.focus(); if (caret !== null) input.setSelectionRange(caret, caret); }
 }
 
 function messageView(m) {
   const isAgent = m.senderType === 'agent';
-  return h('div.cr-msg', { class: m.senderType === 'system' ? 'system' : '' },
+  const mine = m.senderType === 'human' && m.senderId === S.me.id;
+  return h('div.cr-msg', { class: m.senderType === 'system' ? 'system' : mine ? 'mine' : '' },
     m.senderType === 'system' ? null : avatar(m.senderName, m.senderColor, { ai: isAgent }),
     h('div.grow',
       h('div.meta', h('b', m.senderName), isAgent ? h('span.pill.ai', 'AI') : m.senderType === 'human' ? h('span.pill.human', 'human') : null,

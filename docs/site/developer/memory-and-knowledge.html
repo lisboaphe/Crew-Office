@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Memory and knowledge — The Roving Office</title>
+  <meta name="description" content="How the office is built, and how to change it." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html">For everyone</a>
+      <a href="/docs/developer/index.html" aria-current="page">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="developer documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/index.html">Where to look</a>
+        </li>
+        <li>
+          <a href="/docs/developer/getting-the-code.html">Getting the code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/developing.html">Developing on it</a>
+        </li>
+        <li>
+          <a href="/docs/developer/npm-scripts.html">Every npm script</a>
+        </li>
+      </ul>
+      <h2>How it works</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/architecture.html">Architecture</a>
+        </li>
+        <li>
+          <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
+        </li>
+        <li>
+          <a href="/docs/developer/connectivity-service.html">Deploying the connectivity service</a>
+        </li>
+        <li>
+          <a href="/docs/developer/memory-and-knowledge.html" aria-current="page">Memory and knowledge</a>
+        </li>
+        <li>
+          <a href="/docs/developer/upgrade-report.html">Upgrade report: Git, rules, budgets</a>
+        </li>
+        <li>
+          <a href="/docs/developer/ai-providers.html">AI providers: billing rules and test status</a>
+        </li>
+        <li>
+          <a href="/docs/developer/9router-assessment.html">9Router: compatibility and licensing</a>
+        </li>
+        <li>
+          <a href="/docs/developer/physics.html">The physics of the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/scene-internals.html">Scene internals</a>
+        </li>
+        <li>
+          <a href="/docs/developer/job-delivery.html">Job delivery</a>
+        </li>
+        <li>
+          <a href="/docs/developer/editor.html">The furniture editor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/layout-algorithm.html">The layout algorithm</a>
+        </li>
+        <li>
+          <a href="/docs/developer/tuning-the-layouts.html">Tuning the layout generator</a>
+        </li>
+        <li>
+          <a href="/docs/developer/sources.html">The source model</a>
+        </li>
+        <li>
+          <a href="/docs/developer/test-data.html">The Test Data source</a>
+        </li>
+      </ul>
+      <h2>Changing it</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/extending.html">Extending the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/prop-portraits.html">Photographing a prop</a>
+        </li>
+        <li>
+          <a href="/docs/developer/visual-assets.html">Visual assets and their rights</a>
+        </li>
+        <li>
+          <a href="/docs/developer/coplanar-probe.html">The coplanar-face probe</a>
+        </li>
+        <li>
+          <a href="/docs/developer/plugin-distribution.html">Publishing the plugins</a>
+        </li>
+        <li>
+          <a href="/docs/developer/admin-console.html">The admin console</a>
+        </li>
+      </ul>
+      <h2>The protocol</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/protocol/aop-spec.html">The AOP spec</a>
+        </li>
+        <li>
+          <a href="/docs/developer/protocol/aop-harness-adapters.html">Adapter notes</a>
+        </li>
+        <li>
+          <a href="/agent-setup/">What an agent is told to do <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+      <h2>Adapters</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/adapters/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/muse.html">Muse</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="memory-and-knowledge" tabindex="-1">Memory and knowledge</h1>
+<p>How Crew Office keeps what its teams have learned and a map of their code, with the optional
+<a href="https://github.com/mem0ai/mem0">Mem0</a> and <a href="https://github.com/Graphify-Labs/graphify">Graphify</a>
+engines. For what a player sees, read the multiplayer guide (→ user docs:
+<a href="../user/multiplayer.html#memory-knowledge">Memory &amp; Knowledge</a>).</p>
+<p>The one idea to hold on to: <strong>the engines add abilities, not authority.</strong> Every memory is a row in the
+office's own database, and every read and write is checked in <code>lib/crew/knowledge.cjs</code>. Mem0 is only
+ever asked about namespaces the caller may read, and each result is looked up again in the caller's own
+readable rows, so a wrong or tampered answer cannot show something they may not see.</p>
+<h2 id="scopes" tabindex="-1">Scopes</h2>
+<table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Lives on</th>
+<th>Who can read it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agent</td>
+<td>The owner's worker (<code>remember</code>, <code>recall</code>)</td>
+<td>That agent, and its owner in the agent editor. The host never has it</td>
+</tr>
+<tr>
+<td>User</td>
+<td>The host</td>
+<td>One player, and that player's agents</td>
+</tr>
+<tr>
+<td>Team</td>
+<td>The host</td>
+<td>One player and all of that player's agents</td>
+</tr>
+<tr>
+<td>Project</td>
+<td>The host</td>
+<td>The project's members, the office's owner and admins, and agents lent to it with the <code>memory</code> permission</td>
+</tr>
+</tbody>
+</table>
+<p>An agent at work also sees its owner's memories that belong to no project, and never those tagged with a
+different project. Grants are read on every call, so taking away <code>memory</code> stops retrieval on the next one.</p>
+<p>&quot;Private&quot; means hidden from other players and their agents. User and team memory is stored in the host's
+database, which whoever runs the host could open, and the screens say so. That is why credentials and home
+folders are removed on the way in (<code>lib/crew/scrub.cjs</code>), and why agent memory stays on the worker.</p>
+<h2 id="what-agents-get" tabindex="-1">What agents get</h2>
+<p>With memory on for a project, <code>buildContext</code> adds a <code>knowledge</code> block to the job: memories matched by words
+against the task, and code-map matches. <code>lib/crew-worker/runner.cjs</code> presents it inside <code>&lt;reference&gt;</code> tags,
+labelled as information rather than instructions, and removes any such tag from inside the text. Word matching
+is used here because building a job's context is synchronous; the <code>search_memory</code> tool uses Mem0 when it is
+available.</p>
+<p><strong>That labelling is a courtesy to the model, not the protection.</strong> The protection is that tools are issued by
+the host from grants, every time, and nothing reads memory to decide what an agent may do.
+<code>test/crew-knowledge.test.cjs</code> plants a memory claiming to grant permissions and checks that none appear.</p>
+<p>With memory off for a project, its agents get none of this. Workspace memories carry a <code>project_id</code>, and the
+older shared-notes route ignores rows that have one, so they cannot arrive that way either.</p>
+<h2 id="mem0" tabindex="-1">Mem0</h2>
+<p>Licence: Apache-2.0. Nothing is copied into this repository; it is an optional install on the host.</p>
+<p>Its self-hosted server wants Postgres and an OpenAI key by default, which is more than an office should need and
+conflicts with paying for nothing. So <code>lib/crew/mem0_bridge.py</code> runs the library directly, as one local process
+that <code>lib/crew/knowledge-mem0.cjs</code> starts when first needed and stops after 15 idle minutes:</p>
+<ul>
+<li><strong>Vectors</strong> go in an on-disk Qdrant folder and <strong>history</strong> in SQLite, under <code>knowledge/mem0</code> in the data folder.</li>
+<li><strong>The embedding model is chosen explicitly</strong>, from local providers only (<code>fastembed</code>, <code>ollama</code>, <code>huggingface</code>,
+<code>lmstudio</code>), by the app on the host's own computer. There is no default, because first use downloads it. Changing
+it deletes the index, which rebuilds from the rows.</li>
+<li><strong>The language model is never called.</strong> Memories are stored verbatim (<code>infer=False</code>), and its address is a closed
+local port. API keys are removed from the process's environment, and telemetry is turned off.</li>
+</ul>
+<p>If Mem0 is missing or fails, search falls back to words and the response says so.</p>
+<p>Not done yet: agent memory on the worker uses plain word search, not Mem0.</p>
+<h2 id="graphify" tabindex="-1">Graphify</h2>
+<p>Licence: Apache-2.0. Nothing is copied into this repository; it is an optional install on the host, found as
+<code>graphify</code> or <code>python -m graphify</code>, or set by <code>CREW_GRAPHIFY_CMD</code>.</p>
+<p><code>lib/crew/knowledge-graph.cjs</code> builds one graph per repository:</p>
+<ol>
+<li><strong>Export.</strong> One commit of the default branch is written out plainly (<code>crew.git.exportTree</code>). Symlinks arrive as
+small text files, and no hook or filter from the repository runs.</li>
+<li><strong>Remove.</strong> Files that hold secrets (<code>SENSITIVE_FILE</code>) are deleted before Graphify looks.</li>
+<li><strong>Run.</strong> <code>graphify update &lt;path&gt;</code>, with no API keys in its environment, so it is code-only and has nothing to
+send anywhere. Its own cache stays between builds, which makes rebuilds incremental.</li>
+<li><strong>Rebuild the result.</strong> <code>graph.json</code> is treated as untrusted input and copied field by field (<code>sanitizeGraph</code>).
+Anything from outside the repository, or from a sensitive file, does not survive, and neither do unknown fields.
+Only this copy is ever served.</li>
+</ol>
+<p>Graphs rebuild when <code>main</code> changes through a <strong>reviewed merge or a rollback</strong>, the only validated updates there are:
+a pushed branch does not trigger one. At most one build runs per repository, with one waiting, newest commit first.</p>
+<p>Each graph records its commit, and each memory records the commit it was written against, so the screens can say
+when the code has moved on.</p>
+<p>Reading a graph needs <code>crew.git.access(repo).read</code>. The <code>code_graph</code> tool needs the <code>git</code> permission and only sees
+repositories of the project the agent is working in.</p>
+<h2 id="testing" tabindex="-1">Testing</h2>
+<ul>
+<li><code>test/crew-knowledge.test.cjs</code> attacks all of this with two independent clients and their own agents, through the
+real API and worker routes, with stand-ins for the engines.</li>
+<li><code>test/knowledge-engines.test.cjs</code> runs the real Graphify and Mem0 and skips where they are absent.
+<code>.github/workflows/knowledge-engines.yml</code> installs them on Linux and sets <code>CREW_TEST_ENGINES=1</code>, which turns a
+missing engine into a failure so that run cannot quietly test nothing.</li>
+</ul>
+<p>Neither has been tried across two computers or on real project code at scale.</p>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#scopes">Scopes</a></li>
+<li><a href="#what-agents-get">What agents get</a></li>
+<li><a href="#mem0">Mem0</a></li>
+<li><a href="#graphify">Graphify</a></li>
+<li><a href="#testing">Testing</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone with a checkout. If you just want to use the thing,
+      <a href="/docs/user/index.html">the user docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

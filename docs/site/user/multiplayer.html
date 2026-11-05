@@ -386,9 +386,47 @@ work when the provider reports one.</p>
 <p>Where a figure exists you can choose warnings at 50, 75, 90 and 100%, and a level at which new
 tasks pause. A reading is only as new as the last run, so this is not a hard cap. Plan usage,
 tokens, API costs and task budgets are separate, and never converted into each other.</p>
+<h2 id="getting-around" tabindex="-1">Getting around</h2>
+<p>The dock on the left edge of the office is the menu. Rest the mouse on it and it opens, then it stays open until you
+click somewhere else, press Esc, or choose a destination. With a keyboard, Tab to the dock and press Enter, then use the
+arrow keys. Chat stays on the right, and the office stays visible behind everything.</p>
+<p>Preferences has the appearance, animation and quiet-mode choices.</p>
+<h2 id="memory-knowledge" tabindex="-1">Memory &amp; Knowledge</h2>
+<p>This is what your team has learned, and a map of your code. Find it under <strong>AI Management → Memory &amp; Knowledge</strong>.</p>
+<p><strong>Who can see a memory</strong> is chosen when you write it:</p>
+<ul>
+<li><strong>Only me:</strong> you, and your own agents when they work for you.</li>
+<li><strong>My team:</strong> you and all your agents.</li>
+<li><strong>The project:</strong> everyone on the project, and agents lent to it with the memory permission.</li>
+</ul>
+<p>Each agent also has its own private memory, which stays on its owner's computer and shows in the agent editor.</p>
+<p>Other players and their agents cannot see your private or team memories. They are still stored on the computer hosting
+the office, and whoever runs that computer could read that file. Do not save passwords or keys here. Things that look
+like them are removed when you save, but a pattern can miss one.</p>
+<p><strong>Switching it on:</strong> under <em>What is on, per project</em>, a project can have <strong>Memory for agents</strong> and <strong>Code graph</strong>, each on
+or off, both off to begin with. Only the project's creator, or the office's owner or an admin, can change these.</p>
+<ul>
+<li>With memory on, agents on that project get relevant memories before they start, and can search and add to them.</li>
+<li>With the code graph on, you get an interactive map of the project's code. Click anything to see what it uses and what
+uses it, and agents can look things up in it. It is rebuilt from what has been merged into <code>main</code>, never from unreviewed
+work, and it says which version it was built from.</li>
+</ul>
+<p>Anything an agent reads from here is treated as information. It cannot change what the agent is allowed to do, even if
+someone writes that it can.</p>
+<h3 id="the-optional-plugins" tabindex="-1">The optional plugins</h3>
+<p>Memory works with nothing extra, and search matches words. Both plugins below are free, run on the computer hosting the
+office, and use no paid service. Neither is included in the download, because they need Python. <strong>Settings → Plugins</strong>
+shows what it found on this computer.</p>
+<ul>
+<li><strong>Mem0</strong> finds memories by meaning. Install Python 3.10 or newer, then <code>python -m pip install mem0ai fastembed</code> (on
+Windows, <code>py -m pip install mem0ai fastembed</code>), press Check again, and choose a local embedding model such as
+<code>BAAI/bge-small-en-v1.5</code>. The first use downloads that model.</li>
+<li><strong>Graphify</strong> builds the code graph. Install it with <code>python -m pip install graphifyy</code> (on Windows, <code>py -m pip install graphifyy</code>) and press Check again. It only reads code, with no AI model, so nothing leaves the computer.</li>
+</ul>
 <h2 id="the-orchestrator" tabindex="-1">The Orchestrator</h2>
 <p>A playbook is a saved plan of who does what, and in what order. Open <strong>Orchestrator</strong>, start from
 a template, and connect the pieces:</p>
+<p>The first time you open it, a guided tour points at each real control while you try it. <strong>How it works</strong> on that page starts it again, and it can open a template as a draft to follow along with.</p>
 <ul>
 <li><strong>Lead Agent</strong> owns the run and writes the final summary. It has to be one of yours.</li>
 <li><strong>Worker Agent</strong> does the steps it is connected to.</li>
@@ -562,6 +600,8 @@ choose a real provider for real work.</p>
 <li><a href="#backup-ais">Backup AIs</a></li>
 <li><a href="#token-saver">Token saver</a></li>
 <li><a href="#usage">Usage</a></li></ul></li>
+<li><a href="#getting-around">Getting around</a></li>
+<li><a href="#memory-knowledge">Memory & Knowledge</a><ul><li><a href="#the-optional-plugins">The optional plugins</a></li></ul></li>
 <li><a href="#the-orchestrator">The Orchestrator</a><ul><li><a href="#holidays-firing-and-new-names">Holidays, firing and new names</a></li>
 <li><a href="#which-ai-each-agent-uses">Which AI each agent uses</a></li>
 <li><a href="#your-worker-and-your-api-keys">Your worker and your API keys</a></li></ul></li>

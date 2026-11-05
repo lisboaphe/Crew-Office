@@ -200,7 +200,7 @@ test('Test 4: a push with hooks, links and build steps runs nothing on the host,
   fs.writeFileSync(path.join(w, 'hooks', 'post-receive'), `#!/bin/sh\nnode -e "${evil}"\n`);
   git(['add', '-A'], w);
   git(['commit', '-qm', 'A dangerous build step'], w);
-  const branch = `refs/heads/user/${(await o.b.get('/api/crew/me')).user.id.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}/evil`;
+  const branch = `refs/heads/user/${(await o.b.get('/api/crew/me')).user.id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}/evil`;
   git(['push', '--quiet', 'origin', `HEAD:${branch}`], w);
   await sleep(600);
   assert.ok(!fs.existsSync(canary), 'storing it ran nothing');
