@@ -74,7 +74,7 @@ The vault's key is held by Windows DPAPI, tested on a real Windows machine, incl
 | MCP and external tools | The runner has no MCP client, so there is nothing to govern yet |
 | Separate storage process | The room server holds the whole user's file access, with no route exposing it |
 | End-to-end encryption through a relay | Not possible for browser clients: see `NETWORK_SECURITY.md` |
-| A public relay | None exists. Someone must run one |
+| A public connectivity service | The program and its deployment exist. None is running, so no build has an address to find. Someone must deploy one: `docs/developer/connectivity-service.md` |
 | Reviewing dependencies with established tooling | Host has none at runtime. `npm audit` not run in CI |
 
 ### Blocked by what is available here
@@ -83,6 +83,7 @@ The vault's key is held by Windows DPAPI, tested on a real Windows machine, incl
 |---|---|
 | **Two real computers** | One PC here |
 | **Different internet connections, CGNAT, restrictive NAT** | Needs real networks and a deployed relay |
+| Docker and Caddy deployment of the relay, real DNS and certificates | Docker not installed, and no server here |
 | Docker sandbox behaviour | Docker not installed |
 | Real model facing prompt injection | Needs a real model and a real attempt |
 
@@ -90,15 +91,15 @@ The vault's key is held by Windows DPAPI, tested on a real Windows machine, incl
 
 Run with a real friend or a second PC. These are the ones that cannot be done from one computer.
 
-1. Deploy a relay. Host on PC A, and invite PC B from a different connection, such as a phone hotspot.
-2. On B: join by link with no install. Check the status reads **Connected through relay**.
+1. Deploy a relay. Host on PC A, and invite PC B from a different connection, such as a phone hotspot. Check A reads **Internet room available**.
+2. On B: join by link with no install. Check the office shows **Relay connection**. Then with the app: click the `crewoffice://` link and check it opens and names the office, and try the room code.
 3. On B: install, add a worker, connect an agent. Run a real task.
 4. On B's agent, ask it to read something outside the project. It must be refused, and appear as blocked in A's Security record.
 5. Install Docker on A. Give A's reviewer B's code. Check tests run in a container, and that without Docker they are refused.
 6. Press STOP ALL AI ACTIVITY on A during real work. Check B's running command dies, and no new work starts.
 7. Unplug B's network during a job. Check its process stops within about two minutes.
 8. Close A. Check B sees the offline page, then recovers when A returns.
-9. Remove B. Check the old link no longer works.
+9. Remove B. Check the old link no longer works. Revoke an invitation, and check its link and code both stop.
 10. Check your AI provider's billing shows no charges.
 
 ## Release checklist

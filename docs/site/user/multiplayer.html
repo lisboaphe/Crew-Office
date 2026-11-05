@@ -177,22 +177,28 @@ host's address, and uses whatever the host runs.</p>
 <ol>
 <li>Open Crew Office. Pick a name and a colour; that is all it asks, and this browser remembers
 you.</li>
-<li>Press <strong>Host Office</strong>. Choose a name, a privacy setting and a player cap:
+<li>Press <strong>Host Office</strong>. Choose an office you already have, or name a new one, then who can join
+and how many players, and press <strong>Host Office</strong> again:
 <ul>
-<li><strong>Invite link</strong> — only people you send the link to. This is the default.</li>
-<li><strong>Password</strong> — anyone with the room code and the password can join.</li>
-<li><strong>Open</strong> — anyone who can reach this host can join, and it is announced on your network.</li>
+<li><strong>Invitation only</strong> — only people you send the invitation to. This is the default.</li>
+<li><strong>Invitation, or room code and password</strong> — a room code alone also asks for the password.</li>
+<li><strong>Invitation, or anyone on my network</strong> — also announced to computers on your own network.</li>
 </ul>
 </li>
-<li>Copy the invitation link it shows and send it to the people you want. It works for 72
-hours and 20 people; make more under Dashboard → Office.</li>
-<li><strong>Enter office</strong>.</li>
+<li>Crew Office makes the office reachable and checks that it really is, from outside. When it
+says <strong>Internet room available</strong>, you get an invitation link and a short room code.</li>
+<li>Press <strong>Copy Invitation</strong> and send it to your friends. It works for 72 hours and 20 people.
+Press <strong>Revoke Invitation</strong> to stop it working at once, and make a new one any time.</li>
+<li><strong>Enter office</strong>. The same screen shows who is connected. <strong>Stop Hosting</strong> closes the office to
+everyone and keeps everything in it.</li>
 </ol>
+<p>If it says <strong>Internet service unavailable</strong> instead, it gives the reason and offers no link, because
+it would not work. See <a href="#playing-over-the-internet">Playing over the internet</a>.</p>
 <p>The office runs while the Crew Office window is open, and <strong>closing the last window stops it</strong>.
 To keep one running without a window, use <code>npm run host</code> from a checkout, or a
 <a href="#playing-over-the-internet">dedicated server</a>. Everything — players, agents, projects, tasks, messages
-and files — is saved on the host and is still there after a restart. The host can <strong>Stop</strong> an
-office (it keeps everything but accepts no work) and start it again.</p>
+and files — is saved on the host and is still there after a restart. When you open it again, an
+office you were hosting comes back online by itself, on the same link.</p>
 <h3 id="your-name" tabindex="-1">Your name</h3>
 <p>A name is a label, not a login. Two people can share one, and typing somebody's name makes you
 a new player who happens to have that name: it gives no access to their agents or their plan.</p>
@@ -211,24 +217,73 @@ confirm. It permanently removes the office's projects, tasks, messages, files, G
 and agents, and sends everyone in it back to the lobby. Export the office first if you want a
 copy. To keep everything and just stop it for a while, use <strong>Stop</strong> instead.</p>
 <h2 id="joining-an-office" tabindex="-1">Joining an office</h2>
-<p>From your own lobby, <strong>Join Office</strong> offers three ways in:</p>
-<ul>
-<li><strong>On your network</strong> lists offices announced on the same Wi-Fi or LAN.</li>
-<li><strong>Room code</strong> joins an office on the host whose lobby you are looking at.</li>
-<li><strong>Another host's address</strong> (<code>http://192.168.1.20:8080</code>) takes you to that host's lobby,
-where you pick a name for that host.</li>
-</ul>
-<p>If someone sent you an invitation link (<code>…/crew/join?invite=…</code>), just open it in a browser:
-pick a name and a colour and you are in. You do not need to install anything to join; you
-only need the app if you want to bring your own agents.</p>
+<p><strong>If someone sent you an invitation link</strong>, just open it in a browser. It shows the office and who
+is hosting it. Pick a name and a colour and press <strong>Join office</strong>. You do not need to install
+anything to join; you only need the app if you want to bring your own agents.</p>
+<p><strong>With Crew Office installed</strong>, press <strong>Join Office</strong> and either paste the link or enter the room
+code, then press <strong>Join</strong>. If you click a <code>crewoffice://</code> link, the app opens and shows you which
+office it is before you go in. On Windows and Linux the installer sets that up. On macOS, open the
+ordinary link instead.</p>
+<p>Room codes look like <code>ABCDE-FGHIJ</code>. Capitals, spaces and dashes do not matter. A code is
+an invitation you can read aloud, so it stops working when the invitation does. If you and the host
+are on the same network, Crew Office connects to them directly instead of over the internet.</p>
+<p><strong>Recent Offices</strong> takes you back to one you have been in. Under <strong>Advanced settings</strong> are offices
+announced on your network, joining by a computer's address, and joining by an office's keycard.</p>
 <h2 id="playing-over-the-internet" tabindex="-1">Playing over the internet</h2>
-<p>Host Office → Create gives you an invitation link. If a relay is set up, it works from anywhere: your friend opens it, picks a name, and is in, with nothing to install. If not, it says the link only works on your own network.</p>
-<p>A relay is a small program on a server, which lets friends reach your computer with no port forwarding. <strong>There is no free public one: someone has to run it</strong>, typically on a server costing a few dollars a month, plus a domain name. It stores nothing, but whoever runs it can read what passes through, so run your own or use one you trust. Add it under Host Office → Advanced. The security docs in the repository cover setting one up and what it costs.</p>
-<p>The status always says what is true: <strong>Hosting locally</strong>, <strong>Connected through relay</strong>, <strong>Reconnecting</strong>, or <strong>Internet hosting unavailable</strong>. No public link is offered until the connection is really up.</p>
-<p>Other ways in, without a relay:</p>
-<p>On the same network, nothing extra is needed. Over the internet a direct connection
-usually does not work on its own, because a home router hides the computers behind it.
-The app does not pretend otherwise, and it has no built-in relay. Pick one:</p>
+<p>Friends need nothing but the invitation: no VPN, no router settings, no port forwarding, nothing to
+install. Neither do you. Your office and its files stay on your computer.</p>
+<p><strong>This needs a connectivity service to be running somewhere.</strong> It is a small program on a server,
+which carries traffic between your friends and your computer. Crew Office finds it by itself once
+your copy has been built knowing its address. There is no free public one, so someone has to run
+it, typically on a server costing a few dollars a month plus a domain name. Until then Host
+Office says so, and you can add a relay under <strong>Advanced settings</strong>, or use one of the other ways
+below. Instructions for running one are in the <a href="../developer/connectivity-service.html">developer docs on deploying the connectivity
+service</a> (→ developer docs).</p>
+<p>The service stores nothing, but whoever runs it can read what passes through, so run your own or use
+one you trust. Your AI sign-ins never pass through it. Git pushes and large files do, and they are
+what uses its bandwidth.</p>
+<p>The status always says what is true now:</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>What it means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hosting locally</strong></td>
+<td>Only your own network can reach this office</td>
+</tr>
+<tr>
+<td><strong>Connecting to internet service</strong></td>
+<td>Connecting, and checking from outside</td>
+</tr>
+<tr>
+<td><strong>Internet room available</strong></td>
+<td>Checked from outside, and working. Only now is there a link</td>
+</tr>
+<tr>
+<td><strong>Relay connection</strong></td>
+<td>Your traffic is going through the service</td>
+</tr>
+<tr>
+<td><strong>Direct connection</strong></td>
+<td>You are connected over your own network, not through a service</td>
+</tr>
+<tr>
+<td><strong>Reconnecting</strong></td>
+<td>Lost the connection, and trying again. Friends come back by themselves</td>
+</tr>
+<tr>
+<td><strong>Internet service unavailable</strong></td>
+<td>It cannot work right now, and the reason is shown</td>
+</tr>
+</tbody>
+</table>
+<p>These have automated tests on one computer. They have not yet been tried between two real internet
+connections, so try it with a friend before relying on it.</p>
+<p>Other ways in, without a service:</p>
 <table>
 <thead>
 <tr>
@@ -241,7 +296,7 @@ The app does not pretend otherwise, and it has no built-in relay. Pick one:</p>
 <tr>
 <td>VPN mesh (Tailscale, ZeroTier)</td>
 <td>Everyone installs it; friends use the host's VPN address</td>
-<td>Easiest and private. Recommended.</td>
+<td>Private, and needs no server. Everyone has to install it</td>
 </tr>
 <tr>
 <td>Port forwarding</td>
@@ -251,7 +306,7 @@ The app does not pretend otherwise, and it has no built-in relay. Pick one:</p>
 <tr>
 <td>A tunnel (Cloudflare Tunnel, ngrok)</td>
 <td>Run the tunnel on the host; share its HTTPS address</td>
-<td>No router changes</td>
+<td>No router changes. Live updates need one that supports streaming</td>
 </tr>
 <tr>
 <td>A dedicated server</td>

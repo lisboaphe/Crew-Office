@@ -62,8 +62,12 @@ lib/crew/
   api.cjs          HTTP routes (browser and worker)
   catalog.cjs      permissions, tools, states, prices — shared with workers
   crash.cjs        crash logs (redacted)
-  lan.cjs          UDP discovery on the local network
+  lan.cjs          UDP discovery on the local network, and slow hashes of room codes for direct joins
+  relay-client.cjs finding the service, the tunnel, proving reachability, publishing codes
   demo-kit.cjs     driving a room from code (demo script, tests)
+lib/relay/
+  frames.cjs       the tunnel's wire format
+  invitation.cjs   what counts as an invitation or room code; shared by app, host and relay
 lib/crew-worker/
   main.cjs         the worker program and its loopback settings page
   worker.cjs       one host connection: stream, claim, run, reconnect
@@ -78,6 +82,8 @@ lib/crew-worker/
 crew/              lobby and in-office overlay (no build step)
 bin/crew-host.cjs  `npm run host` / `npm run dedicated`
 bin/crew-worker.cjs, bin/crew-demo.cjs
+bin/crew-relay.cjs the connectivity service. See [Deploying the connectivity service](connectivity-service.md)
+deploy/relay/      its Docker deployment
 ```
 
 ## Security model
@@ -302,8 +308,11 @@ the repository variable `DEPLOY_TO_FLY` is `true`.
   stops and says so. Workers are not updated or restarted for you.
 - Clearing cookies costs a player joining someone else's host their identity and their agents.
   There is no recovery key yet. Only the host computer's owner is remembered beyond a cookie.
-- No built-in relay or NAT traversal: remote play needs a VPN mesh, port forwarding, a
-  tunnel, or a dedicated server.
+- Internet hosting needs a deployed connectivity service, and a build that knows its address.
+  Over the internet all traffic goes through it: there is no hole-punching. Direct connections
+  are for hosts on the same network.
+- The `crewoffice://` handler is registered on Windows and Linux, not macOS, where that takes an
+  app bundle. The https link works everywhere.
 - The process sandbox does not block network access; use Docker mode where that matters.
 - Agents' sandboxed runs see a copy of the files; their changes are not synced back.
 - The host trusts what a worker reports about usage and test runs. A player can only

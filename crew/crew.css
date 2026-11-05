@@ -374,6 +374,13 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-link.ok::before { background: var(--cr-ok); } .cr-link.wait::before { background: var(--cr-warn); } .cr-link.bad::before { background: var(--cr-bad); }
 .cr-invite-link { display: flex; gap: 8px; align-items: center; background: var(--cr-well); border-radius: 14px; padding: 10px 12px; margin: 10px 0; }
 .cr-invite-link code { flex: 1; background: none; font-size: 13px; }
+.cr-invite-link code { overflow-wrap: anywhere; }
+.cr-room-code { display: flex; gap: 12px; align-items: center; background: var(--cr-well); border-radius: 14px; padding: 12px 14px; margin: 10px 0; }
+.cr-room-code b { flex: 1; font: 600 24px/1.2 ui-monospace, Consolas, monospace; letter-spacing: 0.08em; }
+.cr-invite-card { background: var(--cr-well); border-radius: 14px; padding: 14px 16px; margin: 10px 0; }
+.cr-invite-card b { font-size: 18px; }
+.cr-code-input { font-family: ui-monospace, Consolas, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+.cr-or { margin-top: 10px; font-size: 12px; color: var(--cr-ink-3); }
 .cr-steps { list-style: none; padding: 0; margin: 10px 0; display: flex; flex-direction: column; gap: 5px; }
 .cr-steps li.on { font-weight: 600; } .cr-steps li.done { color: var(--cr-ok); } .cr-steps li.bad { color: var(--cr-bad); }
 @media (max-width: 760px) { .cr-lobby .cr-two-actions { grid-template-columns: 1fr; } }

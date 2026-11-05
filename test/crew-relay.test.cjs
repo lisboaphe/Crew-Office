@@ -186,7 +186,8 @@ function rawHost(port, hostname, p = '/crew') {
 
 test('with a domain, each office has its own address, so one cannot read another’s cookies', { timeout: 40_000 }, async (t) => {
   const relay = await startRelay(t, undefined, { CREW_RELAY_DOMAIN: 'relay.test' });
-  const host = await startHost();
+  // relay.test has no DNS behind it, so the host's check of its own address dials the relay directly.
+  const host = await startHost({ env: { CREW_RELAY_PROBE_VIA: '127.0.0.1' } });
   t.after(() => host.stop());
   const owner = await ownerOf(host);
   await owner('POST', '/api/crew/enter', { name: 'Host' });

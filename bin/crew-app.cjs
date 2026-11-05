@@ -3,6 +3,7 @@
 //
 //   node bin/crew-app.cjs            host for your network (friends can join)
 //   node bin/crew-app.cjs --private  this computer only
+//   node bin/crew-app.cjs crewoffice://join?...   open an invitation; what the system's link handler runs
 //
 // The window is Edge or Chrome in app mode: no tabs or address bar, and a separate profile
 // kept under the user's app data. The office runs behind it with no console, its output in
@@ -18,19 +19,27 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
+const { parseInvitation, SCHEME } = require('../lib/relay/invitation.cjs');
 
 try { process.loadEnvFile(path.join(__dirname, '..', '.env')); } catch { /* no .env */ }
 const PORT = Number(process.env.PORT) || 8080;
 const lobby = `http://localhost:${PORT}/crew`;
 const PRIVATE = process.argv.includes('--private');
 const SERVING = process.argv.includes('--serve');
+// Whatever the operating system hands us came from a link someone clicked. It only goes further if
+// it parses as an invitation, and then only as far as a page that shows it and asks.
+const handed = process.argv.slice(2).find((a) => a.toLowerCase().startsWith(`${SCHEME}:`));
+const invitation = handed && parseInvitation(handed) ? handed : null;
 const windowDir = path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), '.crew-office'), 'CrewOffice', 'window');
 const dataDir = path.join(process.env.ROVING_OFFICE_STATE_DIR || path.join(os.homedir(), '.roving-office'), 'crew');
 
 // The lobby, carrying this computer's key so the page knows it is its owner (lib/crew/auth.cjs).
 // Read late: the server writes the key the first time it starts.
 function lobbyLink() {
-  try { return `${lobby}?this-pc=${fs.readFileSync(path.join(dataDir, 'machine.key'), 'utf8').trim()}`; } catch { return lobby; }
+  const q = new URLSearchParams();
+  try { q.set('this-pc', fs.readFileSync(path.join(dataDir, 'machine.key'), 'utf8').trim()); } catch { /* not written yet */ }
+  if (invitation) q.set('open', invitation);
+  return q.size ? `${lobby}?${q}` : lobby;
 }
 
 function findBrowser() {
@@ -84,7 +93,7 @@ function startInBackground() {
   fs.mkdirSync(dataDir, { recursive: true });
   const log = path.join(dataDir, 'app.log');
   const out = fs.openSync(log, 'w');
-  spawn(process.execPath, [__filename, '--serve', ...(PRIVATE ? ['--private'] : [])], { detached: true, stdio: ['ignore', out, out], windowsHide: true, cwd: path.join(__dirname, '..') }).unref();
+  spawn(process.execPath, [__filename, '--serve', ...(PRIVATE ? ['--private'] : []), ...(invitation ? [invitation] : [])], { detached: true, stdio: ['ignore', out, out], windowsHide: true, cwd: path.join(__dirname, '..') }).unref();
   fs.closeSync(out);
   return log;
 }
