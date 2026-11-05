@@ -39,7 +39,7 @@ function copy(rel, stage) {
 
 // What the app's updater reads (lib/crew/update.cjs). In the release workflow GitHub supplies
 // the run number and repository; a build by hand is build 0 of whatever `origin` points at,
-// so any release counts as newer than it.
+// so any release counts as newer than it. With no GitHub remote the updater uses package.json.
 function buildStamp() {
   const git = (...args) => { try { return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
   const origin = /github\.com[/:]([^/]+\/[^/]+?)(\.git)?$/.exec(git('remote', 'get-url', 'origin'))?.[1];

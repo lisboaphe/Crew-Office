@@ -586,6 +586,9 @@ function editorContext() {
   };
 }
 
+/** A channel as people read it. A project's is named project-<name>-<4 random characters>; only the name means anything. */
+const channelLabel = (c) => (c.kind === 'dm' ? `@${agentById(c.dmAgentId)?.name ?? 'agent'}` : `#${c.kind === 'project' ? c.name.replace(/-[a-zA-Z0-9_-]{4}$/, '').replace(/^project-/, '') : c.name}`);
+
 function renderSide() {
   const ch = S.channels.find((c) => c.id === ui.channelId) ?? S.channels[0];
   if (!ch) { ui.side.replaceChildren(h('header', h('h2', 'Chat'))); return; }
@@ -602,11 +605,13 @@ function renderSide() {
   const oldList = ui.side.querySelector('.cr-msgs');
   const wasReading = oldList && ui.drawnChannel === ch.id && oldList.scrollHeight - oldList.scrollTop - oldList.clientHeight > 40;
   const oldScroll = oldList?.scrollTop ?? 0;
+  const oldChannelScroll = ui.side.querySelector('.cr-channels')?.scrollTop ?? 0;
+  const channelChanged = ui.drawnChannel !== ch.id;
   const oldInput = ui.side.querySelector('.cr-composer input');
   const hadFocus = oldInput && document.activeElement === oldInput;
   const caret = hadFocus ? oldInput.selectionStart : null;
   const list = h('div.cr-msgs', ...msgs.map(messageView));
-  const input = h('input.grow', { 'aria-label': `Message ${ch.name}`, placeholder: ch.kind === 'dm' ? 'Message your agent…' : `Message #${ch.name.replace(/-[a-z0-9]{4}$/, '')}, @Name for an agent`, value: (ui.drafts ??= new Map()).get(ch.id) ?? '', oninput: (e) => ui.drafts.set(ch.id, e.target.value) });
+  const input = h('input.grow', { 'aria-label': `Message ${channelLabel(ch)}`, placeholder: ch.kind === 'dm' ? 'Message your agent…' : `Message ${channelLabel(ch)}, @Name for an agent`, value: (ui.drafts ??= new Map()).get(ch.id) ?? '', oninput: (e) => ui.drafts.set(ch.id, e.target.value) });
   const send = async () => {
     const text = input.value.trim();
     if (!text) return;
@@ -618,17 +623,20 @@ function renderSide() {
     } catch (e) { toast(e.message); }
   };
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
-  const label = (c) => (c.kind === 'dm' ? `@${agentById(c.dmAgentId)?.name ?? 'agent'}` : `#${c.name.replace(/-[a-z0-9]{4}$/, c.kind === 'project' ? '' : '$&')}`);
+  const label = channelLabel;
   ui.side.replaceChildren(
     h('header.cr-chat-head', h('h2', 'Chat', ' ', h('span.cr-chat-where', label(ch))), h('button.btn.small.cr-icon-btn', { onclick: searchMessages, title: 'Search messages', 'aria-label': 'Search messages' }, icon('search')), h('button.btn.small', { onclick: toggleChat, 'aria-label': 'Close chat' }, '✕')),
     h('div.cr-channels', { role: 'tablist', 'aria-label': 'Channels' }, ...S.channels.map((c) => {
       const n = ui.unread?.get(c.id) ?? 0;
-      return h('button', { role: 'tab', 'aria-selected': c.id === ch.id ? 'true' : 'false', class: c.id === ch.id ? 'on' : '', 'aria-label': n ? `${label(c)}, ${n} unread` : label(c), onclick: () => { ui.channelId = c.id; render(); } }, label(c), n ? h('span.cr-unread', n > 99 ? '99+' : n) : null);
+      return h('button', { role: 'tab', 'aria-selected': c.id === ch.id ? 'true' : 'false', class: c.id === ch.id ? 'on' : '', title: label(c), 'aria-label': n ? `${label(c)}, ${n} unread` : label(c), onclick: () => { ui.channelId = c.id; render(); } }, h('span.cr-channel-name', label(c)), n ? h('span.cr-unread', n > 99 ? '99+' : n) : null);
     }),
       h('button', { onclick: newChannel, title: 'New channel', 'aria-label': 'New channel' }, '+')),
     list,
     h('div.cr-composer', input, h('button.btn.primary', { onclick: send, title: 'Send', 'aria-label': 'Send message' }, icon('send'))));
   list.scrollTop = wasReading ? oldScroll : list.scrollHeight;
+  const channelRow = ui.side.querySelector('.cr-channels');
+  channelRow.scrollTop = oldChannelScroll;
+  if (channelChanged) channelRow.querySelector('button.on')?.scrollIntoView({ block: 'nearest' });
   ui.drawnChannel = ch.id;
   if (hadFocus) { input.focus(); if (caret !== null) input.setSelectionRange(caret, caret); }
 }

@@ -2,6 +2,10 @@
   "name": "the-roving-office",
   "version": "0.15.7",
   "description": "A soft-3D isometric office where your agents come to life.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lisboaphe/Crew-Office.git"
+  },
   "type": "module",
   "scripts": {
     "start": "node server.cjs",
