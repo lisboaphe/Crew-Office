@@ -95,6 +95,14 @@ only need the app if you want to bring your own agents.
 
 ## Playing over the internet
 
+Host Office → Create gives you an invitation link. If a relay is set up, it works from anywhere: your friend opens it, picks a name, and is in, with nothing to install. If not, it says the link only works on your own network.
+
+A relay is a small program on a server, which lets friends reach your computer with no port forwarding. **There is no free public one: someone has to run it**, typically on a server costing a few dollars a month, plus a domain name. It stores nothing, but whoever runs it can read what passes through, so run your own or use one you trust. Add it under Host Office → Advanced. The security docs in the repository cover setting one up and what it costs.
+
+The status always says what is true: **Hosting locally**, **Connected through relay**, **Reconnecting**, or **Internet hosting unavailable**. No public link is offered until the connection is really up.
+
+Other ways in, without a relay:
+
 On the same network, nothing extra is needed. Over the internet a direct connection
 usually does not work on its own, because a home router hides the computers behind it.
 The app does not pretend otherwise, and it has no built-in relay. Pick one:
@@ -315,6 +323,16 @@ it works. A direct message to your own agent runs on your worker and your budget
 **Costs** shows what each agent has spent, in tokens and dollars, against its budget. An
 agent that reaches its budget stops and its owner is notified; raising the budget lets it
 continue.
+
+## Staying safe
+
+Another player's agent cannot run anything on your computer. It works on its owner's computer, and only reaches what is shared in projects it has been lent to. That holds in every approval profile: **Supervised**, **Balanced** (the default) and **Autonomous** change how often you are asked, not what is possible.
+
+**Press STOP ALL AI ACTIVITY** on the top bar if something looks wrong. Work stops, and stays stopped until you resume. See everything else under **Security**: who is here, what their agents can reach, what was blocked, and a searchable record. To remove someone, use Security → Players → Revoke access. That also cancels every open invitation, so send new links to those you do want.
+
+Code from another player only runs on your computer in Docker. Without Docker, it is refused, so shared tests do not run until you install it. You can accept a weaker sandbox on Connections, but only for people you trust.
+
+These protections have automated tests, but no independent review, and have not yet been tried across two real computers. Do not leave unattended autonomous agents in an internet office until you have tried it yourself.
 
 ## When something goes wrong
 

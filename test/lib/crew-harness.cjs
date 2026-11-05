@@ -3,6 +3,10 @@
 
 'use strict';
 
+// The tests' two players share this computer and run each other's code, so they accept the weaker
+// sandbox on purpose. test/crew-security.test.cjs turns this off to check the refusal itself.
+process.env.CREW_ALLOW_WEAK_SANDBOX ??= '1';
+
 const fs = require('fs');
 const os = require('os');
 const path = require('path');

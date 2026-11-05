@@ -128,6 +128,25 @@ function pollUntilChanged(link, card, reload, tries = 60) {
   }, 3000);
 }
 
+/** This computer's own controls. They work whether or not any office can be reached. */
+async function safetyPanel(link, reload) {
+  const s = await link.get('/sandbox');
+  const stop = h('button.btn', { class: s.localStop ? '' : 'cr-stop', onclick: async () => { await link.post('/stop', { stopped: !s.localStop }); toast(s.localStop ? 'This computer is working again' : 'All AI on this computer is stopped'); reload(); } }, s.localStop ? 'Resume AI on this computer' : 'STOP ALL AI ON THIS COMPUTER');
+  const weak = h('input', { type: 'checkbox', checked: s.allowWeakSandbox });
+  weak.addEventListener('change', async () => {
+    if (weak.checked && !confirm('Run code from other players without Docker?\n\nIt would run under Node’s permission model and a network guard. Node says this is not a defence against deliberately malicious code. Only accept this for people you trust.')) { weak.checked = false; return; }
+    await link.post('/settings', { allowWeakSandbox: weak.checked });
+    reload();
+  });
+  return h('section.cr-conn-group',
+    h('div.row', h('h3.grow', 'This computer'), stop),
+    s.localStop ? h('p.cr-provider-note', 'Stopped here. No agent will run on this computer until you resume, whatever any office asks.') : null,
+    s.docker
+      ? h('p.hint', 'Docker is available, so code from other players runs in a throwaway container with no network.')
+      : [h('p.cr-provider-note', 'Docker is not installed. Tests and scripts in shared projects are refused here, so other players’ code cannot run on this computer. Your own solo projects are unaffected. Install Docker Desktop to run shared tests safely.'),
+        h('label.cr-switch', weak, h('span', ' Run other players’ code without Docker'), h('span.hint', ' Weaker. Only for people you trust.'))]);
+}
+
 /** The whole screen. `offline` is what to show when no worker answers here. */
 export function connectionsView(link, { offline = null, onChange = null } = {}) {
   const root = h('div.cr-connections', h('p.hint', 'Checking this computer…'));
@@ -149,7 +168,7 @@ export function connectionsView(link, { offline = null, onChange = null } = {}) 
       await link.post('/settings', { neverPaidApi: neverPaid.checked });
       load();
     });
-    root.replaceChildren(...GROUPS.map(section),
+    root.replaceChildren(await safetyPanel(link, load), ...GROUPS.map(section),
       h('details.cr-conn-group', h('summary', h('b', 'Advanced: paid APIs')),
         h('label.cr-switch', neverPaid, h('b', ' Never use paid API'), h('span.hint', ' On by default. No agent ever falls back to these; a subscription limit pauses the work.')),
         h('div.cr-conn-grid', ...paid.map((c) => connectionCard(link, c, load)))));

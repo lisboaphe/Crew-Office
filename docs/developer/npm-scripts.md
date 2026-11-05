@@ -109,6 +109,7 @@ Not yet filed under a heading above.
 | `npm run host` | `node bin/crew-host.cjs` | Host a multiplayer office on this computer for friends on your network (binds 0.0.0.0:8080). The lobby is at /crew. |
 | `npm run dedicated` | `node bin/crew-host.cjs --dedicated` | The same host, marked as a dedicated server — for a VPS or home server where rooms stay up when their creator leaves. |
 | `npm run worker` | `node bin/crew-worker.cjs` | Run your AI agents on this machine with your own API keys. First time: `-- --host <url> --token <wk_…>` from Dashboard → My workers. |
+| `npm run relay` | `node bin/crew-relay.cjs` | The internet relay, for a server you run: lets friends reach an office with no port forwarding. Needs CREW_RELAY_KEY. See docs/security/NETWORK_SECURITY.md. |
 | `npm run demo` | `node bin/crew-demo.cjs` | The Alice-and-Bob multiplayer demo against a running host (`npm run host` first). `-- --provider anthropic` for real models, `-- --manual` to approve by hand. |
 | `npm run demo:bot` | `node bin/crew-demo-bot.cjs` | Three players, five agents, one hosted Git repository: real clones, Smart Sync, review with rework, progress reports, a 25% estimated task budget. Scripted provider unless `-- --provider` says otherwise. |
 | `npm run app` | `node bin/crew-app.cjs` | What the desktop shortcut runs: start the host (or find the one already running) and open the lobby in your browser. `-- --private` for this computer only. |

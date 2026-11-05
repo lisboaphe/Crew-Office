@@ -47,3 +47,7 @@ docs/developer/design/jira-coding-agent.md
 docs/developer/design/job-delivery-gaps.md
 docs/developer/design/openclaw-open-questions.md
 docs/developer/design/origin-and-steps.md
+
+# The security documents live in the checkout and are read from there. They are outside the
+# two published sets, and their status lists are for whoever is about to change the code.
+docs/security

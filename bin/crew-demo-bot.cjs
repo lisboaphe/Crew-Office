@@ -12,6 +12,9 @@
 
 'use strict';
 
+// A demo's players share one computer and run each other's scripted code.
+process.env.CREW_ALLOW_WEAK_SANDBOX ??= '1';
+
 const { player, startWorker } = require('../lib/crew/demo-kit.cjs');
 const { flags } = require('./lib/cli-flags.cjs');
 

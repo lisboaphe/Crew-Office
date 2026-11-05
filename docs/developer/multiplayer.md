@@ -256,6 +256,10 @@ for other tools; this does not, because those are undocumented sources of the sa
 plan usage has no documented reading at all. A reading stops counting once its window has reset,
 and stops pausing work once it is six hours old.
 
+## Security and the relay
+
+The threat model, permissions, sandbox levels, relay design and test status are in `docs/security/`. Those describe what is enforced, and where. Read `SECURITY_TESTS.md` before relying on any of it.
+
 ## The app window
 
 `bin/crew-app.cjs` is what the shortcuts run. It starts itself again as `--serve`, detached

@@ -1997,6 +1997,19 @@ function serveStatic(req, res, url) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host ?? '127.0.0.1'}`);
+  // On everything: no framing of this app by another site, no guessing at content types, and an
+  // invitation in the address bar does not travel in a Referer.
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  // Came through the internet relay? Then only the office is here, not the rest of this server.
+  if (crew) {
+    crew.relay.adopt(req);
+    if (!crew.relay.allowed(req, url)) {
+      crew.safety.denied(req.crewClientIp ?? 'relay', null, 'internet', 'relay.denied', `${req.method} ${url.pathname.slice(0, 120)}`);
+      return json(res, 404, { error: 'Not here.' });
+    }
+  }
 
   try {
     // The multiplayer office: lobby pages and /api/crew/*. Checked first so the crew's
@@ -2025,6 +2038,12 @@ const server = http.createServer(async (req, res) => {
       }
 
       const rest = at.rest;
+
+      // A hosted room's code is printed in invitations and announced on the network, so it cannot
+      // also be the permission to watch its agents. The page is an empty shell; this is the data.
+      if (crew && (rest.startsWith('/aop/v0') || rest === '/api' || rest.startsWith('/api/')) && !crew.api.mayEnterOffice(req, at.keycard)) {
+        return json(res, 403, { error: 'This office is for its members.' });
+      }
 
       // Ingest opens the office it is addressed to: the endpoint file names a
       // keycard, and an adapter posting into an office that was reaped while its

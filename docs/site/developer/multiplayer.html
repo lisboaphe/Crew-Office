@@ -399,6 +399,8 @@ disappear rather than go wrong. Alethe also reads Codex's session files and has 
 for other tools; this does not, because those are undocumented sources of the same data. ChatGPT
 plan usage has no documented reading at all. A reading stops counting once its window has reset,
 and stops pausing work once it is six hours old.</p>
+<h2 id="security-and-the-relay" tabindex="-1">Security and the relay</h2>
+<p>The threat model, permissions, sandbox levels, relay design and test status are in <code>docs/security/</code>. Those describe what is enforced, and where. Read <code>SECURITY_TESTS.md</code> before relying on any of it.</p>
 <h2 id="the-app-window" tabindex="-1">The app window</h2>
 <p><code>bin/crew-app.cjs</code> is what the shortcuts run. It starts itself again as <code>--serve</code>, detached
 and with no console, writing to <code>app.log</code> in the crew data folder, then opens Edge or Chrome
@@ -462,6 +464,7 @@ models cost $0.</li>
 <li><a href="#agent-settings">Agent settings</a></li>
 <li><a href="#playbooks">Playbooks</a></li>
 <li><a href="#usage-figures">Usage figures</a></li>
+<li><a href="#security-and-the-relay">Security and the relay</a></li>
 <li><a href="#the-app-window">The app window</a></li>
 <li><a href="#releases-and-updates">Releases and updates</a></li>
 <li><a href="#known-limits">Known limits</a></li></ul></nav>

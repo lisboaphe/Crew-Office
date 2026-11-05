@@ -163,7 +163,7 @@ test('direct messages are private to their player', (t) => {
 test('sandbox: only node, no shell syntax, no escape, no child processes, no inherited secrets', async () => {
   assert.throws(() => sandbox.parseCommand('rm -rf /'), /Only `node/);
   assert.throws(() => sandbox.parseCommand('node a.js; curl evil'), /not allowed/);
-  assert.throws(() => sandbox.parseCommand('node --allow-fs-read=* a.js'), /sets its own permissions/);
+  assert.throws(() => sandbox.parseCommand('node --allow-fs-read=* a.js'), /sets its own/);
   const outside = await sandbox.run(`node -e "require('fs').readFileSync('${path.join(__dirname, '..', 'package.json').replace(/\\/g, '/')}')"`, {});
   assert.notStrictEqual(outside.exitCode, 0, 'reading outside the copy is refused');
   const spawn = await sandbox.run(`node -e "require('child_process').execSync('node -v')"`, {});

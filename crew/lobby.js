@@ -29,6 +29,7 @@ async function boot() {
   [{ user: me }, info, thisComputer] = await Promise.all([api('GET', '/api/crew/me'), api('GET', '/api/crew/host-info'), api('GET', '/api/crew/this-computer')]);
   document.title = `${BRAND} — Lobby`;
   if (me && params.get('invite') && await acceptInvite()) return;
+  await refreshInternet();
   render();
   if (me) tutorialOnFirstVisit();
 }
@@ -135,134 +136,186 @@ function enter() {
     h('p.hint', 'Based on The Roving Office (Apache-2.0).'));
 }
 
+let view = 'home';
+let hostedRoom = null;
+let internet = null;
+
+const recentKey = 'crew.recentOffices';
+function recentOffices() { try { return JSON.parse(localStorage.getItem(recentKey)) ?? []; } catch { return []; } }
+function rememberOffice(name, url) {
+  try { localStorage.setItem(recentKey, JSON.stringify([{ name, url }, ...recentOffices().filter((r) => r.url !== url)].slice(0, 6))); } catch { /* it only saves typing */ }
+}
+
+function statusPill(s) {
+  const tone = s?.state === 'online' ? 'ok' : s?.state === 'unavailable' ? 'bad' : ['connecting', 'reconnecting'].includes(s?.state) ? 'wait' : '';
+  return h('span.cr-link', { class: tone }, s?.label ?? 'Hosting locally');
+}
+
+async function refreshInternet() {
+  if (!thisComputer.owner) return null;
+  internet = await api('GET', '/api/crew/internet').catch(() => null);
+  return internet;
+}
+
 function lobby() {
   const box = h('div');
-  const hero = h('div.hero', hostCard(), joinCard());
-  box.append(hero, h('div.grid2', myRooms(), connectHelp()));
+  const draw = () => box.replaceChildren(h('div.cr-fade', view === 'host' ? hostView(draw) : view === 'join' ? joinView(draw) : view === 'hosted' ? hostedView(draw) : homeView(draw)));
+  draw();
   return box;
 }
 
-function hostCard() {
+function back(draw) { return h('button.btn.small', { onclick: () => { view = 'home'; draw(); } }, '← Back'); }
+
+function homeView(draw) {
+  const viaRelay = info.viaRelay;
+  return h('div',
+    h('div.cr-two-actions',
+      viaRelay ? null : h('button.cr-bigaction', { onclick: () => { view = 'host'; draw(); } }, h('b', 'Host Office'), h('span.hint', 'Make a room on this computer, and invite friends with a link.')),
+      h('button.cr-bigaction', { onclick: () => { view = 'join'; draw(); } }, h('b', 'Join Office'), h('span.hint', 'Got an invitation? Paste it here, or just open the link.'))),
+    myRooms(draw));
+}
+
+function hostView(draw) {
   const err = h('p.error');
-  const name = h('input', { placeholder: `${me.displayName}'s office`, value: `${me.displayName}'s office` });
-  const privacy = h('select', h('option', { value: 'invite' }, 'Invite link — only people you send it to'), h('option', { value: 'password' }, 'Password — anyone with the code and password'), h('option', { value: 'lan' }, 'Open — anyone who can reach this host'));
-  const pass = h('input', { type: 'password', placeholder: 'Room password' });
-  const passRow = h('div.grow', { style: { display: 'none' } }, h('label', 'Password'), pass);
-  const max = h('input', { type: 'number', min: 1, max: 32, value: 6 });
+  const name = h('input', { value: `${me.displayName}'s office`, maxLength: 40 });
+  const privacy = h('select', h('option', { value: 'invite' }, 'Invite link: only people you send it to'), h('option', { value: 'password' }, 'Invite link, or code and password'), h('option', { value: 'lan' }, 'Open to my local network'));
+  const pass = h('input', { type: 'password', placeholder: 'At least 4 characters' });
+  const passRow = h('div', { style: { display: 'none' } }, h('label', 'Password'), pass);
+  const max = h('input', { type: 'number', min: 1, max: 32, value: 6, style: { width: '110px' } });
   privacy.addEventListener('change', () => { passRow.style.display = privacy.value === 'password' ? '' : 'none'; });
   const go = async () => {
     err.textContent = '';
     try {
       const { room } = await api('POST', '/api/crew/rooms', { name: name.value, privacy: privacy.value, password: pass.value || undefined, maxPlayers: Number(max.value) });
-      await hosted(room);
+      hostedRoom = room;
+      view = 'hosted';
+      draw();
     } catch (e) { err.textContent = e.message; }
   };
-  return h('div.big',
-    h('h2', 'Host Office'),
-    h('p.hint', info.mode === 'dedicated' ? 'This is a dedicated server: the office stays up when you leave.' : 'The office runs on this computer while the app is running. Projects and messages are saved on this computer.'),
-    h('label', 'Office name'), name,
-    h('label', 'Privacy'), privacy,
-    h('div.row', passRow, h('div', { style: { width: '110px' } }, h('label', 'Max players'), max)),
-    err, h('button.btn.primary', { onclick: go }, 'Host Office'));
+  return h('div.big', back(draw), h('h2', { style: { marginTop: '10px' } }, 'Host Office'),
+    h('label', 'Office name'), name, h('label', 'Who can join'), privacy, passRow, h('label', 'Maximum players'), max, err,
+    h('div.actions', h('button.btn.primary', { onclick: go }, 'Create')),
+    internetSetup(draw));
 }
 
-async function hosted(room) {
-  // The link is how people get in, so hosting makes one rather than leaving it as a chore.
-  const { invite } = await api('POST', `/api/crew/rooms/${room.id}/invites`, { role: 'member', uses: 20 });
-  const links = info.bind === '127.0.0.1' ? [] : info.lanAddresses.map((a) => `http://${a}:${info.port}/crew/join?invite=${invite.code}`);
-  const copy = (l) => navigator.clipboard?.writeText(l).then(() => toast('Link copied'), () => toast('Select the link and copy it by hand.'));
-  modalLike(h('div',
-    h('h2', `“${room.name}” is open`),
-    links.length
-      ? [h('p', 'Send this link to the people you want to join. It works on your network for 72 hours and 20 people, and you can make more in the office.'),
-        ...links.map((l) => h('div.row', h('code.grow', l), h('button.btn.small', { onclick: () => copy(l) }, 'Copy')))]
-      : h('p.hint', 'This office only listens on this computer. To let people join, start Crew Office without “this computer only”.'),
-    h('p.hint', 'For people outside your network, see “Playing over the internet” in the lobby.'),
-    h('div.row', h('button.btn.primary', { onclick: () => { location.href = `/office/${room.code}`; } }, 'Enter office'), h('button.btn', { onclick: () => render() }, 'Back to lobby'))));
-}
-
-function modalLike(content) {
-  root.replaceChildren(header(), h('div.big', content));
-}
-
-function joinCard() {
-  const err = h('p.error');
-  const code = h('input', { placeholder: 'ABCD-1234', value: params.get('code') ?? '', style: { textTransform: 'uppercase' } });
-  const pass = h('input', { type: 'password', placeholder: 'Password, if the office has one' });
-  const address = h('input', { placeholder: 'http://192.168.1.20:8080' });
-  const lan = h('div.cr-list', h('p.hint', 'Looking for offices on your network…'));
-
-  const join = async (body) => {
-    err.textContent = '';
+/** Set up once. After that, hosting is just Create. */
+function internetSetup(draw) {
+  if (!thisComputer.owner) return null;
+  const url = h('input', { placeholder: 'https://relay.example.com', value: internet?.relay ?? '' });
+  const key = h('input', { type: 'password', placeholder: 'The key your relay was started with', autocomplete: 'off' });
+  const note = h('p.hint');
+  const save = async () => {
     try {
-      const { room } = await api('POST', '/api/crew/rooms/join', body);
-      location.href = `/office/${room.code}`;
-    } catch (e) { err.textContent = e.message; }
+      internet = await api('PUT', '/api/crew/internet', { url: url.value, ...(key.value ? { key: key.value } : {}) });
+      note.textContent = 'Saved. Connecting…';
+      setTimeout(async () => { await refreshInternet(); draw(); }, 1500);
+    } catch (e) { note.textContent = e.message; }
   };
+  const box = h('details.cr-conn-group', h('summary', h('b', 'Advanced: networking')),
+    h('p.hint', 'Internet invitations go through a relay: a small service that lets friends reach this computer with no port forwarding. Someone has to run it, on a cheap server of your own or a friend’s. It stores nothing, but it does see traffic pass through, so run it yourself or use one you trust.'),
+    h('div.row', statusPill(internet), internet?.reason ? h('span.hint', internet.reason) : null),
+    h('label', 'Relay address'), url, h('label', 'Relay key'), key, note,
+    h('div.actions', h('button.btn', { onclick: save }, 'Save')),
+    info.bind !== '127.0.0.1' && info.lanAddresses.length ? h('p.hint', `On your own network, this computer is ${info.lanAddresses.map((a) => `http://${a}:${info.port}`).join(', ')}.`) : h('p.hint', 'This office only listens on this computer.'),
+    h('p.hint', 'Other ways in: a VPN mesh such as Tailscale, or your own tunnel. Forwarding a port exposes this computer, so prefer those.'));
+  return box;
+}
+
+function hostedView(draw) {
+  const room = hostedRoom;
+  const box = h('div.big', h('h2', `“${room.name}” is open`), h('p.hint', 'Loading the invitation…'));
+  (async () => {
+    await refreshInternet();
+    const { invite } = await api('POST', `/api/crew/rooms/${room.id}/invites`, { role: 'member', uses: 20 });
+    const online = internet?.url ?? null;
+    const lan = info.bind === '127.0.0.1' ? [] : info.lanAddresses.map((a) => `http://${a}:${info.port}`);
+    const link = online ? `${online}/crew/join?invite=${invite.code}` : lan.length ? `http://${info.lanAddresses[0]}:${info.port}/crew/join?invite=${invite.code}` : null;
+    const copy = (l) => navigator.clipboard?.writeText(l).then(() => toast('Invitation copied'), () => toast('Select the link and copy it by hand.'));
+    let players = [];
+    try { players = (await api('GET', `/api/crew/rooms/${room.id}/state`)).members ?? []; } catch { /* shown as none */ }
+    box.replaceChildren(
+      h('div.row', h('h2.grow', `“${room.name}” is open`), statusPill(internet)),
+      online
+        ? h('p', 'Send this to the people you want. They open it, pick a name, and they are in.')
+        : h('p.cr-provider-note', `${link ? 'This link only works on your own network.' : 'This office only listens on this computer, so there is no link to share yet.'} ${internet?.configured ? `Internet hosting is not connected. ${internet?.reason ?? ''}` : 'To invite friends over the internet, set up a relay under Advanced.'}`),
+      link ? h('div.cr-invite-link', h('code', link), h('button.btn.small.primary', { onclick: () => copy(link) }, 'Copy invitation')) : null,
+      h('p.hint', `Works for 72 hours and 20 people. Revoke it any time under Security. Players here: ${players.map((m) => m.displayName).join(', ') || 'just you'} (of ${room.maxPlayers}).`),
+      h('div.actions',
+        h('button.btn', { onclick: () => { view = 'home'; draw(); } }, 'Room management'),
+        h('button.btn.danger', { onclick: async () => { await api('POST', `/api/crew/rooms/${room.id}/status`, { status: 'stopped' }); toast('Stopped hosting. Everything is kept.'); view = 'home'; draw(); } }, 'Stop hosting'),
+        h('button.btn.primary', { onclick: () => { location.href = `/office/${room.code}`; } }, 'Enter office')),
+      internetSetup(draw));
+  })().catch((e) => box.append(h('p.error', e.message)));
+  return box;
+}
+
+function joinView(draw) {
+  const input = h('input', { placeholder: 'Paste an invitation link', value: params.get('code') ?? '', autofocus: true });
+  const pass = h('input', { type: 'password', placeholder: 'Password, if it has one' });
+  const steps = h('ul.cr-steps');
+  const help = h('div');
+  const lan = h('div.cr-list', h('p.hint', 'Looking on your network…'));
+
+  const show = (lines) => steps.replaceChildren(...lines.map(([text, state]) => h('li', { class: state }, `${state === 'done' ? '✓' : state === 'bad' ? '✕' : '•'} ${text}`)));
+  const trouble = (lines) => help.replaceChildren(h('div.cr-provider-note', h('b', 'If it will not connect'), h('ul', ...lines.map((l) => h('li', l)))));
+
+  const go = async () => {
+    const raw = input.value.trim();
+    help.replaceChildren();
+    if (!raw) return;
+    let link = null;
+    try { const u = new URL(raw); if (['http:', 'https:'].includes(u.protocol)) link = u; } catch { /* a code */ }
+    if (link) {
+      if (!link.searchParams.get('invite') && !link.pathname.startsWith('/crew')) { show([['That does not look like an invitation link.', 'bad']]); return; }
+      // Only ever opens a Crew Office join page. A pasted link cannot send this window elsewhere.
+      const target = `${link.origin}/crew/join${link.search}`;
+      show([['Going to the office…', 'on']]);
+      rememberOffice(link.hostname, target);
+      location.href = target;
+      return;
+    }
+    show([['Looking for that office on this host…', 'on']]);
+    try {
+      const { room } = await api('POST', '/api/crew/rooms/join', { code: raw, password: pass.value || undefined });
+      show([['Found it', 'done'], ['Entering…', 'on']]);
+      rememberOffice(room.name, `/office/${room.code}`);
+      location.href = `/office/${room.code}`;
+    } catch (e) {
+      show([[e.message, 'bad']]);
+      trouble(['A room code only finds offices on this computer’s own host. For a friend’s office, paste the whole link they sent you.', 'Links expire after 72 hours, and can be revoked. Ask for a new one.', 'If the page says the office is not online, its host has to open Crew Office first.']);
+    }
+  };
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
 
   const refreshLan = async () => {
+    if (info.viaRelay) { lan.replaceChildren(h('p.hint', 'Not available from here.')); return; }
     try {
       const { rooms } = await api('GET', '/api/crew/lan-rooms');
-      lan.replaceChildren(...(rooms.length ? rooms.filter((r) => !r.local).map((r) => h('div.cr-item.room',
-        h('div.grow', h('b', r.name), h('div.hint', `${r.players}/${r.maxPlayers} players · ${r.host}${r.hasPassword ? ' · password' : ''}`)),
-        h('button.btn.small', { onclick: () => { location.href = `${r.host}/crew/join?code=${encodeURIComponent(r.code)}`; } }, 'Join'))) : [h('p.hint', 'No offices announced on this network right now. (Discovery works on the same Wi-Fi or switch only.)')]));
-      if (rooms.length && !rooms.some((r) => !r.local)) lan.replaceChildren(h('p.hint', 'Only this computer’s own offices are announced right now.'));
+      const others = rooms.filter((r) => !r.local);
+      lan.replaceChildren(...(others.length ? others.map((r) => h('div.cr-item.room.row', h('div.grow', h('b', r.name), h('div.hint', `${r.players}/${r.maxPlayers} players${r.hasPassword ? ' · password' : ''}`)), h('button.btn.small', { onclick: () => { location.href = `${r.host}/crew/join?code=${encodeURIComponent(r.code)}`; } }, 'Join'))) : [h('p.hint', 'None announced on this network right now.')]));
     } catch { /* discovery is optional */ }
   };
   refreshLan();
-  const timer = setInterval(refreshLan, 5000);
-  window.addEventListener('pagehide', () => clearInterval(timer));
-
-  return h('div.big',
-    h('h2', 'Join Office'),
-    h('p.hint', 'Got an invitation link? Just open it. Otherwise:'),
-    h('label', 'Room code (an office on this host)'), code,
-    h('label', 'Password'), pass,
-    h('div.row', { style: { marginTop: '8px' } }, h('button.btn.primary', { onclick: () => join({ code: code.value.trim(), password: pass.value || undefined }) }, 'Join')),
-    err,
-    h('label', 'On your network'), lan,
-    h('label', 'Another host’s address'),
-    h('div.row', h('div.grow', address), h('button.btn', {
-      onclick: () => {
-        const a = address.value.trim().replace(/\/+$/, '');
-        if (!/^https?:\/\//.test(a)) { err.textContent = 'Addresses start with http:// or https://'; return; }
-        location.href = `${a}/crew/join${code.value.trim() ? `?code=${encodeURIComponent(code.value.trim())}` : ''}`;
-      },
-    }, 'Go')),
-    h('p.hint', 'Joining another host opens its lobby, where you pick a name for that host.'));
+  const timer = setInterval(() => { if (lan.isConnected) refreshLan(); else clearInterval(timer); }, 5000);
+  const recent = recentOffices();
+  return h('div.big', back(draw), h('h2', { style: { marginTop: '10px' } }, 'Join Office'),
+    h('label', 'Invitation link or room code'), input, h('label', 'Password'), pass,
+    h('div.actions', h('button.btn.primary', { onclick: go }, 'Join')), steps, help,
+    recent.length ? [h('h3', 'Recent offices'), h('div.cr-list', ...recent.map((r) => h('div.cr-item.click.row', { onclick: () => { location.href = r.url; } }, h('b.grow', r.name), h('span.hint', 'Open'))))] : null,
+    h('h3', 'On your network'), lan);
 }
 
-function myRooms() {
+function myRooms(draw) {
   const list = h('div.cr-list', h('p.hint', 'Loading…'));
   api('GET', '/api/crew/rooms').then(({ rooms }) => {
     list.replaceChildren(...(rooms.length ? rooms.map((r) => h('div.cr-item.room',
-      h('div.grow', h('b', r.name), h('div.hint', h('span.code', r.code), ` · ${r.myRole} · ${r.players}/${r.maxPlayers} players · ${r.privacy}`, r.status !== 'open' ? h('span.pill.warn', ' stopped') : null)),
-      r.myRole === 'owner' ? h('button.btn.small', {
-        onclick: async () => { await api('POST', `/api/crew/rooms/${r.id}/status`, { status: r.status === 'open' ? 'stopped' : 'open' }); toast(r.status === 'open' ? 'Office stopped' : 'Office started'); render(); },
-      }, r.status === 'open' ? 'Stop' : 'Start') : null,
-      r.myRole === 'owner' ? h('button.btn.small.danger', {
-        onclick: async () => { if (await confirmDeleteOffice(r)) { toast('Office deleted'); render(); } },
-      }, 'Delete') : null,
-      h('button.btn.small.primary', { onclick: () => { location.href = `/office/${r.code}`; } }, 'Enter'))) : [h('p.hint', 'No offices yet — host one, or join a friend’s.')]));
+      h('div.grow', h('b', r.name), h('div.hint', `${r.myRole} · ${r.players}/${r.maxPlayers} players`, r.status !== 'open' ? h('span.pill.warn', ' stopped') : null)),
+      r.myRole === 'owner' && !info.viaRelay ? h('button.btn.small', { onclick: () => { hostedRoom = r; view = 'hosted'; draw(); } }, 'Invite') : null,
+      r.myRole === 'owner' ? h('button.btn.small', { onclick: async () => { await api('POST', `/api/crew/rooms/${r.id}/status`, { status: r.status === 'open' ? 'stopped' : 'open' }); toast(r.status === 'open' ? 'Office stopped' : 'Office started'); render(); } }, r.status === 'open' ? 'Stop' : 'Start') : null,
+      r.myRole === 'owner' ? h('button.btn.small.danger', { onclick: async () => { if (await confirmDeleteOffice(r)) { toast('Office deleted'); render(); } } }, 'Delete') : null,
+      h('button.btn.small.primary', { onclick: () => { rememberOffice(r.name, `/office/${r.code}`); location.href = `/office/${r.code}`; } }, 'Enter'))) : [h('p.hint', 'No offices yet. Host one, or join a friend’s.')]));
   });
-  return h('div.big', h('h2', 'Your offices on this host'), list);
-}
-
-function connectHelp() {
-  const lanLine = info.lanAddresses.length && info.bind !== '127.0.0.1'
-    ? h('p', 'This host is reachable on your network at ', ...info.lanAddresses.map((a) => h('code', `http://${a}:${info.port}`)), '.')
-    : h('p', 'This host is listening only on this computer. Start it with ', h('code', 'npm run host'), ' to accept players from your network.');
-  return h('div.big',
-    h('h2', 'Playing over the internet'),
-    lanLine,
-    h('p.hint', 'On the same Wi-Fi or LAN, friends join with the address above — nothing else to set up.'),
-    h('p.hint', 'From outside your network a direct connection is usually impossible without help, because your router hides this computer. Pick one:'),
-    h('ul.hint',
-      h('li', h('b', 'A VPN mesh'), ' such as Tailscale or ZeroTier: everyone installs it, and friends use your VPN address. Easiest and private.'),
-      h('li', h('b', 'Port forwarding'), ` on your router to port ${info.port} of this computer, then share your public IP. Exposes this host to the internet: use a strong room password, and preferably HTTPS through a reverse proxy.`),
-      h('li', h('b', 'A tunnel'), ' (e.g. Cloudflare Tunnel, ngrok) that gives this host a public HTTPS address.'),
-      h('li', h('b', 'A dedicated server'), ' on a VPS or home server (Docker supported) that stays up when you are offline.')),
-    h('p.hint', 'There is no built-in relay yet: nothing in this app connects through a third-party service.'));
+  return h('div.big', h('h2', 'Your offices'), list, thisComputer.owner ? h('div', { style: { marginTop: '10px' } }, internetSetup(() => render())) : null);
 }
 
 boot().catch((e) => { root.replaceChildren(h('p.error', `Could not load the lobby: ${e.message}`)); });

@@ -493,6 +493,11 @@ next <code>npm run docs</code> will overwrite you. Add a script, add its <code>s
 <td>Run your AI agents on this machine with your own API keys. First time: <code>-- --host &lt;url&gt; --token &lt;wk_…&gt;</code> from Dashboard → My workers.</td>
 </tr>
 <tr>
+<td><code>npm run relay</code></td>
+<td><code>node bin/crew-relay.cjs</code></td>
+<td>The internet relay, for a server you run: lets friends reach an office with no port forwarding. Needs CREW_RELAY_KEY. See docs/security/NETWORK_SECURITY.md.</td>
+</tr>
+<tr>
 <td><code>npm run demo</code></td>
 <td><code>node bin/crew-demo.cjs</code></td>
 <td>The Alice-and-Bob multiplayer demo against a running host (<code>npm run host</code> first). <code>-- --provider anthropic</code> for real models, <code>-- --manual</code> to approve by hand.</td>

@@ -219,6 +219,10 @@ where you pick a name for that host.</li>
 pick a name and a colour and you are in. You do not need to install anything to join; you
 only need the app if you want to bring your own agents.</p>
 <h2 id="playing-over-the-internet" tabindex="-1">Playing over the internet</h2>
+<p>Host Office → Create gives you an invitation link. If a relay is set up, it works from anywhere: your friend opens it, picks a name, and is in, with nothing to install. If not, it says the link only works on your own network.</p>
+<p>A relay is a small program on a server, which lets friends reach your computer with no port forwarding. <strong>There is no free public one: someone has to run it</strong>, typically on a server costing a few dollars a month, plus a domain name. It stores nothing, but whoever runs it can read what passes through, so run your own or use one you trust. Add it under Host Office → Advanced. The security docs in the repository cover setting one up and what it costs.</p>
+<p>The status always says what is true: <strong>Hosting locally</strong>, <strong>Connected through relay</strong>, <strong>Reconnecting</strong>, or <strong>Internet hosting unavailable</strong>. No public link is offered until the connection is really up.</p>
+<p>Other ways in, without a relay:</p>
 <p>On the same network, nothing extra is needed. Over the internet a direct connection
 usually does not work on its own, because a home router hides the computers behind it.
 The app does not pretend otherwise, and it has no built-in relay. Pick one:</p>
@@ -451,6 +455,11 @@ it works. A direct message to your own agent runs on your worker and your budget
 <p><strong>Costs</strong> shows what each agent has spent, in tokens and dollars, against its budget. An
 agent that reaches its budget stops and its owner is notified; raising the budget lets it
 continue.</p>
+<h2 id="staying-safe" tabindex="-1">Staying safe</h2>
+<p>Another player's agent cannot run anything on your computer. It works on its owner's computer, and only reaches what is shared in projects it has been lent to. That holds in every approval profile: <strong>Supervised</strong>, <strong>Balanced</strong> (the default) and <strong>Autonomous</strong> change how often you are asked, not what is possible.</p>
+<p><strong>Press STOP ALL AI ACTIVITY</strong> on the top bar if something looks wrong. Work stops, and stays stopped until you resume. See everything else under <strong>Security</strong>: who is here, what their agents can reach, what was blocked, and a searchable record. To remove someone, use Security → Players → Revoke access. That also cancels every open invitation, so send new links to those you do want.</p>
+<p>Code from another player only runs on your computer in Docker. Without Docker, it is refused, so shared tests do not run until you install it. You can accept a weaker sandbox on Connections, but only for people you trust.</p>
+<p>These protections have automated tests, but no independent review, and have not yet been tried across two real computers. Do not leave unattended autonomous agents in an internet office until you have tried it yourself.</p>
 <h2 id="when-something-goes-wrong" tabindex="-1">When something goes wrong</h2>
 <p>The host writes crash logs to a <code>crash-logs</code> folder in its data directory, and each worker
 writes its own. They record what broke and the last events before it, and never contain
@@ -486,6 +495,7 @@ choose a real provider for real work.</p>
 <li><a href="#approvals">Approvals</a></li>
 <li><a href="#chat">Chat</a></li>
 <li><a href="#costs">Costs</a></li>
+<li><a href="#staying-safe">Staying safe</a></li>
 <li><a href="#when-something-goes-wrong">When something goes wrong</a></li>
 <li><a href="#trying-it-without-an-api-key">Trying it without an API key</a></li></ul></nav>
     </aside>

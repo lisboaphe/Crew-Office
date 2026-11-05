@@ -11,6 +11,7 @@ import { gitTab, filesTab, rulesTab } from './workspace.js';
 import { createAgentEditor } from './agent-editor.js';
 import { createOrchestrator } from './orchestrator.js';
 import { addWorkerWizard } from './wizard.js';
+import { createSecurityCenter } from './security.js';
 import { workerLink, connectionsView, usageView, usageBar } from './connections.js';
 
 const code = (location.pathname.match(/^\/office\/([^/]+)/) ?? [])[1];
@@ -62,11 +63,15 @@ async function refresh() {
 function connect() {
   es?.close();
   es = new EventSource(`/api/crew/rooms/${roomId}/events`);
+  // The browser retries by itself. This only tells the person, and refetches what was missed.
+  es.addEventListener('error', () => { if (!ui.reconnecting) { ui.reconnecting = true; render(); } });
+  es.addEventListener('open', () => { if (ui.reconnecting) { ui.reconnecting = false; refresh().catch(() => {}); } });
   const on = (ev, fn) => es.addEventListener(ev, (e) => { try { fn(JSON.parse(e.data)); } catch (err) { console.error(err); } });
   on('resync', () => refresh());
   // The owner gets the agent twice — the public view, then their own with the brief — in that order.
   on('agent', (a) => { upsert(S.agents, a); render(); });
   on('playbooks', () => ui.orchestrator?.changed());
+  on('safety', () => refresh());
   on('agent.removed', ({ id }) => { S.agents = S.agents.filter((a) => a.id !== id); render(); });
   on('room.deleted', () => { location.href = '/crew'; });
   on('members', ({ members }) => { S.members = members; render(); });
@@ -122,6 +127,7 @@ function buildChrome() {
   meetingLayer.id = 'crew-meetings';
   ui.orchestrator = createOrchestrator(editorContext());
   ui.editor = createAgentEditor(editorContext());
+  ui.security = createSecurityCenter(editorContext());
   document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.dash, ui.side, ui.editor.el);
   render();
 }
@@ -149,6 +155,7 @@ function renderBar() {
   const players = h('div.players', { title: 'Players' }, ...S.members.map((m) => avatar(m.displayName, m.color, { online: m.online, title: `${m.displayName} (${m.role})${m.online ? ' — here' : ''}` })));
   ui.bar.replaceChildren(
     h('span.room-name', S.room.name, S.room.status !== 'open' ? ' · stopped' : ''),
+    connectionPill(),
     players,
     updateNotice(),
     h('button.btn', { onclick: () => toggleDash() }, 'Dashboard'),
@@ -157,6 +164,8 @@ function renderBar() {
     h('button.btn', { onclick: () => openSide('chat') }, 'Chat'),
     h('button.btn', { onclick: () => toggleDash('approvals') }, 'Approvals', pending ? h('span.badge', pending) : null),
     h('button.btn', { onclick: () => toggleDash('notifications') }, '🔔', unread ? h('span.badge', unread) : null),
+    h('button.btn', { onclick: () => toggleDash('security') }, 'Security'),
+    stopButton(),
     h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'A short tour of how the office works' }, '📘 How it works'),
   );
 }
@@ -186,6 +195,7 @@ const SECTIONS = [
   { key: 'projects', label: 'Projects', tabs: [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['deliverables', 'Deliverables']] },
   { key: 'connections', label: 'Connections', tabs: [['connections', 'AI connections']] },
   { key: 'usage', label: 'Usage', tabs: [['usage', 'Plan usage'], ['costs', 'Task costs']] },
+  { key: 'security', label: 'Security', tabs: [['security', 'Security Center']] },
 ];
 const sectionOf = (tab) => SECTIONS.find((s) => s.tabs.some(([k]) => k === tab)) ?? SECTIONS[0];
 const onThisComputer = () => ['localhost', '127.0.0.1'].includes(location.hostname);
@@ -194,12 +204,12 @@ const localWorker = () => workerLink(`http://127.0.0.1:${S.host?.workerPort ?? 8
 function renderDash() {
   // These hold their own state and update themselves. A half-drawn playbook, its zoom and a
   // connection card's progress all survive the office's updates by simply not being redrawn.
-  if (['playbooks', 'runs', 'connections', 'usage'].includes(ui.tab) && ui.dash.dataset.tab === ui.tab) return;
+  if (['playbooks', 'runs', 'connections', 'usage', 'security'].includes(ui.tab) && ui.dash.dataset.tab === ui.tab) return;
   const body = h('div.body');
   const wsCtx = { S, roomId, ui, render, taskDetail };
   const section = sectionOf(ui.tab);
   (ui.lastTab ??= {})[section.key] = ui.tab;
-  ({ git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()) })[ui.tab](body);
+  ({ git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()), security: (b) => b.append(ui.security.show()) })[ui.tab](body);
   // Only a real change of place animates: the office repaints this on every event.
   if (ui.drawnTab !== ui.tab) { body.classList.add('cr-fade'); ui.drawnTab = ui.tab; }
   const scroll = ui.dash.querySelector('.body')?.scrollTop ?? 0;
@@ -440,12 +450,36 @@ function openSide(mode) {
   render();
 }
 
+/** How this window reaches the office, and only what is true right now. */
+function connectionPill() {
+  if (ui.reconnecting) return h('span.cr-link.wait', 'Reconnecting…');
+  const internet = S.host?.internet;
+  const here = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if (!here && !/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)) return h('span.cr-link.ok', 'Connected through relay');
+  if (!here) return h('span.cr-link.ok', 'Direct connection');
+  return h('span.cr-link', { class: internet?.state === 'online' ? 'ok' : internet?.state === 'unavailable' ? 'bad' : '' }, internet?.label ?? 'Hosting locally');
+}
+
+/** On the HUD and in the Security Center. The host decides what the press may do. */
+function stopButton() {
+  const staff = ['owner', 'admin'].includes(S.room.myRole);
+  if (S.emergency) return h('span.cr-stopped', 'ALL AI STOPPED');
+  return h('button.btn.cr-stop', {
+    title: staff ? 'Stops every agent in this office' : 'Stops your own agents. Only the owner or an admin can stop everyone’s.',
+    onclick: async () => {
+      try {
+        if (staff) { await api('POST', `/api/crew/rooms/${roomId}/emergency-stop`, { reason: 'Pressed the stop button' }); toast('All AI activity stopped'); await refresh(); } else { await api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: true }); toast('Your agents are stopped'); }
+      } catch (e) { toast(e.message, 6000); }
+    },
+  }, staff ? 'STOP ALL AI ACTIVITY' : 'STOP MY AI');
+}
+
 function openAgent(id) { ui.editor.open(id).catch((e) => toast(e.message)); }
 
 /** What the editor, the wizard and the Orchestrator need from the office. */
 function editorContext() {
   return {
-    S, roomId, ui, ownerOfComputer: ui.ownerOfComputer, statusPill, taskDetail, jobLogs, assignTask, holidayButton, fireButton, messageView, viewFile, openAgent,
+    stopButton, S, roomId, ui, ownerOfComputer: ui.ownerOfComputer, statusPill, taskDetail, jobLogs, assignTask, holidayButton, fireButton, messageView, viewFile, openAgent,
     refreshState: refresh,
     workerLink: localWorker,
     chatWith: (a, channelId) => { if (!channelId) return; ui.channelId = channelId; if (!S.channels.find((c) => c.id === channelId)) S.channels.push({ id: channelId, kind: 'dm', name: 'dm', dmAgentId: a.id }); openSide('chat'); },
@@ -651,7 +685,9 @@ function invite() {
     const out = h('div');
     const go = async () => {
       const { invite: inv } = await api('POST', `/api/crew/rooms/${roomId}/invites`, { role: role.value, uses: Number(uses.value) });
-      const bases = [location.origin, ...(S.host.lanAddresses ?? []).map((a) => `http://${a}:${S.host.port}`)];
+      // The internet address first, when there is one. Network addresses only work at home.
+      const online = S.host.internet?.url;
+      const bases = online ? [online] : [location.origin, ...(S.host.lanAddresses ?? []).map((a) => `http://${a}:${S.host.port}`)];
       out.replaceChildren(h('p', 'Share one of these (valid for 72 hours):'), ...[...new Set(bases)].map((b) => h('pre', `${b}/crew/join?invite=${inv.code}`)));
     };
     return h('div', ...field('Role', role), ...field('Uses', uses), out, h('div.actions', h('button.btn', { onclick: () => close() }, 'Close'), h('button.btn.primary', { onclick: go }, 'Create link')));
