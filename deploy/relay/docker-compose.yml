@@ -1,0 +1,51 @@
+# The connectivity service with HTTPS, on any small server with Docker and a domain name.
+# docs/developer/connectivity-service.md is the walkthrough.
+#
+#   cp deploy/relay/.env.example deploy/relay/.env      # then edit it
+#   docker compose -f deploy/relay/docker-compose.yml up -d --build
+
+services:
+  relay:
+    build:
+      context: ../..
+      dockerfile: deploy/relay/Dockerfile
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 256m
+    pids_limit: 64
+    environment:
+      CREW_RELAY_DOMAIN: ${CREW_RELAY_DOMAIN:?set it in deploy/relay/.env}
+      CREW_RELAY_TRUST_PROXY: "1"
+      CREW_RELAY_OPEN: ${CREW_RELAY_OPEN:-}
+      CREW_RELAY_KEY: ${CREW_RELAY_KEY:-}
+      CREW_RELAY_METRICS_KEY: ${CREW_RELAY_METRICS_KEY:-}
+      CREW_RELAY_MAX_TUNNELS: ${CREW_RELAY_MAX_TUNNELS:-50}
+      CREW_RELAY_TUNNELS_PER_IP: ${CREW_RELAY_TUNNELS_PER_IP:-5}
+      CREW_RELAY_DAILY_MB: ${CREW_RELAY_DAILY_MB:-}
+      CREW_RELAY_MAX_BODY_MB: ${CREW_RELAY_MAX_BODY_MB:-512}
+    expose: ["8443"]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [relay]
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    mem_limit: 256m
+    ports: ["80:80", "443:443"]
+    environment:
+      CREW_RELAY_DOMAIN: ${CREW_RELAY_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?set it in deploy/relay/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  caddy-data:
+  caddy-config:

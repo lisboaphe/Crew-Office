@@ -9,9 +9,9 @@ Friends join from a browser, workers call an HTTP API, Git uses smart HTTP, and 
 | **WebRTC with STUN and TURN** | Node has no built-in WebRTC, so it would add a native dependency to a project with none. A browser cannot open a page over a data channel without first loading it from somewhere, and Git's HTTP client cannot use one at all. TURN is needed anyway on hard networks | Rejected: it would mean rewriting every transport |
 | **Iroh or other QUIC libraries** | Excellent for native peers, but native code, and browsers cannot join directly | Rejected: friends would have to install something to join |
 | **Reverse tunnel, as e4mc does** | The host dials out, so NAT and CGNAT do not matter, and everything stays plain HTTP | **Chosen** |
-| **Someone else's tunnel** (Cloudflare, ngrok, Tailscale Funnel) | Works, and still a fine choice in Advanced. Each needs an account, a separate install or both, and terms vary. Their free tiers are not promised here | Not the built-in path |
+| **Someone else's tunnel** (Cloudflare, ngrok, Tailscale Funnel) | Works, and still a fine choice in Advanced. Each needs an account, a separate install or both. Cloudflare's no-account Quick Tunnels do not support server-sent events | Not the built-in path |
 
-**The cost of this choice:** connections are always relayed, never direct, so there is no NAT hole-punching. On the same network, people use the direct LAN address instead. "Direct connection" in the app means exactly that, and is only shown for it.
+**The cost of this choice:** over the internet connections are always relayed, never direct, so there is no NAT hole-punching. On the same network a friend's app that recognises a room code connects straight to the host's LAN address instead, and that is what "Direct connection" means. It is plain HTTP, so it is for networks you trust.
 
 ## What you need, and what it costs
 
@@ -30,7 +30,7 @@ Run it with:
 CREW_RELAY_KEY=<long random secret> node bin/crew-relay.cjs 8443
 ```
 
-Put it behind a TLS-terminating proxy, or set `CREW_RELAY_TLS_CERT` and `CREW_RELAY_TLS_KEY`. It refuses to start without a key unless you set `CREW_RELAY_OPEN=1`. Then in Crew Office: Host Office → Advanced → relay address and key.
+Put it behind a TLS-terminating proxy, or set `CREW_RELAY_TLS_CERT` and `CREW_RELAY_TLS_KEY`. It refuses to start without a key unless you set `CREW_RELAY_OPEN=1`. Then either stamp its address into your builds, so every copy finds it by itself, or enter it in Crew Office under Advanced settings. `docs/developer/connectivity-service.md` covers Docker, DNS, limits, monitoring and bandwidth.
 
 ## What the relay can and cannot see
 
@@ -40,7 +40,7 @@ It never sees AI credentials: those stay on each worker, and go only to each pro
 
 ## What a visitor can reach
 
-Through the relay, only the office's pages, API and Git are there. Everything else on the server answers 404. A visitor can never count as this computer: requests carry a secret made fresh at each start, the host's forwarding headers and hostname are checked, and the machine key does not work from outside. Visitors cannot create rooms, and a bare room code does not open an office from outside. Only this server's own port is reachable through the tunnel, not anything else on the computer.
+The automatic service is only dialled while an office is being hosted, and only hosted offices can be joined through it. Through the relay, only the office's pages, API and Git are there. Everything else on the server answers 404. A visitor can never count as this computer: requests carry a secret made fresh at each start, the host's forwarding headers and hostname are checked, and the machine key does not work from outside. Visitors cannot create rooms, and a bare room code does not open an office from outside. Only this server's own port is reachable through the tunnel, not anything else on the computer.
 
 With a domain configured, each office gets its own hostname, so one office's page cannot read another's cookies. Without one, a relay serves a single office.
 
@@ -48,13 +48,17 @@ With a domain configured, each office gets its own hostname, so one office's pag
 
 **Host:** new players 30/hour per address, joins 20/minute, chat 30/minute, 12 open streams per player, 1 MB request bodies, 200 MB Git pushes.
 
-**Relay:** 1200 requests/minute per address, 200 concurrent requests per office, 50 offices, 512 MB bodies, no unauthenticated hosts.
+**Relay:** 1200 requests/minute per address, 20 code look-ups/minute per address, 200 concurrent requests per office, 50 offices, 5 offices per address, 512 MB bodies, and on an open relay 5 GB per office per day. All configurable. Hosts need a key unless the operator sets `CREW_RELAY_OPEN=1`, which any copy of the app can then use, within those limits, to serve anything under that domain. So give an open relay a domain of its own. Bad frames from a host end that host's connection only.
 
-Invitations have 96 bits of randomness, expire in 72 hours by default, have limited uses, and can be revoked. Room passwords use scrypt.
+Invitation links have 96 bits of randomness, expire in 72 hours by default, have limited uses, and can be revoked. Room passwords use scrypt.
+
+Room codes have 50 bits, from a CSPRNG, are separate from an office's keycard, and end with their invitation. The relay holds only their SHA-256, and limits guesses, as does the host. On a password office a code still wants the password. On the local network they are announced only as a deliberately slow hash, since 50 bits would not survive a fast one. Uses are counted by the host, so replaying a used-up invitation does nothing, and each reachability check uses a one-time nonce.
+
+A `crewoffice://` link can come from any web page. It is only acted on if it parses as an invitation: an origin, https unless on a private network, and a token. The app never opens anything else, and shows which office and which address before going there. Fetching a preview from another computer is only for this computer's owner.
 
 ## Connection statuses
 
-The app shows only what is true now: **Hosting locally**, **Connecting to internet service**, **Connected through relay**, **Direct connection** (a LAN address), **Reconnecting**, **Internet hosting unavailable**. No invitation with a public address is offered until the relay has confirmed the tunnel.
+The app shows only what is true now: **Hosting locally**, **Connecting to internet service**, **Internet room available**, **Relay connection**, **Direct connection** (a LAN address), **Reconnecting**, **Internet service unavailable**. No invitation with a public address is offered until the host has fetched its own public address from outside and seen a one-time nonce come back down its tunnel. That is repeated every minute, and two failures in a row take the link away.
 
 ## Safe internet hosting
 

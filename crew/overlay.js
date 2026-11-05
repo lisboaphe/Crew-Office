@@ -455,7 +455,7 @@ function connectionPill() {
   if (ui.reconnecting) return h('span.cr-link.wait', 'Reconnecting…');
   const internet = S.host?.internet;
   const here = ['localhost', '127.0.0.1'].includes(location.hostname);
-  if (!here && !/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)) return h('span.cr-link.ok', 'Connected through relay');
+  if (!here && !/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)) return h('span.cr-link.ok', 'Relay connection');
   if (!here) return h('span.cr-link.ok', 'Direct connection');
   return h('span.cr-link', { class: internet?.state === 'online' ? 'ok' : internet?.state === 'unavailable' ? 'bad' : '' }, internet?.label ?? 'Hosting locally');
 }

@@ -149,6 +149,10 @@ if (-not $NoShortcuts) {
   Set-ItemProperty $key -Name UninstallString -Value "powershell.exe -ExecutionPolicy Bypass -File `"$Target\installer\windows\uninstall.ps1`""
   Set-ItemProperty $key -Name NoModify -Value 1 -Type DWord
   Set-ItemProperty $key -Name NoRepair -Value 1 -Type DWord
+
+  # crewoffice:// invitations open in the app. A problem here costs only that convenience: an
+  # invitation's https link works in a browser either way.
+  try { & (Join-Path $Target 'installer\windows\register-protocol.ps1') -Node $node } catch { Say "Could not register invitation links: $_" 'Yellow' }
 }
 
 Say ''

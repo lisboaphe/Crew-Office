@@ -36,7 +36,11 @@ jobs:
           node-version: 24
       - run: npm ci
       - run: npm run test:crew
+      # The internet service copies of this build find by themselves. A repository variable, so a
+      # fork builds with none and says so, instead of quietly depending on someone else's relay.
       - run: node installer/build.cjs
+        env:
+          CREW_CONNECTIVITY_URL: ${{ vars.CREW_CONNECTIVITY_URL }}
       - name: Publish
         shell: pwsh
         env:
