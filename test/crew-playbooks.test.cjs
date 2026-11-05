@@ -297,7 +297,7 @@ test('only this computer’s own app can reach the worker; a remote office page 
   assert.ok(!by.openai.canTest, 'and cannot even be tested while off');
   assert.strictEqual(by['openrouter-free'].canTest, false, 'nothing to test without a key');
   assert.ok(by['claude-handoff'].notice.includes('Anthropic'), 'Anthropic’s restriction is stated');
-  assert.deepStrictEqual([...new Set(cards.map((c) => c.group))], ['subscription', 'local', 'free', 'paid']);
+  assert.deepStrictEqual([...new Set(cards.map((c) => c.group))], ['subscription', 'local', 'free', 'cloud', 'paid']);
 
   const usage = JSON.parse((await raw(port, { path: '/usage' })).body);
   assert.deepStrictEqual(usage.reported, {}, 'no invented figures');

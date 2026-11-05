@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI providers: billing rules and test status — The Roving Office</title>
+  <meta name="description" content="How the office is built, and how to change it." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html">For everyone</a>
+      <a href="/docs/developer/index.html" aria-current="page">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="developer documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/index.html">Where to look</a>
+        </li>
+        <li>
+          <a href="/docs/developer/getting-the-code.html">Getting the code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/developing.html">Developing on it</a>
+        </li>
+        <li>
+          <a href="/docs/developer/npm-scripts.html">Every npm script</a>
+        </li>
+      </ul>
+      <h2>How it works</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/architecture.html">Architecture</a>
+        </li>
+        <li>
+          <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
+        </li>
+        <li>
+          <a href="/docs/developer/upgrade-report.html">Upgrade report: Git, rules, budgets</a>
+        </li>
+        <li>
+          <a href="/docs/developer/ai-providers.html" aria-current="page">AI providers: billing rules and test status</a>
+        </li>
+        <li>
+          <a href="/docs/developer/9router-assessment.html">9Router: compatibility and licensing</a>
+        </li>
+        <li>
+          <a href="/docs/developer/physics.html">The physics of the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/scene-internals.html">Scene internals</a>
+        </li>
+        <li>
+          <a href="/docs/developer/job-delivery.html">Job delivery</a>
+        </li>
+        <li>
+          <a href="/docs/developer/editor.html">The furniture editor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/layout-algorithm.html">The layout algorithm</a>
+        </li>
+        <li>
+          <a href="/docs/developer/tuning-the-layouts.html">Tuning the layout generator</a>
+        </li>
+        <li>
+          <a href="/docs/developer/sources.html">The source model</a>
+        </li>
+        <li>
+          <a href="/docs/developer/test-data.html">The Test Data source</a>
+        </li>
+      </ul>
+      <h2>Changing it</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/extending.html">Extending the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/prop-portraits.html">Photographing a prop</a>
+        </li>
+        <li>
+          <a href="/docs/developer/visual-assets.html">Visual assets and their rights</a>
+        </li>
+        <li>
+          <a href="/docs/developer/coplanar-probe.html">The coplanar-face probe</a>
+        </li>
+        <li>
+          <a href="/docs/developer/plugin-distribution.html">Publishing the plugins</a>
+        </li>
+        <li>
+          <a href="/docs/developer/admin-console.html">The admin console</a>
+        </li>
+      </ul>
+      <h2>The protocol</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/protocol/aop-spec.html">The AOP spec</a>
+        </li>
+        <li>
+          <a href="/docs/developer/protocol/aop-harness-adapters.html">Adapter notes</a>
+        </li>
+        <li>
+          <a href="/agent-setup/">What an agent is told to do <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+      <h2>Adapters</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/adapters/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/muse.html">Muse</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="ai-providers" tabindex="-1">AI providers</h1>
+<p>How an agent reaches a model on its owner's computer, what each service documents, and how far each
+integration has really been proven. The room host hears a connection's state and one line of reason,
+never a key or an account fact.</p>
+<h2 id="the-shape-of-it" tabindex="-1">The shape of it</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lib/crew-worker/ai-connections.cjs</code></td>
+<td>Each service: setup steps, how to list models, and the rule for what may run</td>
+</tr>
+<tr>
+<td><code>lib/crew-worker/providers.cjs</code></td>
+<td><code>createProvider</code>, the one place every model call passes through, and <code>gated</code>, which applies the rule to each request</td>
+</tr>
+<tr>
+<td><code>lib/crew-worker/cli-providers.cjs</code></td>
+<td>The official CLIs used as a plain model: Claude Code, Codex, OpenCode, Kiro</td>
+</tr>
+<tr>
+<td><code>lib/crew-worker/os-secret.cjs</code></td>
+<td>Holds the vault's key in the operating system's own store</td>
+</tr>
+<tr>
+<td><code>crew/connections.js</code>, <code>crew/wizard.js</code></td>
+<td>The Connections screen and the Add Worker wizard, talking straight to the worker on this computer</td>
+</tr>
+<tr>
+<td><code>lib/crew/catalog.cjs</code></td>
+<td>What the host may know of each service. No account facts</td>
+</tr>
+</tbody>
+</table>
+<p>To add a service, add an entry to <code>DEFS</code> and one to <code>PROVIDERS</code>. An OpenAI-compatible one needs no
+code of its own.</p>
+<h2 id="the-rule" tabindex="-1">The rule</h2>
+<p>Whether a request costs money is decided <strong>per model</strong>, in <code>block()</code>, before anything is sent:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Runs when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>free</code>, <code>promo</code>, <code>subscription</code>, <code>local</code></td>
+<td>Established, as below</td>
+</tr>
+<tr>
+<td><code>trial</code></td>
+<td>The owner has agreed to trial use</td>
+</tr>
+<tr>
+<td><code>unknown</code></td>
+<td>Never. The owner has to check their own account first</td>
+</tr>
+<tr>
+<td><code>paid</code></td>
+<td>&quot;Never use paid API&quot; is off <strong>and</strong> paid models are allowed on this connection</td>
+</tr>
+</tbody>
+</table>
+<p>Several services use one key for free and paid use and do not tell an app which applies, so they
+start as <code>unknown</code>. Nothing here infers free from a service's marketing. A confirmation is recorded
+with its date, and is the owner's statement, not something this app verified.</p>
+<p>A provider that reports a limit (429, or 402 for an empty balance) pauses the job or moves it to a
+backup its owner listed, at most once each, per <code>router.cjs</code>. A backup that cannot run for billing
+reasons is skipped. Test Connection goes through the same rule, so it cannot be how a charge happens.</p>
+<h2 id="what-each-service-documents" tabindex="-1">What each service documents</h2>
+<p>Read from each service's own documentation on 5 November 2026. Limits and free lists change, so the
+code asks the service wherever it can, and treats these as a starting point.</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Reached through</th>
+<th>Models from</th>
+<th>What decides the cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cloudflare Workers AI</td>
+<td><code>api.cloudflare.com/client/v4/accounts/{id}/ai/v1</code></td>
+<td><code>/ai/models/search</code></td>
+<td>Workers Free fails with an error past 10,000 Neurons a day. Workers Paid bills past it. An app cannot tell which</td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td><code>generativelanguage.googleapis.com/v1beta/openai</code></td>
+<td><code>/v1beta/models</code></td>
+<td>A key takes its project's tier. With no billing account linked it stays free. An app cannot tell</td>
+</tr>
+<tr>
+<td>Mistral AI</td>
+<td><code>api.mistral.ai/v1</code></td>
+<td><code>/v1/models</code>, with <code>capabilities</code></td>
+<td>Experiment plan is free. The same key works on paid plans</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td><code>openrouter.ai/api/v1</code></td>
+<td><code>/models</code>, with <code>pricing</code></td>
+<td>Per model. Only zero-priced models are offered, and the request also carries a price cap of zero</td>
+</tr>
+<tr>
+<td>NVIDIA NIM</td>
+<td><code>integrate.api.nvidia.com/v1</code></td>
+<td><code>/v1/models</code></td>
+<td>Developer trial. The figures are from NVIDIA's forums, not its terms, so none is shown</td>
+</tr>
+<tr>
+<td>Z.ai</td>
+<td><code>api.z.ai/api/paas/v4</code></td>
+<td><code>/models</code>, or the pricing page if that fails</td>
+<td><code>glm-4.7-flash</code> and <code>glm-4.5-flash</code> are free. The rest bill the account</td>
+</tr>
+<tr>
+<td>Ollama Cloud</td>
+<td><code>ollama.com/v1</code></td>
+<td><code>ollama.com/api/tags</code></td>
+<td>The $0 plan is pay per token for cloud models. Any plan draws on purchased credit after its included usage</td>
+</tr>
+<tr>
+<td>OpenCode</td>
+<td><code>opencode run</code></td>
+<td><code>opencode models opencode --verbose</code>, with <code>cost</code></td>
+<td>Per model. Free models need OpenCode itself, and are free for a limited time</td>
+</tr>
+<tr>
+<td>Kiro</td>
+<td><code>kiro-cli chat --no-interactive</code></td>
+<td><code>kiro-cli chat --list-models --format json</code></td>
+<td>Credits on the owner's plan. API keys come from paid plans only</td>
+</tr>
+</tbody>
+</table>
+<h3 id="opencode-and-kiro-as-plain-models" tabindex="-1">OpenCode and Kiro as plain models</h3>
+<p>Like Claude Code and Codex, these are agents in their own right, so they run in an empty folder with
+their own tools off, and the office's tools are offered through a small JSON protocol. That keeps
+permissions, approvals, budgets and the sandbox exactly as they are for everything else.</p>
+<p>Three things about OpenCode took finding out, and the code depends on them:</p>
+<ul>
+<li><strong>A rule denying everything hangs a run</strong>, with no output. One file has to stay readable by name.</li>
+<li><strong>A prompt sent as an attached file gets refused</strong>, because a careful model takes it for a prompt
+injection. So it is a custom agent's system prompt.</li>
+<li><strong>It believes <code>PWD</code> over its real working folder</strong>, so a shell that leaves a stale one breaks it.</li>
+</ul>
+<p>It also reports what each step cost. Anything above zero stops the connection.</p>
+<h3 id="9router" tabindex="-1">9Router</h3>
+<p>Not used. <code>9router-assessment.md</code> has the reasoning. A routing layer could choose a paid model where
+this rule cannot see it, and direct connections turned out to be enough. Someone can still point the
+Local connection at one, and it would then count as local, so that is theirs to judge.</p>
+<h2 id="how-far-each-is-proven" tabindex="-1">How far each is proven</h2>
+<p><strong>Fully functional and tested</strong> means a real agent did a real task through the real service. Nothing
+else earns it. <code>test/crew-ai-providers.test.cjs</code> runs against a stand-in server: it proves what this
+app sends and refuses, not that a service behaves as documented. <code>test/live-ai-providers.cjs</code> talks to
+the real ones, by hand, with the owner's own key.</p>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>Status</th>
+<th>What was run</th>
+<th>What is missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenCode</td>
+<td><strong>Fully functional and tested</strong></td>
+<td>Installed, models listed, Test Connection, wizard, a real project planned and a file written, cancel, tools denied</td>
+<td>Only on Windows</td>
+</tr>
+<tr>
+<td>OpenRouter</td>
+<td>Partially functional</td>
+<td>Real model list. Request flow against the stand-in</td>
+<td>A real key</td>
+</tr>
+<tr>
+<td>NVIDIA NIM</td>
+<td>Partially functional</td>
+<td>Real model list. Request flow against the stand-in</td>
+<td>A real key</td>
+</tr>
+<tr>
+<td>Ollama Cloud</td>
+<td>Partially functional</td>
+<td>Real model list. Request flow against the stand-in</td>
+<td>A key, and a plan confirmed by its owner</td>
+</tr>
+<tr>
+<td>Z.ai</td>
+<td>Partially functional</td>
+<td>Free list from its pricing page. Request flow against the stand-in. Its model list has not been seen</td>
+<td>A real key. Coding Plan keys use another address, which is not offered</td>
+</tr>
+<tr>
+<td>Cloudflare Workers AI</td>
+<td>Partially functional</td>
+<td>Request flow against the stand-in. Model list parsed from the documented shape, not seen</td>
+<td>A real token. Whether tool support is reported as assumed</td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td>Partially functional</td>
+<td>The same</td>
+<td>A real key</td>
+</tr>
+<tr>
+<td>Mistral AI</td>
+<td>Partially functional</td>
+<td>The same</td>
+<td>A real key</td>
+</tr>
+<tr>
+<td>Kiro</td>
+<td>Not proven</td>
+<td>Written from its documentation. Never run</td>
+<td>The CLI and a real account. Its docs do not say whether a sign-in alone runs without a person, or give a Windows install command</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-no-service-here-does-yet" tabindex="-1">What no service here does yet</h3>
+<ul>
+<li><strong>Streaming.</strong> Replies arrive whole. Where a service documents streaming the model list says so,
+which is about the service, not this app.</li>
+<li><strong>Reading a balance.</strong> Usage shows what this worker counted and what a service stated in its reply
+headers. Otherwise it says Usage unavailable.</li>
+<li><strong>Search tools for researchers.</strong> <code>fetch_url</code> works with any model. No service's own search is wired up.</li>
+</ul>
+<h2 id="keys" tabindex="-1">Keys</h2>
+<p>Encrypted with AES-256-GCM. The key to that is held by Windows DPAPI, the macOS Keychain or the
+Secret Service, whichever the system has, and otherwise a user-only file. The Connections screen says
+which. An older key file moves across and is removed only after the store gives the same key back.
+DPAPI is tested. <strong>The macOS and Linux paths have never run.</strong> On Windows this is DPAPI directly, not
+an entry in Credential Manager, though the protection is the same kind.</p>
+<p>A key goes to its own service and nowhere else, and any echoed in an error is replaced before it can
+reach a log. The CLIs run with every other service's keys removed from their environment. Base
+addresses are fixed in code. The <code>CREW_AI_BASE_*</code> overrides exist for tests, and only the owner of the
+computer can set them.</p>
+<h2 id="updates-and-a-private-repository" tabindex="-1">Updates and a private repository</h2>
+<p>GitHub answers an anonymous request for a private repository as it would a missing one. So
+<code>lib/crew/update.cjs</code> asks anonymously first, and on a refusal asks again with the person's own sign-in:
+<code>gh auth token</code>, then <code>git credential fill</code>. Neither is stored, and neither reaches a browser. Downloads
+use the asset API address, because the plain download link does not accept a token. Whoever installs
+needs an account that can see the repository. A friend without that cannot update in the app, and
+should be sent the setup program, unless the repository becomes public.</p>
+<p>Each build is published by <code>.github/workflows/release.yml</code> on a push to <code>main</code>, and uses GitHub Actions
+minutes from the account that owns the repository.</p>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#the-shape-of-it">The shape of it</a></li>
+<li><a href="#the-rule">The rule</a></li>
+<li><a href="#what-each-service-documents">What each service documents</a><ul><li><a href="#opencode-and-kiro-as-plain-models">OpenCode and Kiro as plain models</a></li>
+<li><a href="#9router">9Router</a></li></ul></li>
+<li><a href="#how-far-each-is-proven">How far each is proven</a><ul><li><a href="#what-no-service-here-does-yet">What no service here does yet</a></li></ul></li>
+<li><a href="#keys">Keys</a></li>
+<li><a href="#updates-and-a-private-repository">Updates and a private repository</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone with a checkout. If you just want to use the thing,
+      <a href="/docs/user/index.html">the user docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

@@ -162,8 +162,8 @@ test('the free connection cannot spend, and its quota is OpenRouter’s own figu
   const ad = createProvider('openrouter-free', vaultWith({ apiKey: 'sk-or-stand-in' }), budget);
   const call = (model) => ad.complete({ system: 's', transcript: [{ role: 'user', text: 'hi' }], tools: [], model });
 
-  await assert.rejects(call('anthropic/claude-opus'), /not a free model/, 'a paid model is refused before anything is sent');
-  await assert.rejects(call('openai/gpt-5'), /not a free model/);
+  await assert.rejects(call('anthropic/claude-opus'), /paid model/, 'a paid model is refused before anything is sent');
+  await assert.rejects(call('openai/gpt-5'), /paid model/);
   assert.strictEqual(seen.length, 0);
 
   const r = await call('openrouter/free');

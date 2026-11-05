@@ -3,7 +3,7 @@
 **Automated tests do not prove the absence of sandbox escapes or every possible vulnerability, and passing them does not make this safe for public hosting.** They show the specific boundaries below hold against the specific attacks tried.
 
 ```bash
-node --test test/crew-security.test.cjs test/crew-relay.test.cjs test/crew-entry-update.test.cjs test/crew-playbooks.test.cjs test/crew-router.test.cjs
+node --test test/crew-ai-providers.test.cjs test/crew-security.test.cjs test/crew-relay.test.cjs test/crew-entry-update.test.cjs test/crew-playbooks.test.cjs test/crew-router.test.cjs
 npm run test:crew     # every multiplayer test
 ```
 
@@ -63,11 +63,14 @@ Agents use the scripted provider, so tool calls are real and the decisions are f
 | Emergency controls | Everything in the brief through routes. Stopping one project has no button yet |
 | Session handling | Revocation on removal. No active-session list per player |
 
+### Credentials
+
+The vault's key is held by Windows DPAPI, tested on a real Windows machine, including moving an older key file across. The macOS Keychain and Linux Secret Service paths are written and have never run, and a computer with neither falls back to a user-only file. The Connections screen says which is in use.
+
 ### Not yet implemented
 
 | Requirement | Note |
 |---|---|
-| OS credential store | Vault key is a file with user-only permissions |
 | MCP and external tools | The runner has no MCP client, so there is nothing to govern yet |
 | Separate storage process | The room server holds the whole user's file access, with no route exposing it |
 | End-to-end encryption through a relay | Not possible for browser clients: see `NETWORK_SECURITY.md` |

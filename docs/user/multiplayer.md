@@ -26,14 +26,18 @@ New here? Press **📘 How it works** in the lobby or the office for a short tou
 
 ## Updates
 
-When a new build is out, **Update available** appears at the top of the lobby and the office,
-on the computer that hosts it. Nothing installs until you press it. The app checks the
+**Check for updates** is at the top of the lobby and the office, on the computer that hosts it, and
+turns into **Update available** when a new build is out. Nothing installs until you press it. The app checks the
 published build's checksum, replaces itself, and comes back within about a minute; your
 offices, projects and sign-ins are kept. Everyone in the office is disconnected until then.
 
 Close any worker window first. A worker runs from the same folder, so while it is open the
 update stops and tells you, leaving the app as it was. Updating inside the app is Windows
 only for now; on macOS and Linux the button takes you to the download page.
+
+If the app's repository is private, GitHub has to know it is you: press **Sign in to GitHub** and
+finish in the window that opens, with an account that can see it. That needs the GitHub CLI
+installed. If you cannot see the repository, ask whoever runs it for the new setup program.
 
 To look for updates the app asks GitHub for the latest build, so GitHub sees that request
 come from your address. Other players' copies are not involved: a player only needs the
@@ -154,9 +158,31 @@ Anthropic does not allow third-party apps to route requests through Claude plan 
 behalf of users, so Claude Code is offered as a manual handoff: the app prepares each task and
 you run it in your own Claude Code.
 
-Free tiers offer a way in with no subscription. **OpenRouter free models** run on your own
-OpenRouter key and refuse anything that is not free, so they cannot charge you. Free models can
-log what they are sent, so do not use them for private code.
+Connections groups everything by what it costs you:
+
+- **My subscriptions**: ChatGPT, Codex, Claude Code and Kiro, on your own plan.
+- **Free and developer AI**: Cloudflare Workers AI, Google Gemini, Mistral, OpenRouter's free models,
+  NVIDIA NIM's developer access and OpenCode's free models.
+- **Other cloud providers**: Z.ai and Ollama Cloud.
+- **Local AI**: Ollama and LM Studio, on this computer.
+- **Advanced: paid APIs**: off unless you turn them on.
+
+Each card opens the service's own page and walks you through getting a key. Keys are encrypted on your
+computer, and go only to that service. Every player connects their own, and the office host never
+receives them.
+
+**Nothing runs until it is established that it will not charge you.** Some services use one key for
+free and paid use, and will not tell the app which yours is. Those say **Verification required**:
+look at your own account, then confirm what you found. If that later changes, for example if you link
+billing to a Google project, remove your confirmation under **Configure**. Where a service has free
+and paid models, only the free ones can be chosen. When a free allowance runs out, the work pauses,
+or moves to a backup you ticked. It never moves to something that costs money.
+
+Press **Models** to see each model and what the service says about it, and choose one. Agents can each
+use a different one. Anything a service does not report says **Not reported**.
+
+Free models can log or learn from what they are sent, so do not use them for private code. Each card
+says what is known for that service.
 
 ### Backup AIs
 

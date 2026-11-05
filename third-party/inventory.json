@@ -4,15 +4,15 @@
   "reviewedAt": "2026-09-10",
   "scope": "Source inventory with recorded license evidence; not an approval, SPDX/CycloneDX attestation, or built-container SBOM. Unversioned assets and platform components require release review.",
   "summary": {
-    "npmPackages": 227,
+    "npmPackages": 235,
     "npmDeclaredLicenseCounts": {
-      "MIT": 162,
+      "MIT": 167,
       "BSD-2-Clause": 28,
       "ISC": 16,
-      "Apache-2.0": 12,
+      "Apache-2.0": 14,
       "Python-2.0": 1,
       "BSD-3-Clause": 4,
-      "Unlicense": 1,
+      "Unlicense": 2,
       "PSF-2.0": 1,
       "BlueOak-1.0.0": 2
     },
@@ -24,7 +24,8 @@
       "@humanfs/types@0.15.0",
       "esm-import-transformer@3.0.5",
       "keyv@4.5.4",
-      "natural-compare@1.4.0"
+      "natural-compare@1.4.0",
+      "standardwebhooks@1.1.1"
     ],
     "componentsWithUnresolvedRights": [
       "uxwing-brand-marks",
@@ -55,11 +56,11 @@
   "distributionRecipes": [
     {
       "path": "Dockerfile.fly",
-      "sha256": "494b7bd57e34861f37d473d546601f598a907dc22b8cbd42387860d0dc4a9954"
+      "sha256": "bb5a1b665cf387bbf9303549f03a89adcd798a5dab70b839a7564aadaba696ab"
     },
     {
       "path": ".dockerignore",
-      "sha256": "7300b0a7102de998e35758cda7b38614ced7b44ab070444becbf0b0410799189"
+      "sha256": "e3c57dbfdb3730205fc888642d83cce1524de19ed13155fd7be21afdae6cba64"
     },
     {
       "path": "bin/aop-codex-install.cjs",
@@ -226,11 +227,11 @@
       "files": [
         {
           "path": "src/rovo-mark.js",
-          "sha256": "5124b7fbacbd1dcad88f6f73e6d90a4158f6a2e59b68410468a66e4ae790e881"
+          "sha256": "fb40c10af93a01adc420f66aad7e7ccd83c83755e37572d7ddbad8bf026297c0"
         },
         {
           "path": "src/ui/marks.js",
-          "sha256": "41c1352da7a19f66b62a5067894252a550720f0ebede3435be750b2979ae25d0"
+          "sha256": "bdc6bd0c09060113e968c2a8178c5f4f1a14da82c27f78f2c69bbde147545999"
         }
       ],
       "licenseEvidence": []
@@ -255,7 +256,7 @@
       "files": [
         {
           "path": "src/ui/marks.js",
-          "sha256": "41c1352da7a19f66b62a5067894252a550720f0ebede3435be750b2979ae25d0"
+          "sha256": "bdc6bd0c09060113e968c2a8178c5f4f1a14da82c27f78f2c69bbde147545999"
         }
       ],
       "licenseEvidence": []
@@ -280,7 +281,7 @@
       "files": [
         {
           "path": "src/ui/marks.js",
-          "sha256": "41c1352da7a19f66b62a5067894252a550720f0ebede3435be750b2979ae25d0"
+          "sha256": "bdc6bd0c09060113e968c2a8178c5f4f1a14da82c27f78f2c69bbde147545999"
         }
       ],
       "licenseEvidence": []
@@ -307,11 +308,11 @@
       "files": [
         {
           "path": "docs/images/objects/aceLogo.png",
-          "sha256": "d64a14f742f65a85e0fb274583d61eb7483bd52dec6186725389d539d6ca0c4e"
+          "sha256": "3970edae13cd6c8e5d7bdcaefc1728de6f16a0c42e9c5956568c29f0c3007f85"
         },
         {
           "path": "src/scene/standees.js",
-          "sha256": "6b857b5c2c7ae322473b023a3dbeb3e16f00453f6d4a77f3a961cd3e1154de9d"
+          "sha256": "bccb2ee7c7b804abf44601328bbfcde30c616fcfa014b5e765b6ea1e19b5d8e6"
         }
       ],
       "licenseEvidence": []
@@ -339,15 +340,15 @@
       "files": [
         {
           "path": "docs/images/objects/rovoLogo.png",
-          "sha256": "9ce6b1fef91041016042480ba08d4e339adf3bc4c875b1a9543e0335bb10bbd3"
+          "sha256": "0382dab31fb31cd3d7bd0199e8f6831a431bf6004423989f39b94de7baabe8a7"
         },
         {
           "path": "src/rovo-mark.js",
-          "sha256": "5124b7fbacbd1dcad88f6f73e6d90a4158f6a2e59b68410468a66e4ae790e881"
+          "sha256": "fb40c10af93a01adc420f66aad7e7ccd83c83755e37572d7ddbad8bf026297c0"
         },
         {
           "path": "src/scene/standees.js",
-          "sha256": "6b857b5c2c7ae322473b023a3dbeb3e16f00453f6d4a77f3a961cd3e1154de9d"
+          "sha256": "bccb2ee7c7b804abf44601328bbfcde30c616fcfa014b5e765b6ea1e19b5d8e6"
         }
       ],
       "licenseEvidence": []
@@ -374,11 +375,11 @@
       "files": [
         {
           "path": "docs/images/objects/kanbanBoard.png",
-          "sha256": "4afdc2ed6a05c1e385ddb61ca9d1e1d87acab184d54baef71ef1c494a1629c05"
+          "sha256": "5e26e6db67a91a6510220ccd8d9624089101d9f14bf4cb4b3fc9e541a09a3cfd"
         },
         {
           "path": "src/scene/kanban.js",
-          "sha256": "eae6eddbbf7b4528a7c6639340b626f9a5b6d7156834ee9f530e1c552b69feed"
+          "sha256": "910ca7d1bbc1a48f7840faf7a5b8ab427ba561665d372f50479113013da39746"
         }
       ],
       "licenseEvidence": []
@@ -407,7 +408,7 @@
       "files": [
         {
           "path": "src/ui/marks.js",
-          "sha256": "41c1352da7a19f66b62a5067894252a550720f0ebede3435be750b2979ae25d0"
+          "sha256": "bdc6bd0c09060113e968c2a8178c5f4f1a14da82c27f78f2c69bbde147545999"
         }
       ],
       "licenseEvidence": [
@@ -651,7 +652,7 @@
         },
         {
           "path": "Dockerfile.fly",
-          "sha256": "494b7bd57e34861f37d473d546601f598a907dc22b8cbd42387860d0dc4a9954"
+          "sha256": "bb5a1b665cf387bbf9303549f03a89adcd798a5dab70b839a7564aadaba696ab"
         }
       ],
       "licenseEvidence": []
@@ -1067,6 +1068,57 @@
       ]
     },
     {
+      "name": "@anthropic-ai/sdk",
+      "version": "1.4.0",
+      "location": "node_modules/@anthropic-ai/sdk",
+      "purl": "pkg:npm/%40anthropic-ai/sdk@1.4.0",
+      "integrity": "sha512-tyuibnhQL57kLOx5oomY4Ld7jOVOPNC5v3IiyRtR3l+Friv66tI4VbuZYF2NMel/T0WMuQMBFOMKDBUbUh8gPA==",
+      "lockFingerprint": "f261819d9b02c0f060723a9fb48cd756eea17b3e5d592ab0ad1e347e69aa885e",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "Apache-2.0",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "github:anthropics/anthropic-sdk-typescript",
+      "dependencies": {
+        "@opentelemetry/api": "^1.4.1",
+        "json-schema-to-ts": "^3.1.1",
+        "standardwebhooks": "^1.0.0"
+      },
+      "licenseEvidence": [
+        {
+          "path": "node_modules/@anthropic-ai/sdk/LICENSE",
+          "sha256": "7fc343be7ec189b803c1872267cbaf0381b12ffdb22d972b8ea7b21b262ba563",
+          "text": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is granting the License.\n\n      \"Legal Entity\" shall mean the union of the acting entity and all\n      other entities that control, are controlled by, or are under common\n      control with that entity. For the purposes of this definition,\n      \"control\" means (i) the power, direct or indirect, to cause the\n      direction or management of such entity, whether by contract or\n      otherwise, or (ii) ownership of fifty percent (50%) or more of the\n      outstanding shares, or (iii) beneficial ownership of such entity.\n\n      \"You\" (or \"Your\") shall mean an individual or Legal Entity\n      exercising permissions granted by this License.\n\n      \"Source\" form shall mean the preferred form for making modifications,\n      including but not limited to software source code, documentation\n      source, and configuration files.\n\n      \"Object\" form shall mean any form resulting from mechanical\n      transformation or translation of a Source form, including but\n      not limited to compiled object code, generated documentation,\n      and conversions to other media types.\n\n      \"Work\" shall mean the work of authorship, whether in Source or\n      Object form, made available under the License, as indicated by a\n      copyright notice that is included in or attached to the work\n      (an example is provided in the Appendix below).\n\n      \"Derivative Works\" shall mean any work, whether in Source or Object\n      form, that is based on (or derived from) the Work and for which the\n      editorial revisions, annotations, elaborations, or other modifications\n      represent, as a whole, an original work of authorship. For the purposes\n      of this License, Derivative Works shall not include works that remain\n      separable from, or merely link (or bind by name) to the interfaces of,\n      the Work and Derivative Works thereof.\n\n      \"Contribution\" shall mean any work of authorship, including\n      the original version of the Work and any modifications or additions\n      to that Work or Derivative Works thereof, that is intentionally\n      submitted to Licensor for inclusion in the Work by the copyright owner\n      or by an individual or Legal Entity authorized to submit on behalf of\n      the copyright owner. For the purposes of this definition, \"submitted\"\n      means any form of electronic, verbal, or written communication sent\n      to the Licensor or its representatives, including but not limited to\n      communication on electronic mailing lists, source code control systems,\n      and issue tracking systems that are managed by, or on behalf of, the\n      Licensor for the purpose of discussing and improving the Work, but\n      excluding communication that is conspicuously marked or otherwise\n      designated in writing by the copyright owner as \"Not a Contribution.\"\n\n      \"Contributor\" shall mean Licensor and any individual or Legal Entity\n      on behalf of whom a Contribution has been received by Licensor and\n      subsequently incorporated within the Work.\n\n   2. Grant of Copyright License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      copyright license to reproduce, prepare Derivative Works of,\n      publicly display, publicly perform, sublicense, and distribute the\n      Work and such Derivative Works in Source or Object form.\n\n   3. Grant of Patent License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      (except as stated in this section) patent license to make, have made,\n      use, offer to sell, sell, import, and otherwise transfer the Work,\n      where such license applies only to those patent claims licensable\n      by such Contributor that are necessarily infringed by their\n      Contribution(s) alone or by combination of their Contribution(s)\n      with the Work to which such Contribution(s) was submitted. If You\n      institute patent litigation against any entity (including a\n      cross-claim or counterclaim in a lawsuit) alleging that the Work\n      or a Contribution incorporated within the Work constitutes direct\n      or contributory patent infringement, then any patent licenses\n      granted to You under this License for that Work shall terminate\n      as of the date such litigation is filed.\n\n   4. Redistribution. You may reproduce and distribute copies of the\n      Work or Derivative Works thereof in any medium, with or without\n      modifications, and in Source or Object form, provided that You\n      meet the following conditions:\n\n      (a) You must give any other recipients of the Work or\n          Derivative Works a copy of this License; and\n\n      (b) You must cause any modified files to carry prominent notices\n          stating that You changed the files; and\n\n      (c) You must retain, in the Source form of any Derivative Works\n          that You distribute, all copyright, patent, trademark, and\n          attribution notices from the Source form of the Work,\n          excluding those notices that do not pertain to any part of\n          the Derivative Works; and\n\n      (d) If the Work includes a \"NOTICE\" text file as part of its\n          distribution, then any Derivative Works that You distribute must\n          include a readable copy of the attribution notices contained\n          within such NOTICE file, excluding those notices that do not\n          pertain to any part of the Derivative Works, in at least one\n          of the following places: within a NOTICE text file distributed\n          as part of the Derivative Works; within the Source form or\n          documentation, if provided along with the Derivative Works; or,\n          within a display generated by the Derivative Works, if and\n          wherever such third-party notices normally appear. The contents\n          of the NOTICE file are for informational purposes only and\n          do not modify the License. You may add Your own attribution\n          notices within Derivative Works that You distribute, alongside\n          or as an addendum to the NOTICE text from the Work, provided\n          that such additional attribution notices cannot be construed\n          as modifying the License.\n\n      You may add Your own copyright statement to Your modifications and\n      may provide additional or different license terms and conditions\n      for use, reproduction, or distribution of Your modifications, or\n      for any such Derivative Works as a whole, provided Your use,\n      reproduction, and distribution of the Work otherwise complies with\n      the conditions stated in this License.\n\n   5. Submission of Contributions. Unless You explicitly state otherwise,\n      any Contribution intentionally submitted for inclusion in the Work\n      by You to the Licensor shall be under the terms and conditions of\n      this License, without any additional terms or conditions.\n      Notwithstanding the above, nothing herein shall supersede or modify\n      the terms of any separate license agreement you may have executed\n      with Licensor regarding such Contributions.\n\n   6. Trademarks. This License does not grant permission to use the trade\n      names, trademarks, service marks, or product names of the Licensor,\n      except as required for reasonable and customary use in describing the\n      origin of the Work and reproducing the content of the NOTICE file.\n\n   7. Disclaimer of Warranty. Unless required by applicable law or\n      agreed to in writing, Licensor provides the Work (and each\n      Contributor provides its Contributions) on an \"AS IS\" BASIS,\n      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n      implied, including, without limitation, any warranties or conditions\n      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\n      PARTICULAR PURPOSE. You are solely responsible for determining the\n      appropriateness of using or redistributing the Work and assume any\n      risks associated with Your exercise of permissions under this License.\n\n   8. Limitation of Liability. In no event and under no legal theory,\n      whether in tort (including negligence), contract, or otherwise,\n      unless required by applicable law (such as deliberate and grossly\n      negligent acts) or agreed to in writing, shall any Contributor be\n      liable to You for damages, including any direct, indirect, special,\n      incidental, or consequential damages of any character arising as a\n      result of this License or out of the use or inability to use the\n      Work (including but not limited to damages for loss of goodwill,\n      work stoppage, computer failure or malfunction, or any and all\n      other commercial damages or losses), even if such Contributor\n      has been advised of the possibility of such damages.\n\n   9. Accepting Warranty or Additional Liability. While redistributing\n      the Work or Derivative Works thereof, You may choose to offer,\n      and charge a fee for, acceptance of support, warranty, indemnity,\n      or other liability obligations and/or rights consistent with this\n      License. However, in accepting such obligations, You may act only\n      on Your own behalf and on Your sole responsibility, not on behalf\n      of any other Contributor, and only if You agree to indemnify,\n      defend, and hold each Contributor harmless for any liability\n      incurred by, or claims asserted against, such Contributor by reason\n      of your accepting any such warranty or additional liability.\n\n   END OF TERMS AND CONDITIONS\n\n   APPENDIX: How to apply the Apache License to your work.\n\n      To apply the Apache License to your work, attach the following\n      boilerplate notice, with the fields enclosed by brackets \"[]\"\n      replaced with your own identifying information. (Don't include\n      the brackets!)  The text should be enclosed in the appropriate\n      comment syntax for the file format. We also recommend that a\n      file or class name and description of purpose be included on the\n      same \"printed page\" as the copyright notice for easier\n      identification within third-party archives.\n\n   Copyright 2023 Anthropic, PBC.\n\n   Licensed under the Apache License, Version 2.0 (the \"License\");\n   you may not use this file except in compliance with the License.\n   You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n   Unless required by applicable law or agreed to in writing, software\n   distributed under the License is distributed on an \"AS IS\" BASIS,\n   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n   See the License for the specific language governing permissions and\n   limitations under the License.\n"
+        },
+        {
+          "path": "node_modules/@anthropic-ai/sdk/LICENSE-MIT",
+          "sha256": "d09e6e88d79d708a5b9e9456104cf4ac0bd936191620e143aea35cbd89af3d87",
+          "text": "This repository changed its license from the MIT License to the Apache License, Version 2.0 (see LICENSE) in version 1.0.0 of the @anthropic-ai/sdk package. The MIT License below still applies to every version published under it, and to third-party contributions merged into this repository before the change.\n\n--------------------------------------------------------------------------------\n\nCopyright 2023 Anthropic, PBC.\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n"
+        }
+      ]
+    },
+    {
+      "name": "@babel/runtime",
+      "version": "7.29.10",
+      "location": "node_modules/@babel/runtime",
+      "purl": "pkg:npm/%40babel/runtime@7.29.10",
+      "integrity": "sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==",
+      "lockFingerprint": "370f79c6b60852df3a15af4309bdbc287af05efa8b6a0131b5216702a846c583",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "MIT",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "https://github.com/babel/babel.git",
+      "dependencies": {},
+      "licenseEvidence": [
+        {
+          "path": "node_modules/@babel/runtime/LICENSE",
+          "sha256": "117da2af0d4ce0fe1c8e19b5cff9dcd806adf973d328d27b11d4448c4ff24f76",
+          "text": "MIT License\n\nCopyright (c) 2014-present Sebastian McKenzie and other contributors\n\nPermission is hereby granted, free of charge, to any person obtaining\na copy of this software and associated documentation files (the\n\"Software\"), to deal in the Software without restriction, including\nwithout limitation the rights to use, copy, modify, merge, publish,\ndistribute, sublicense, and/or sell copies of the Software, and to\npermit persons to whom the Software is furnished to do so, subject to\nthe following conditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\nNONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE\nLIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION\nOF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION\nWITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n"
+        }
+      ]
+    },
+    {
       "name": "@eslint-community/eslint-utils",
       "version": "4.10.1",
       "location": "node_modules/@eslint-community/eslint-utils",
@@ -1381,6 +1433,27 @@
       ]
     },
     {
+      "name": "@opentelemetry/api",
+      "version": "1.10.0",
+      "location": "node_modules/@opentelemetry/api",
+      "purl": "pkg:npm/%40opentelemetry/api@1.10.0",
+      "integrity": "sha512-lMkyes8iHrG+mk6WH7X70MdCLI2RS0FwNBY1PyQ8UemaijE2m5mv5A0Niy3HtbYTFrgkUEQjFMXmSAk2hQDuPQ==",
+      "lockFingerprint": "d059fc936c1afd270c1a53b6569f1df5aeb36ba3811a919109328b55f66e19f0",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "Apache-2.0",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "open-telemetry/opentelemetry-js",
+      "dependencies": {},
+      "licenseEvidence": [
+        {
+          "path": "node_modules/@opentelemetry/api/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "text": "                                 Apache License\n                           Version 2.0, January 2004\n                        http://www.apache.org/licenses/\n\n   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n   1. Definitions.\n\n      \"License\" shall mean the terms and conditions for use, reproduction,\n      and distribution as defined by Sections 1 through 9 of this document.\n\n      \"Licensor\" shall mean the copyright owner or entity authorized by\n      the copyright owner that is granting the License.\n\n      \"Legal Entity\" shall mean the union of the acting entity and all\n      other entities that control, are controlled by, or are under common\n      control with that entity. For the purposes of this definition,\n      \"control\" means (i) the power, direct or indirect, to cause the\n      direction or management of such entity, whether by contract or\n      otherwise, or (ii) ownership of fifty percent (50%) or more of the\n      outstanding shares, or (iii) beneficial ownership of such entity.\n\n      \"You\" (or \"Your\") shall mean an individual or Legal Entity\n      exercising permissions granted by this License.\n\n      \"Source\" form shall mean the preferred form for making modifications,\n      including but not limited to software source code, documentation\n      source, and configuration files.\n\n      \"Object\" form shall mean any form resulting from mechanical\n      transformation or translation of a Source form, including but\n      not limited to compiled object code, generated documentation,\n      and conversions to other media types.\n\n      \"Work\" shall mean the work of authorship, whether in Source or\n      Object form, made available under the License, as indicated by a\n      copyright notice that is included in or attached to the work\n      (an example is provided in the Appendix below).\n\n      \"Derivative Works\" shall mean any work, whether in Source or Object\n      form, that is based on (or derived from) the Work and for which the\n      editorial revisions, annotations, elaborations, or other modifications\n      represent, as a whole, an original work of authorship. For the purposes\n      of this License, Derivative Works shall not include works that remain\n      separable from, or merely link (or bind by name) to the interfaces of,\n      the Work and Derivative Works thereof.\n\n      \"Contribution\" shall mean any work of authorship, including\n      the original version of the Work and any modifications or additions\n      to that Work or Derivative Works thereof, that is intentionally\n      submitted to Licensor for inclusion in the Work by the copyright owner\n      or by an individual or Legal Entity authorized to submit on behalf of\n      the copyright owner. For the purposes of this definition, \"submitted\"\n      means any form of electronic, verbal, or written communication sent\n      to the Licensor or its representatives, including but not limited to\n      communication on electronic mailing lists, source code control systems,\n      and issue tracking systems that are managed by, or on behalf of, the\n      Licensor for the purpose of discussing and improving the Work, but\n      excluding communication that is conspicuously marked or otherwise\n      designated in writing by the copyright owner as \"Not a Contribution.\"\n\n      \"Contributor\" shall mean Licensor and any individual or Legal Entity\n      on behalf of whom a Contribution has been received by Licensor and\n      subsequently incorporated within the Work.\n\n   2. Grant of Copyright License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      copyright license to reproduce, prepare Derivative Works of,\n      publicly display, publicly perform, sublicense, and distribute the\n      Work and such Derivative Works in Source or Object form.\n\n   3. Grant of Patent License. Subject to the terms and conditions of\n      this License, each Contributor hereby grants to You a perpetual,\n      worldwide, non-exclusive, no-charge, royalty-free, irrevocable\n      (except as stated in this section) patent license to make, have made,\n      use, offer to sell, sell, import, and otherwise transfer the Work,\n      where such license applies only to those patent claims licensable\n      by such Contributor that are necessarily infringed by their\n      Contribution(s) alone or by combination of their Contribution(s)\n      with the Work to which such Contribution(s) was submitted. If You\n      institute patent litigation against any entity (including a\n      cross-claim or counterclaim in a lawsuit) alleging that the Work\n      or a Contribution incorporated within the Work constitutes direct\n      or contributory patent infringement, then any patent licenses\n      granted to You under this License for that Work shall terminate\n      as of the date such litigation is filed.\n\n   4. Redistribution. You may reproduce and distribute copies of the\n      Work or Derivative Works thereof in any medium, with or without\n      modifications, and in Source or Object form, provided that You\n      meet the following conditions:\n\n      (a) You must give any other recipients of the Work or\n          Derivative Works a copy of this License; and\n\n      (b) You must cause any modified files to carry prominent notices\n          stating that You changed the files; and\n\n      (c) You must retain, in the Source form of any Derivative Works\n          that You distribute, all copyright, patent, trademark, and\n          attribution notices from the Source form of the Work,\n          excluding those notices that do not pertain to any part of\n          the Derivative Works; and\n\n      (d) If the Work includes a \"NOTICE\" text file as part of its\n          distribution, then any Derivative Works that You distribute must\n          include a readable copy of the attribution notices contained\n          within such NOTICE file, excluding those notices that do not\n          pertain to any part of the Derivative Works, in at least one\n          of the following places: within a NOTICE text file distributed\n          as part of the Derivative Works; within the Source form or\n          documentation, if provided along with the Derivative Works; or,\n          within a display generated by the Derivative Works, if and\n          wherever such third-party notices normally appear. The contents\n          of the NOTICE file are for informational purposes only and\n          do not modify the License. You may add Your own attribution\n          notices within Derivative Works that You distribute, alongside\n          or as an addendum to the NOTICE text from the Work, provided\n          that such additional attribution notices cannot be construed\n          as modifying the License.\n\n      You may add Your own copyright statement to Your modifications and\n      may provide additional or different license terms and conditions\n      for use, reproduction, or distribution of Your modifications, or\n      for any such Derivative Works as a whole, provided Your use,\n      reproduction, and distribution of the Work otherwise complies with\n      the conditions stated in this License.\n\n   5. Submission of Contributions. Unless You explicitly state otherwise,\n      any Contribution intentionally submitted for inclusion in the Work\n      by You to the Licensor shall be under the terms and conditions of\n      this License, without any additional terms or conditions.\n      Notwithstanding the above, nothing herein shall supersede or modify\n      the terms of any separate license agreement you may have executed\n      with Licensor regarding such Contributions.\n\n   6. Trademarks. This License does not grant permission to use the trade\n      names, trademarks, service marks, or product names of the Licensor,\n      except as required for reasonable and customary use in describing the\n      origin of the Work and reproducing the content of the NOTICE file.\n\n   7. Disclaimer of Warranty. Unless required by applicable law or\n      agreed to in writing, Licensor provides the Work (and each\n      Contributor provides its Contributions) on an \"AS IS\" BASIS,\n      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or\n      implied, including, without limitation, any warranties or conditions\n      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A\n      PARTICULAR PURPOSE. You are solely responsible for determining the\n      appropriateness of using or redistributing the Work and assume any\n      risks associated with Your exercise of permissions under this License.\n\n   8. Limitation of Liability. In no event and under no legal theory,\n      whether in tort (including negligence), contract, or otherwise,\n      unless required by applicable law (such as deliberate and grossly\n      negligent acts) or agreed to in writing, shall any Contributor be\n      liable to You for damages, including any direct, indirect, special,\n      incidental, or consequential damages of any character arising as a\n      result of this License or out of the use or inability to use the\n      Work (including but not limited to damages for loss of goodwill,\n      work stoppage, computer failure or malfunction, or any and all\n      other commercial damages or losses), even if such Contributor\n      has been advised of the possibility of such damages.\n\n   9. Accepting Warranty or Additional Liability. While redistributing\n      the Work or Derivative Works thereof, You may choose to offer,\n      and charge a fee for, acceptance of support, warranty, indemnity,\n      or other liability obligations and/or rights consistent with this\n      License. However, in accepting such obligations, You may act only\n      on Your own behalf and on Your sole responsibility, not on behalf\n      of any other Contributor, and only if You agree to indemnify,\n      defend, and hold each Contributor harmless for any liability\n      incurred by, or claims asserted against, such Contributor by reason\n      of your accepting any such warranty or additional liability.\n\n   END OF TERMS AND CONDITIONS\n\n   APPENDIX: How to apply the Apache License to your work.\n\n      To apply the Apache License to your work, attach the following\n      boilerplate notice, with the fields enclosed by brackets \"[]\"\n      replaced with your own identifying information. (Don't include\n      the brackets!)  The text should be enclosed in the appropriate\n      comment syntax for the file format. We also recommend that a\n      file or class name and description of purpose be included on the\n      same \"printed page\" as the copyright notice for easier\n      identification within third-party archives.\n\n   Copyright [yyyy] [name of copyright owner]\n\n   Licensed under the Apache License, Version 2.0 (the \"License\");\n   you may not use this file except in compliance with the License.\n   You may obtain a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\n   Unless required by applicable law or agreed to in writing, software\n   distributed under the License is distributed on an \"AS IS\" BASIS,\n   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n   See the License for the specific language governing permissions and\n   limitations under the License.\n"
+        }
+      ]
+    },
+    {
       "name": "@sindresorhus/slugify",
       "version": "2.2.1",
       "location": "node_modules/@sindresorhus/slugify",
@@ -1470,6 +1543,27 @@
       ]
     },
     {
+      "name": "@stablelib/base64",
+      "version": "1.0.1",
+      "location": "node_modules/@stablelib/base64",
+      "purl": "pkg:npm/%40stablelib/base64@1.0.1",
+      "integrity": "sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==",
+      "lockFingerprint": "be887dab33da548216753939496bc93e58c41cdea21fcf7587b9a64d81eff3a2",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "MIT",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "https://github.com/StableLib/stablelib",
+      "dependencies": {},
+      "licenseEvidence": [
+        {
+          "path": "node_modules/@stablelib/base64/LICENSE",
+          "sha256": "1605b77bebe018db1fc27bd22fbcdeed1335c617937a124299a8b042b42b0fb6",
+          "text": "This software is licensed under the MIT license:\n\nCopyright (C) 2016 Dmitry Chestnykh\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of\nthis software and associated documentation files (the \"Software\"), to deal in\nthe Software without restriction, including without limitation the rights to\nuse, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\nof the Software, and to permit persons to whom the Software is furnished to do\nso, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n"
+        }
+      ]
+    },
+    {
       "name": "@types/esrecurse",
       "version": "4.3.1",
       "location": "node_modules/@types/esrecurse",
@@ -1538,7 +1632,7 @@
       "location": "node_modules/@types/linkify-it",
       "purl": "pkg:npm/%40types/linkify-it@5.0.0",
       "integrity": "sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==",
-      "lockFingerprint": "c83360cd938d32361e050a791667cc9f8b99d444414259c57343a1a9a6000d59",
+      "lockFingerprint": "c16f97f5039765543b60fe5337cef889ec710a5ef63ca05bb07e1c4f7dd479c5",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -1583,7 +1677,7 @@
       "location": "node_modules/@types/mdurl",
       "purl": "pkg:npm/%40types/mdurl@2.0.0",
       "integrity": "sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==",
-      "lockFingerprint": "2f259180b4b1a625414441e0b0368a85549fba7b2d27c3bac87c2dcf5eb023bd",
+      "lockFingerprint": "8df386d9087e38f9c4105b5f210f042983a176a47936dd251651b8b7c774459b",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -1648,7 +1742,7 @@
       "location": "node_modules/acorn",
       "purl": "pkg:npm/acorn@8.18.0",
       "integrity": "sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ==",
-      "lockFingerprint": "5fd752c116b71949f68bba1e88456f8e5319489d42598af565b12ad7601a0628",
+      "lockFingerprint": "c76b78f5605dc25f20e2f1b248713c0fcd6f3a7d6322cd19f78a7c101afa9e45",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -2523,7 +2617,7 @@
       "location": "node_modules/eslint",
       "purl": "pkg:npm/eslint@10.9.1",
       "integrity": "sha512-9VaAkDURekixUQJy0oJYl2DcN6oKMfxay7XzaGYAWQwsb6qfKf+x76R2k1L8kb1boc+FyCAaTA9GmiKaaiaF+A==",
-      "lockFingerprint": "fc1f15c6a647840066010e684513d562ff1453b39f4181211e64c86095512edc",
+      "lockFingerprint": "e56e938853f215f75a0b5a348c1898082573702303e46f9732bc7707a486885f",
       "direct": true,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -2892,6 +2986,27 @@
           "path": "node_modules/fast-levenshtein/LICENSE.md",
           "sha256": "942a98cb8846a6354266193f173c1354615827fbb7d67f68399599dff12c4d6a",
           "text": "(MIT License)\n\nCopyright (c) 2013 [Ramesh Nair](http://www.hiddentao.com/)\n\nPermission is hereby granted, free of charge, to any person\nobtaining a copy of this software and associated documentation\nfiles (the \"Software\"), to deal in the Software without\nrestriction, including without limitation the rights to use,\ncopy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the\nSoftware is furnished to do so, subject to the following\nconditions:\n\nThe above copyright notice and this permission notice shall be\nincluded in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES\nOF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND\nNONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT\nHOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,\nWHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING\nFROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\nOTHER DEALINGS IN THE SOFTWARE.\n\n"
+        }
+      ]
+    },
+    {
+      "name": "fast-sha256",
+      "version": "1.3.0",
+      "location": "node_modules/fast-sha256",
+      "purl": "pkg:npm/fast-sha256@1.3.0",
+      "integrity": "sha512-n11RGP/lrWEFI/bWdygLxhI+pVeo1ZYIVwvvPkW7azl/rOy+F3HYRZ2K5zeE9mmkhQppyv9sQFx0JM9UabnpPQ==",
+      "lockFingerprint": "94d02f26181469f8b4368ef9a67cea9a7610ccbf1d20752c8892745ad812c586",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "Unlicense",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "https://github.com/dchest/fast-sha256-js",
+      "dependencies": {},
+      "licenseEvidence": [
+        {
+          "path": "node_modules/fast-sha256/LICENSE",
+          "sha256": "88d9b4eb60579c191ec391ca04c16130572d7eedc4a86daa58bf28c6e14c9bcd",
+          "text": "This is free and unencumbered software released into the public domain.\n\nAnyone is free to copy, modify, publish, use, compile, sell, or\ndistribute this software, either in source code form or as a compiled\nbinary, for any purpose, commercial or non-commercial, and by any\nmeans.\n\nIn jurisdictions that recognize copyright laws, the author or authors\nof this software dedicate any and all copyright interest in the\nsoftware to the public domain. We make this dedication for the benefit\nof the public at large and to the detriment of our heirs and\nsuccessors. We intend this dedication to be an overt act of\nrelinquishment in perpetuity of all present and future rights to this\nsoftware under copyright law.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND,\nEXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\nMERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.\nIN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR\nOTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,\nARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR\nOTHER DEALINGS IN THE SOFTWARE.\n\nFor more information, please refer to <http://unlicense.org>\n"
         }
       ]
     },
@@ -3861,6 +3976,30 @@
       ]
     },
     {
+      "name": "json-schema-to-ts",
+      "version": "3.1.1",
+      "location": "node_modules/json-schema-to-ts",
+      "purl": "pkg:npm/json-schema-to-ts@3.1.1",
+      "integrity": "sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==",
+      "lockFingerprint": "cd09681f52e1837bf47b7fb91a49bdf9cfc44e2ba5171ffcb5981726f8ffe701",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "MIT",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "git+https://github.com/ThomasAribart/json-schema-to-ts.git",
+      "dependencies": {
+        "@babel/runtime": "^7.18.3",
+        "ts-algebra": "^2.0.0"
+      },
+      "licenseEvidence": [
+        {
+          "path": "node_modules/json-schema-to-ts/LICENSE",
+          "sha256": "18a2bfd070b08bd1cc538c90f59989a9523e070e72fe9a9068593c3e82f44fa7",
+          "text": "MIT License\n\nCopyright (c) 2020 Thomas Aribart\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n"
+        }
+      ]
+    },
+    {
       "name": "json-schema-traverse",
       "version": "0.4.1",
       "location": "node_modules/json-schema-traverse",
@@ -4045,7 +4184,7 @@
       "location": "node_modules/linkify-it",
       "purl": "pkg:npm/linkify-it@6.1.0",
       "integrity": "sha512-wJ/TwpSDTLepCrQoYWYIExIKg5Zchex2Nn5yk2mFnB+6PtdkHtyLx742md9csRjjOnGkKIS/RrbY7l8D6gT9Vw==",
-      "lockFingerprint": "5ff58851c3351a55007ec4c3a505d0cd95d870faec534641ddaf282a39ec9911",
+      "lockFingerprint": "9343d8b5b17d2de2a04e433cc90bdd55e4c4f0c7ed9bb217e0d7151d675cd65d",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -4156,7 +4295,7 @@
       "location": "node_modules/markdown-it",
       "purl": "pkg:npm/markdown-it@15.0.1",
       "integrity": "sha512-9/7gE95FNPkfUWrjJIoHZza2iLmuJlPD0UNMxPi7bxUrbCR525YZY0r+zyfes0dZI5ZZ/uNIXUJca0pJvtw41g==",
-      "lockFingerprint": "af16bc15cbc2eb22f34550be19eabd931fb7786d675150b56bb06348dae26f7b",
+      "lockFingerprint": "18d2d13e76573ea8f7c419600c9512f5e549cd2f921aaa295b7eff306717ff76",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -4205,7 +4344,7 @@
       "location": "node_modules/markdown-it/node_modules/argparse",
       "purl": "pkg:npm/argparse@3.0.1",
       "integrity": "sha512-nM4mHF/KM1v59ZNKX7zfusQz5wUAxR511YG8Vo6TyiV4aqhu++rbJW4v04xsWhpSsHFj66flT8P7znVpyO20xQ==",
-      "lockFingerprint": "305fc3d65b4489e195439f0d31931813d34f7f7c9901a109249be0376de8bcc5",
+      "lockFingerprint": "a0c16f53f2567c64e9684c20312edf2ac4df30c976664384027c8d0da10c2264",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "PSF-2.0",
@@ -4226,7 +4365,7 @@
       "location": "node_modules/markdown-it/node_modules/entities",
       "purl": "pkg:npm/entities@8.0.0",
       "integrity": "sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==",
-      "lockFingerprint": "4fef6d4cc039674effbc0a5ed0c516f5f07539850c0834e22e250961cf4b3a45",
+      "lockFingerprint": "9ac7e62aacbe91ad8f6dc905f02330f7e11920324c3ad9f7804460d93d551212",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "BSD-2-Clause",
@@ -4784,7 +4923,7 @@
       "location": "node_modules/picomatch",
       "purl": "pkg:npm/picomatch@4.0.7",
       "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
-      "lockFingerprint": "96c34ee4e0af4a1b91b1018ce3823808144383284dac23be85266d358e98bf70",
+      "lockFingerprint": "361b24a993fd5d1864091d7953c120b12b61bbb9152b69a34450da76664b8d19",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -4828,7 +4967,7 @@
       "location": "node_modules/posthtml",
       "purl": "pkg:npm/posthtml@0.16.7",
       "integrity": "sha512-7Hc+IvlQ7hlaIfQFZnxlRl0jnpWq2qwibORBhQYIb0QbNtuicc5ZxvKkVT71HJ4Py1wSZ/3VR1r8LfkCtoCzhw==",
-      "lockFingerprint": "e6aacfc51088b9d4237a7f3a006f7a94287d3309af5c190a0db1a9986a36ddc2",
+      "lockFingerprint": "9d7913a998f9821584f1fe3cc74a8663c1b208df8e99e2736977c38643909123",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",
@@ -5475,6 +5614,24 @@
       ]
     },
     {
+      "name": "standardwebhooks",
+      "version": "1.1.1",
+      "location": "node_modules/standardwebhooks",
+      "purl": "pkg:npm/standardwebhooks@1.1.1",
+      "integrity": "sha512-bCbX9ZEyFkWPsRz7Bl3NuQUJohmwGSev/yhr7vhaGPlc4AfIrspIRa6cPTBuI1ItmrTDJ4d/S2hCsfe4+vQGnQ==",
+      "lockFingerprint": "d082772541e343c809f512c84d9038bc2dae188afa4a2e1d61a731d7e2b08aee",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "MIT",
+      "licenseEvidenceStatus": "full-license-text-missing",
+      "repository": "https://github.com/standard-webhooks/standard-webhooks",
+      "dependencies": {
+        "@stablelib/base64": "^1.0.0",
+        "fast-sha256": "^1.3.0"
+      },
+      "licenseEvidence": []
+    },
+    {
       "name": "statuses",
       "version": "2.0.2",
       "location": "node_modules/statuses",
@@ -5585,6 +5742,27 @@
       ]
     },
     {
+      "name": "ts-algebra",
+      "version": "2.0.0",
+      "location": "node_modules/ts-algebra",
+      "purl": "pkg:npm/ts-algebra@2.0.0",
+      "integrity": "sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==",
+      "lockFingerprint": "040b32d5b923400f80b9e6d10ab06d37816739ade62ae68c9b06f61d2dcd4f11",
+      "direct": false,
+      "scope": "runtime-npm",
+      "declaredLicense": "MIT",
+      "licenseEvidenceStatus": "license-text-recorded",
+      "repository": "git+https://github.com/ThomasAribart/ts-algebra.git",
+      "dependencies": {},
+      "licenseEvidence": [
+        {
+          "path": "node_modules/ts-algebra/LICENSE",
+          "sha256": "18a2bfd070b08bd1cc538c90f59989a9523e070e72fe9a9068593c3e82f44fa7",
+          "text": "MIT License\n\nCopyright (c) 2020 Thomas Aribart\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n"
+        }
+      ]
+    },
+    {
       "name": "type-check",
       "version": "0.4.0",
       "location": "node_modules/type-check",
@@ -5613,7 +5791,7 @@
       "location": "node_modules/uc.micro",
       "purl": "pkg:npm/uc.micro@3.0.0",
       "integrity": "sha512-U3PppEkleoTnIfi8BozMx3yju3qc/L6SwqWo2Sw+54PX+PX0q9I+r1Um5HCmqD7n9VDX5/v3vQH/AjA6deDdtw==",
-      "lockFingerprint": "2c7d2b396066d100936588eb82c5f12afc7e4f8ba1b0f2beabcd4c146cd9d991",
+      "lockFingerprint": "c450a8169af227e5ee3d3e5880d529eb360ec36ac019fb6a1b513d1f3b0c3b22",
       "direct": false,
       "scope": "development-install",
       "declaredLicense": "MIT",

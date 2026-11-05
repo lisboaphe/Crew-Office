@@ -134,13 +134,28 @@ export function createAgentEditor(ctx) {
     const provider = h('select', ...Object.entries(S.providers).map(([k, p]) => h('option', { value: k, selected: k === a.provider }, p.label)));
     const model = h('input', { value: a.model });
     const models = h('div.hint');
-    const showModels = () => { const p = S.providers[provider.value]; models.textContent = p.billing === 'paid' ? 'Billed per token. It will not run until you turn off “Never use paid API” on your worker.' : p.models.length ? `Models: ${p.models.join(', ')}` : 'Use the model name your local server serves.'; };
+    const known = h('datalist', { id: `models-${a.id}` });
+    model.setAttribute('list', known.id);
+    /** What may run for this role, from the owner's own worker. Each agent can use a different one. */
+    const showModels = async () => {
+      const p = S.providers[provider.value];
+      known.replaceChildren();
+      models.textContent = p.billing === 'paid' ? 'Billed per token. It will not run until you turn off “Never use paid API” on your worker.' : p.models.length ? `Models: ${p.models.join(', ')}` : provider.value === 'local' ? 'Use the model name your local server serves.' : 'Models are chosen under Connections. “default” means the one you chose there.';
+      if (!['account', 'mixed'].includes(p.billing) && provider.value !== 'openrouter-free' && provider.value !== 'kiro') return;
+      try {
+        const res = await fetch(`http://127.0.0.1:${S.workerPort ?? 8790}/ai/models?provider=${encodeURIComponent(provider.value)}`);
+        const r = await res.json();
+        const free = (r.models ?? []).filter((m) => !m.blocked);
+        known.replaceChildren(...free.map((m) => h('option', { value: m.id }, `${m.usageLabel}${m.tools === true ? ', uses tools' : ''}`)));
+        if (free.length) models.textContent = `${free.length} models may run on this connection. Start typing to see them. Anything that would cost money is refused on your worker, whatever is typed here.`;
+      } catch { /* the worker is not on this computer */ }
+    };
     provider.addEventListener('change', () => { model.value = S.providers[provider.value].defaultModel; showModels(); });
     showModels();
     return h('div', facts, actions,
       h('div.row.cr-two', field('Name', name), field('Colour', color)),
       field('Role', role),
-      h('div.row.cr-two', field('AI behind this agent', provider), field('Model', model)), models,
+      h('div.row.cr-two', field('AI behind this agent', provider), field('Model', model)), known, models,
       backups(a),
       capacity(a),
       h('div.actions', h('button.btn.primary', { onclick: saved(() => saveAgent({ name: name.value, role: role.value, color: color.value, provider: provider.value, model: model.value })) }, 'Save')));
@@ -164,7 +179,7 @@ export function createAgentEditor(ctx) {
       const reading = u?.reported?.[a.provider];
       box.lastChild.replaceWith(reading
         ? h('div', ...Object.entries(reading.windows).map(([n, w]) => h('div.cr-usage-window', h('div.row', h('span.grow', n), h('b', `${Math.round(w.usedPercent)}% used`)), usageBar(w.usedPercent))))
-        : h('p.hint', u ? 'Usage information unavailable' : 'Open this office from the Crew Office app to see your worker’s figures here.'));
+        : h('p.hint', u ? 'Usage unavailable' : 'Open this office from the Crew Office app to see your worker’s figures here.'));
     });
     return box;
   }

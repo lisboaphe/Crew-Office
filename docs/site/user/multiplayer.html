@@ -160,13 +160,16 @@ Without either one, Crew Office opens in your default browser and keeps a consol
 instead; closing that console stops the office.</p>
 <p>New here? Press <strong>📘 How it works</strong> in the lobby or the office for a short tour.</p>
 <h2 id="updates" tabindex="-1">Updates</h2>
-<p>When a new build is out, <strong>Update available</strong> appears at the top of the lobby and the office,
-on the computer that hosts it. Nothing installs until you press it. The app checks the
+<p><strong>Check for updates</strong> is at the top of the lobby and the office, on the computer that hosts it, and
+turns into <strong>Update available</strong> when a new build is out. Nothing installs until you press it. The app checks the
 published build's checksum, replaces itself, and comes back within about a minute; your
 offices, projects and sign-ins are kept. Everyone in the office is disconnected until then.</p>
 <p>Close any worker window first. A worker runs from the same folder, so while it is open the
 update stops and tells you, leaving the app as it was. Updating inside the app is Windows
 only for now; on macOS and Linux the button takes you to the download page.</p>
+<p>If the app's repository is private, GitHub has to know it is you: press <strong>Sign in to GitHub</strong> and
+finish in the window that opens, with an account that can see it. That needs the GitHub CLI
+installed. If you cannot see the repository, ask whoever runs it for the new setup program.</p>
 <p>To look for updates the app asks GitHub for the latest build, so GitHub sees that request
 come from your address. Other players' copies are not involved: a player only needs the
 host's address, and uses whatever the host runs.</p>
@@ -286,9 +289,28 @@ to one by itself: a subscription limit pauses the work.</p>
 <p>Anthropic does not allow third-party apps to route requests through Claude plan credentials on
 behalf of users, so Claude Code is offered as a manual handoff: the app prepares each task and
 you run it in your own Claude Code.</p>
-<p>Free tiers offer a way in with no subscription. <strong>OpenRouter free models</strong> run on your own
-OpenRouter key and refuse anything that is not free, so they cannot charge you. Free models can
-log what they are sent, so do not use them for private code.</p>
+<p>Connections groups everything by what it costs you:</p>
+<ul>
+<li><strong>My subscriptions</strong>: ChatGPT, Codex, Claude Code and Kiro, on your own plan.</li>
+<li><strong>Free and developer AI</strong>: Cloudflare Workers AI, Google Gemini, Mistral, OpenRouter's free models,
+NVIDIA NIM's developer access and OpenCode's free models.</li>
+<li><strong>Other cloud providers</strong>: Z.ai and Ollama Cloud.</li>
+<li><strong>Local AI</strong>: Ollama and LM Studio, on this computer.</li>
+<li><strong>Advanced: paid APIs</strong>: off unless you turn them on.</li>
+</ul>
+<p>Each card opens the service's own page and walks you through getting a key. Keys are encrypted on your
+computer, and go only to that service. Every player connects their own, and the office host never
+receives them.</p>
+<p><strong>Nothing runs until it is established that it will not charge you.</strong> Some services use one key for
+free and paid use, and will not tell the app which yours is. Those say <strong>Verification required</strong>:
+look at your own account, then confirm what you found. If that later changes, for example if you link
+billing to a Google project, remove your confirmation under <strong>Configure</strong>. Where a service has free
+and paid models, only the free ones can be chosen. When a free allowance runs out, the work pauses,
+or moves to a backup you ticked. It never moves to something that costs money.</p>
+<p>Press <strong>Models</strong> to see each model and what the service says about it, and choose one. Agents can each
+use a different one. Anything a service does not report says <strong>Not reported</strong>.</p>
+<p>Free models can log or learn from what they are sent, so do not use them for private code. Each card
+says what is known for that service.</p>
 <h3 id="backup-ais" tabindex="-1">Backup AIs</h3>
 <p>In an agent's editor, under <strong>Overview</strong>, you can tick other AIs for it to move to if one reports
 a limit. It tries each one at most once per job, and pauses when they are all out. The whole task

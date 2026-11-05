@@ -6,7 +6,7 @@
 // able to drive their worker, so they get their worker's own page and the same steps there.
 
 import { h, api, toast, modal } from './common.js';
-import { statusChip, STATUS } from './connections.js';
+import { statusChip, STATUS, connectForm, verifyForm, modelPicker, GROUPS } from './connections.js';
 
 const PRESETS = [
   { id: 'developer', name: 'Developer', role: 'Software Developer', skills: ['code', 'testing', 'git'], tools: ['messaging', 'files.read', 'files.write', 'memory', 'exec', 'git'], blurb: 'Writes and changes code on its own branch.', instructions: 'Work in small, tested steps. Say plainly what you could not finish.' },
@@ -70,9 +70,7 @@ export function addWorkerWizard(ctx) {
           const pick = (c) => h('button.cr-preset.cr-ai', { class: c.status === 'working' ? 'ready' : '', onclick: () => { state.card = c; go(2); } }, h('div.row', h('b.grow', c.name), statusChip(c)), h('span.hint', c.method));
           const group = (g) => data.cards.filter((c) => c.group === g).map(pick);
           box.replaceChildren(
-            h('h4', 'Your subscription'), h('div.cr-preset-grid', ...group('subscription')),
-            h('h4', 'Local AI'), h('div.cr-preset-grid', ...group('local')),
-            h('h4', 'Free tiers'), h('div.cr-preset-grid', ...group('free')),
+            ...GROUPS.flatMap(([g, title]) => (group(g).length ? [h('h4', title), h('div.cr-preset-grid', ...group(g))] : [])),
             h('details', h('summary', 'Advanced: paid APIs'), h('p.hint', 'Billed per token, separately from any subscription. Nothing ever falls back to these.'), h('div.cr-preset-grid', ...group('paid'))));
         } catch (e) { box.replaceChildren(h('p.error', e.message), h('button.btn', { onclick: render }, 'Try again')); }
       })();
@@ -102,8 +100,9 @@ export function addWorkerWizard(ctx) {
         state.card = c;
         const installed = c.status !== 'notinstalled' && c.status !== 'unavailable';
         const signedIn = !['signin', 'notinstalled'].includes(c.status);
+        const refresh = async () => { const { cards } = await link.get('/setup/connections'); const now = cards.find((x) => x.id === c.id); if (now) draw(now); };
         const manual = c.provider === 'claude-handoff';
-        const ready = c.status === 'working' || (manual && signedIn && installed);
+        const ready = (c.status === 'working' && (!c.connected || Boolean(c.chosenModel) || c.provider === 'kiro')) || (manual && signedIn && installed);
         continueBtn.disabled = !ready;
         const note = h('p.hint');
         const action = (label, fn) => { const b = h('button.btn.primary', label); b.addEventListener('click', async () => { b.disabled = true; try { await fn(note); } catch (e) { note.textContent = e.message; } b.disabled = false; }); return b; };
@@ -124,11 +123,11 @@ export function addWorkerWizard(ctx) {
           await link.post('/setup/signin', { tool: c.signIn.tool });
           n.textContent = `${c.name} opened its own sign-in. Finish it there. This continues by itself.`;
         }));
-        if (c.group === 'free' && c.status === 'signin') {
-          const key = h('input', { type: 'password', autocomplete: 'off', placeholder: 'Paste your key. It stays on this computer.' });
-          steps.append(key, action('Save key', async (n) => { await link.post('/keys', { provider: c.provider, apiKey: key.value }); n.textContent = 'Saved.'; }));
-          if (c.install?.docs) steps.append(h('a.btn', { href: c.install.docs, target: '_blank', rel: 'noopener' }, 'Get a key'));
-        }
+        const guided = [];
+        if (c.connected && c.needsKey && c.statusText === 'API key needed') guided.push(connectForm(link, c, refresh));
+        if (c.connected && !c.needsKey && c.status === 'notinstalled') guided.push(h('ol.hint', ...c.steps.map((s) => h('li', s))));
+        if (c.connected && c.status === 'verify') guided.push(h('h4', 'Check your account first'), verifyForm(link, c, refresh));
+        if (c.connected && c.isConnected && c.status !== 'verify' && c.provider !== 'kiro') guided.push(h('h4', 'Choose a model'), modelPicker(link, c, { onPick: (m) => { state.model = m.id; refresh(); } }));
         if (c.needsKey && c.status === 'unavailable') steps.append(h('p.cr-provider-note', 'Paid API is off, so this cannot be used. To allow it, turn off “Never use paid API” under Connections. Only agents you set to it would ever use it.'));
         if (c.canTest && c.status !== 'working') steps.append(action('Run a real test', async (n) => {
           n.textContent = 'Sending one small real request…';
@@ -140,9 +139,9 @@ export function addWorkerWizard(ctx) {
           h('ul.cr-checklist',
             row(installed, 'Installed', c.installed),
             c.technical?.path && c.technical.path !== 'not found' ? row(true, 'Found on this computer', c.technical.path) : null,
-            row(signedIn ? true : installed ? false : null, c.group === 'local' ? 'No account needed' : 'Signed in', c.account),
+            row(signedIn ? true : installed ? false : null, c.group === 'local' ? 'No account needed' : /^None needed/.test(c.account ?? '') ? 'No account needed' : c.fields?.length && !c.signIn ? 'Key saved' : 'Signed in', c.account),
             manual ? row(signedIn && installed ? true : null, 'Runs by hand', 'You run each task in Claude Code') : row(c.status === 'working' ? true : null, 'A real test got an answer', c.status === 'working' ? null : 'Not yet')),
-          c.detail ? h('p', c.detail) : null, c.notice ? h('p.cr-provider-note', c.notice) : null, steps, note, nav(true, continueBtn)].filter(Boolean));
+          c.detail ? h('p', c.detail) : null, c.notice ? h('p.cr-provider-note', c.notice) : null, ...guided, steps, note, nav(true, continueBtn)].filter(Boolean));
       };
       draw(state.card);
       // Whatever the person does in the provider's own window, this notices and moves on.
@@ -151,7 +150,7 @@ export function addWorkerWizard(ctx) {
         try {
           const { cards } = await link.get('/setup/connections');
           const now = cards.find((x) => x.id === state.card.id);
-          if (now && (now.status !== state.card.status || now.account !== state.card.account)) { toast(`${now.name}: ${STATUS[now.status]?.label}`); draw(now); }
+          if (now && (now.status !== state.card.status || now.account !== state.card.account) && !box.querySelector('input:focus')) { toast(`${now.name}: ${STATUS[now.status]?.label}`); draw(now); }
         } catch { /* the worker is restarting */ }
       }, 3000);
       return box;
@@ -173,7 +172,7 @@ export function addWorkerWizard(ctx) {
       const create = async () => {
         err.textContent = '';
         try {
-          const model = S.providers[state.card.provider]?.defaultModel;
+          const model = state.model ?? state.card.chosenModel ?? S.providers[state.card.provider]?.defaultModel;
           const { agent } = await api('POST', `${R}/agents`, { name: name.value, role: role.value, skills: p.skills, instructions: instructions.value, provider: state.card.provider, model, color: color.value, tools: tools.filter((t) => t.box.checked).map((t) => t.k), isManager: Boolean(p.isManager) });
           if (p.orchestrationRole) await api('PUT', `${R}/agents/${agent.id}/profile`, { orchestrationRole: p.orchestrationRole });
           await api('PUT', `${R}/rules/agent/${agent.id}`, { rules: { approvalMode: approval.value, testsBeforeDone: tests.box.checked, requireReview: review.box.checked } });

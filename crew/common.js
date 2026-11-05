@@ -108,20 +108,27 @@ export function confirmDeleteOffice(room) {
 
 let updateCheck = null;
 
-/** “Update available”, only on the computer that hosts, and only once there is one. */
+/**
+ * The update option, on the computer that hosts and nowhere else. It is always there, and turns
+ * into “Update available” once there is one, so finding out never depends on being told.
+ */
 export function updateNotice() {
   const slot = h('span.cr-update');
   updateCheck ??= api('GET', '/api/crew/update').catch(() => null);
   updateCheck.then((u) => {
-    if (u?.available) slot.replaceChildren(h('button.btn.primary', { onclick: () => askToUpdate(u), title: `Build ${u.latest.build} is ready to install` }, 'Update available'));
+    if (!u || (u.available === false && u.enabled === undefined)) return; // Not the hosting computer.
+    slot.replaceChildren(u.available
+      ? h('button.btn.primary', { onclick: () => updateDialog(u), title: `Build ${u.latest.build} is ready to install` }, 'Update available')
+      : h('button.btn.small', { onclick: () => updateDialog(u), title: 'Check GitHub for a newer version' }, 'Check for updates'));
   });
   return slot;
 }
 
-function askToUpdate(u) {
+function updateDialog(first) {
   modal('Update Crew Office', (close) => {
+    const body = h('div');
     const err = h('p.error');
-    const go = async () => {
+    const install = async (u) => {
       err.textContent = '';
       try {
         await api('POST', '/api/crew/update/install');
@@ -129,12 +136,31 @@ function askToUpdate(u) {
         waitForUpdate(u.current.build);
       } catch (e) { err.textContent = e.message; }
     };
-    return h('div',
-      h('p', `Build ${u.latest.build} is ready. You have build ${u.current.build}.`),
-      u.canInstall
-        ? [h('p.hint', 'The office stops for a moment and everyone in it is disconnected until it is back. Your offices, projects and sign-ins are kept. Close any worker window first: it runs from the same folder and would block the update.'),
-          err, h('div.actions', h('button.btn', { onclick: () => close() }, 'Not now'), h('button.btn.primary', { onclick: go }, 'Update now'))]
-        : [h('p.hint', u.reason), h('div.actions', h('button.btn', { onclick: () => close() }, 'Close'), h('a.btn.primary', { href: u.latest.url, target: '_blank', rel: 'noopener' }, 'Open the download page'))]);
+    const check = async () => {
+      body.replaceChildren(h('p.hint', 'Asking GitHub…'));
+      try { draw(await api('GET', '/api/crew/update?force=1')); } catch (e) { body.replaceChildren(h('p.error', e.message)); }
+    };
+    const cancel = (label) => h('button.btn', { onclick: () => close() }, label);
+    const again = () => h('button.btn', { onclick: check }, 'Check again');
+    const draw = (u) => {
+      if (!u.enabled) { body.replaceChildren(h('p', u.reason), h('div.actions', cancel('Close'))); return; }
+      const have = `You have build ${u.current.build}${u.current.commit ? ` (${String(u.current.commit).slice(0, 7)})` : ''}.`;
+      if (u.needsSignIn) {
+        body.replaceChildren(h('p', 'This app’s updates come from a private repository, so GitHub needs to know it is you.'),
+          h('p.hint', `${have} Sign in once with an account that can see ${u.repo}. It uses the official GitHub CLI, in its own window, and nothing here sees your password.`), err,
+          h('div.actions', cancel('Not now'), again(), h('button.btn.primary', { onclick: async () => { err.textContent = ''; try { await api('POST', '/api/crew/update/sign-in'); err.textContent = 'Finish in the window that opened, then press Check again. If none opened, install GitHub CLI from cli.github.com first.'; } catch (e) { err.textContent = e.message; } } }, 'Sign in to GitHub')));
+        return;
+      }
+      if (u.error) { body.replaceChildren(h('p', 'Could not check for updates.'), h('p.hint', u.error), h('div.actions', cancel('Close'), again())); return; }
+      if (!u.available) { body.replaceChildren(h('p', u.latest ? 'You are up to date.' : 'No version has been published yet.'), h('p.hint', `${have}${u.latest ? ` The newest published is build ${u.latest.build}.` : ''}`), h('div.actions', cancel('Close'), again())); return; }
+      body.replaceChildren(h('p', `Build ${u.latest.build} is ready. ${have}`), ...(u.canInstall
+        ? [h('p.hint', 'It downloads from GitHub, is checked against its published checksum, and installs over this one. The office stops for a moment and everyone in it is disconnected until it is back. Your offices, projects and sign-ins are kept. Close any worker window first: it runs from the same folder and would block the update.'),
+          err, h('div.actions', cancel('Not now'), h('button.btn.primary', { onclick: () => install(u) }, 'Update now'))]
+        : [h('p.hint', u.reason), h('div.actions', cancel('Close'), h('a.btn.primary', { href: u.latest.url, target: '_blank', rel: 'noopener' }, 'Open the download page'))]));
+    };
+    draw(first);
+    check();
+    return body;
   });
 }
 
