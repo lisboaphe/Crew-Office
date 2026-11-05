@@ -66,3 +66,13 @@ These were real, in code that looked finished. They are recorded because they ar
 7. **Node flags such as `--require` and `--env-file` were allowed** in sandbox commands. Tested harmless today, but now refused by an allowlist.
 8. **Clones inherited the machine's Git configuration**, including any LFS or filter settings.
 9. **Browser crash reports were always refused**, so client errors were never recorded.
+
+## Memory and the code graph
+
+| Threat | What stops it | What it does not stop |
+| --- | --- | --- |
+| A player or agent reads another player's private memory | Checked per row in `lib/crew/knowledge.cjs`, and refusals are audited. Mem0 is asked about permitted namespaces only, and its answers are checked again | The person running the host can read the database file. The screens say so |
+| A memory tells an agent to do something | Tools are issued from grants on every call, and nothing reads memory to decide. It is also presented as reference material | A model can still be misled in what it writes, within what it is allowed to do |
+| A secret ends up in shared memory or a graph | Patterns remove credentials and home folders on the way in. Sensitive files are deleted before Graphify runs, and its output is rebuilt field by field | A pattern can miss a secret, so the screens say not to store them |
+| A hostile repository attacks the graph build | A plain export with no symlinks, hooks or filters, no API keys in the environment, no shell, and untrusted handling of the output | A flaw in Graphify's own parsers is run on the host, against code from other players. It runs as the host's user, without a sandbox |
+| An engine reaches a paid service | Off by default, per project. Local providers only, API keys removed from the environment, and Mem0's language model pointed at a closed port | It downloads the chosen model once, from where that provider keeps it |

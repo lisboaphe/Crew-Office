@@ -6,6 +6,7 @@
 // app does, and clicking anything opens the real logs and files.
 
 import { h, api, toast, modal, ago, helpTip } from './common.js';
+import { openGuidedTour } from './tutorial.js';
 
 const NODE = {
   lead: { label: 'Lead Agent', hint: 'Owns the run and writes the final summary.', color: '#9b6dff' },
@@ -19,6 +20,7 @@ const NODE = {
   merge: { label: 'Merge', hint: 'Checks the work really merged. Merging itself goes through review.', color: '#d364b8' },
   completion: { label: 'Completion', hint: 'The end of a path.', color: '#8b95a9' },
 };
+const TOUR_SEEN = 'crew.orchestratorTourSeen';
 const W = 190;
 const H = 66;
 const STATE_TONE = { completed: 'ok', in_progress: 'run', queued: 'run', review: 'run', awaiting_approval: 'wait', waiting: 'wait', pending: 'idle', failed: 'bad', blocked: 'bad', cancelled: 'muted' };
@@ -192,7 +194,7 @@ export function createOrchestrator(ctx) {
 
   function drawList() {
     return h('div',
-      h('div.row', h('h2.grow', 'Playbooks'), helpTip('What is a playbook?', ['A saved plan of who does what, and in what order.', 'Start from a template and choose your agents.', 'Run it with a goal. Each step becomes a real task you can watch.'])),
+      h('div.row', h('h2.grow', 'Playbooks'), h('button.btn.small', { onclick: tour, title: 'A guided tour of the Orchestrator' }, 'How it works'), helpTip('What is a playbook?', ['A saved plan of who does what, and in what order.', 'Start from a template and choose your agents.', 'Run it with a goal. Each step becomes a real task you can watch.'])),
       data.playbooks.length ? h('div.cr-list', ...data.playbooks.map((p) => h('div.cr-item.click.row', { onclick: () => { current = structuredClone(p); dirty = false; drawEditor(); } }, h('div.grow', h('b', p.name), h('div.hint', `${p.graph.nodes.length} steps · ${p.description || 'No description'}`)), h('span.hint', ago(p.updatedAt))))) : h('p.hint', 'No playbooks yet. Start from one of these:'),
       h('h3', 'Start from a template'),
       h('div.cr-preset-grid', ...data.templates.map((t) => h('button.cr-preset', { onclick: () => create({ templateId: t.id }) }, h('b', t.name), h('span.hint', t.description))),
@@ -226,7 +228,7 @@ export function createOrchestrator(ctx) {
     setTimeout(() => canvas.fitAll());
     return h('div.cr-board',
       h('div.cr-board-head', h('button.btn.small', { onclick: () => { if (dirty && !confirm('Leave without saving?')) return; current = null; dirty = false; drawEditor(); } }, '← Playbooks'), name, h('span.grow'),
-        h('button.btn.small.danger', { onclick: remove }, 'Delete'), saveBtn, h('button.btn.primary', { onclick: async () => { await save(); startRun(); } }, 'Run')),
+        h('button.btn.small', { onclick: tour, title: 'A guided tour of the Orchestrator' }, 'How it works'), h('button.btn.small.danger', { onclick: remove }, 'Delete'), saveBtn, h('button.btn.primary.cr-run-btn', { onclick: async () => { await save(); startRun(); } }, 'Run')),
       palette, h('div.cr-board-main', canvas.el, inspector));
   }
 
@@ -285,6 +287,68 @@ export function createOrchestrator(ctx) {
       };
       return h('div', h('div.cr-field', h('label', 'Goal'), goal), h('p.hint', 'Each step becomes a real task. Your agents use your own connections; a limit pauses the work, and nothing switches to a paid API.'), err,
         h('div.actions', h('button.btn', { onclick: () => close() }, 'Cancel'), h('button.btn.primary', { onclick: go }, 'Start')));
+    });
+  }
+
+  // --- the guided tour ---------------------------------------------------------------------
+
+  const here = (sel) => () => editorRoot.querySelector(sel);
+  let touring = null;
+
+  function tour() {
+    touring?.close();
+    const example = data.templates.find((t) => t.id === 'build-review') ?? data.templates[0];
+    touring = openGuidedTour({
+      label: 'How the Orchestrator works',
+      onClose: () => { touring = null; try { localStorage.setItem(TOUR_SEEN, '1'); } catch { /* it may offer again */ } },
+      steps: [
+        { title: 'The Orchestrator', lines: [
+          'You draw who does what, and in what order. That drawing is a playbook, and you can run it as many times as you like.',
+          'A run is not a simulation. Each step becomes a real task on the board, done by a real agent, on its owner’s computer and with its owner’s connection.',
+          'You can try everything as we go: this tour does not block the page.',
+        ] },
+        { title: 'Start from a template', spot: () => (current ? null : editorRoot.querySelector('.cr-preset-grid')), lines: [
+          'Four ready-made shapes: one agent, build and review, parallel workers, and try-then-rescue.',
+          'Choosing one only makes a draft. Nothing runs until you press Run.',
+        ], action: !current && example ? { label: `Open “${example.name}” as a draft to follow along`, run: () => create({ templateId: example.id }) } : undefined,
+        away: 'You already have a playbook open, so the templates are behind ← Playbooks.' },
+        { title: 'The ten kinds of step', spot: here('.cr-palette'), away: 'Open a playbook to see these.', lines: [
+          'Lead and Worker are agents. The Lead owns the run and writes the final summary. A Worker does the steps it is connected to.',
+          'Task, Code Review and Test are work for an agent to do.',
+          'Condition, Approval, Merge and Completion have no AI in them. The office settles those itself, from what really happened.',
+          'Click one to add it, or drag it onto the board.',
+        ] },
+        { title: 'Connect them', spot: here('.cr-canvas'), away: 'Open a playbook to see the board.', lines: [
+          'Drag from a step’s right edge to another step: the second waits for the first.',
+          'Steps with no connection between them run at the same time. That is how you get parallel work.',
+          'Connect a Worker to a Task to give it that task. With none connected, you can name a role and the best agent for it is picked.',
+          'Select anything and press Delete to remove it. Scroll to zoom, drag the background to move.',
+        ] },
+        { title: 'Choose who does it', spot: here('.cr-inspector'), away: 'Open a playbook to see this panel.', lines: [
+          'Click a step and this panel shows its settings: which agent, or what to do.',
+          'You can name a friend’s agent. They are asked when the run starts, the step waits until they lend it, and it runs on their computer and their plan.',
+          'The Lead has to be one of your own.',
+        ] },
+        { title: 'Set the rules', spot: here('.cr-inspector'), away: 'Open a playbook to see this panel.', lines: [
+          'Click the empty board and this panel shows the rules for the whole playbook: approvals, another agent reviewing before a merge, tests before done, a Git repository.',
+          'With approvals off, Approval steps pass by themselves. Deleting things and rolling back still ask, whatever you set here.',
+        ] },
+        { title: 'Run it', spot: here('.cr-run-btn'), away: 'Open a playbook to see the Run button.', lines: [
+          'Run saves the playbook and asks for a goal, such as “Build a small task management web app”.',
+          'Every agent needs its worker online. A step that cannot start says why and waits.',
+          'A usage limit pauses the work. Nothing switches to a paid API by itself.',
+        ] },
+        { title: 'Watch it happen', spot: () => document.querySelector('.cr-tabs'), lines: [
+          'The Runs tab shows the same board, lit up by what each step is really doing. Click any step to open its logs and files.',
+          'Agents also work on the 3D floor, and talk in the project’s channel in the chat on the right.',
+          'Approvals wait for you at the tick at the top of the screen.',
+        ] },
+        { title: 'What agents can use', lines: [
+          'A run is an ordinary project, so if Memory & Knowledge is on for it, its agents get relevant memories and a map of the code before they start.',
+          'That material is treated as information only. It never changes what an agent is allowed to do.',
+          'Stop All AI Activity at the top of the screen stops everything, at any moment.',
+        ] },
+      ],
     });
   }
 
@@ -351,7 +415,7 @@ export function createOrchestrator(ctx) {
   }
 
   /** Called when the Orchestrator's tabs are shown. */
-  const showEditor = () => { load().then(() => { if (!current || !editorRoot.firstChild) drawEditor(); }).catch((e) => toast(e.message)); return editorRoot; };
+  const showEditor = () => { if (!editorRoot.firstChild) editorRoot.replaceChildren(h('p.hint', 'Loading playbooks…')); load().then(() => { if (!current || !editorRoot.firstChild) drawEditor(); offerTour(); }).catch((e) => toast(e.message)); return editorRoot; };
   const showRuns = (id = null) => { load().then(() => { if (id) watch(id); else drawRuns(); }).catch((e) => toast(e.message)); return runsRoot; };
 
   /** Someone saved a playbook. The list can follow; a board somebody is drawing on stays put. */
@@ -370,6 +434,13 @@ export function createOrchestrator(ctx) {
     await load();
   }
 
+  /** Once per browser, the first time someone opens the Orchestrator. */
+  function offerTour() {
+    let seen = true;
+    try { seen = localStorage.getItem(TOUR_SEEN) === '1'; } catch { /* no memory, so do not nag */ }
+    if (!seen && !touring && editorRoot.isConnected) setTimeout(tour, 350);
+  }
+
   load().catch(() => {});
-  return { showEditor, showRuns, changed, playbooksUsing, addToPlaybook, playbooks: () => data.playbooks };
+  return { showEditor, showRuns, changed, playbooksUsing, addToPlaybook, tour, playbooks: () => data.playbooks };
 }

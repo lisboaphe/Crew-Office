@@ -1,5 +1,25 @@
 # Changelog
 
+## Glass interface, new navigation, Memory & Knowledge
+
+### Added
+
+- **A guided tour of the Orchestrator**, pointing at each real control while you try it.
+- **Navigation you open by resting the mouse on it**, which stays open until you click elsewhere or press Esc. It replaces the two rows of buttons over the office and the rail inside the dashboard.
+- **Memory & Knowledge**: searchable, editable memories for you, your team and a project, each recording the code version it was written against. Agents get relevant ones before they start, per project, and they cannot widen what an agent may do.
+- **An interactive code graph** built from merged code, with search, connections and source. It needs the optional [Graphify](https://github.com/Graphify-Labs/graphify).
+- **Search by meaning**, with the optional [Mem0](https://github.com/mem0ai/mem0) and a local model you choose. Without it, search matches words.
+- **Friends** and **Preferences** pages.
+
+### Changed
+
+- **Dark glass** with blue and violet gradients is now the look of the app. Light glass is in Preferences.
+- **Chat** stays on the right, with unread counts per channel. What you are typing and where you have scrolled now survive the office's updates, which used to lose both.
+
+### Fixed
+
+- The tour no longer says internet play needs a VPN.
+
 ## Automatic internet invitations
 
 Host Office now makes an office reachable by itself, once a connectivity service is deployed. See [its deployment guide](docs/developer/connectivity-service.md). None is running yet, so until then Host Office says so and offers no link.

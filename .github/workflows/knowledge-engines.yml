@@ -1,0 +1,50 @@
+# The real Graphify and the real Mem0, on a machine that has Python. Separate from CI because it installs
+# large packages and downloads an embedding model, and only runs when the code touching them changes.
+#
+# No key is given to it, and neither engine needs one: this is also the check that they work with none.
+
+name: Knowledge engines
+
+on:
+  pull_request:
+    paths:
+      - 'lib/crew/knowledge*.cjs'
+      - 'lib/crew/mem0_bridge.py'
+      - 'lib/crew/scrub.cjs'
+      - 'test/knowledge-engines.test.cjs'
+      - '.github/workflows/knowledge-engines.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'lib/crew/knowledge*.cjs'
+      - 'lib/crew/mem0_bridge.py'
+      - 'lib/crew/scrub.cjs'
+      - 'test/knowledge-engines.test.cjs'
+      - '.github/workflows/knowledge-engines.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  engines:
+    name: Real Graphify and Mem0
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install graphifyy mem0ai fastembed
+      - run: pip list | grep -iE '^(graphifyy|mem0ai|fastembed|qdrant-client) '
+      - run: node --test test/knowledge-engines.test.cjs
+        env:
+          CREW_TEST_ENGINES: '1'

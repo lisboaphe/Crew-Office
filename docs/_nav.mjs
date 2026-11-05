@@ -132,6 +132,7 @@ export const NAV = {
         { url: '/developer/architecture.html', title: 'Architecture' },
         { url: '/developer/multiplayer.html', title: 'The multiplayer layer' },
         { url: '/developer/connectivity-service.html', title: 'Deploying the connectivity service' },
+        { url: '/developer/memory-and-knowledge.html', title: 'Memory and knowledge' },
         { url: '/developer/upgrade-report.html', title: 'Upgrade report: Git, rules, budgets' },
         { url: '/developer/ai-providers.html', title: 'AI providers: billing rules and test status' },
         { url: '/developer/9router-assessment.html', title: '9Router: compatibility and licensing' },
