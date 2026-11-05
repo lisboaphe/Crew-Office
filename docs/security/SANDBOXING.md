@@ -50,4 +50,4 @@ Clones disable hooks, symlinks, submodule recursion, `file` and `ext` protocols,
 
 - Projects that need packages, or any language but Node, cannot run tests in the sandbox. Python scripts can be written and reviewed, but not run.
 - The process level's network guard is code inside the process. It blocks every route ordinary code has, and it was attacked with `fetch`, `net`, `http` and `dns`. It is still not a kernel boundary.
-- **Docker mode has not been run on this project's test machine**, because Docker is not installed there. Its arguments are checked; its behaviour is not.
+- **Docker mode runs only in CI**, on Linux with GitHub's Docker: a sandboxed test run has to pass there. It has not been run under Docker Desktop on Windows or macOS.

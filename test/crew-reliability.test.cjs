@@ -69,6 +69,34 @@ test('an expired lease is a failed attempt; the task retries, then fails, and de
   assert.ok(crew.work.notificationsFor(r.id, alice.id).some((n) => /failed/.test(n.text)), 'the creator was told');
 });
 
+// Found by release runs failing at random: a timer left behind by a finished job reached a closed
+// database and became an uncaught exception, in whichever test happened to be running by then.
+test('closing the office cancels what was still waiting to run', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { crew, close } = makeCrew();
+  const { alice, room: r } = room(crew);
+  const a = agent(crew, r.id, alice.id, 'A', 'Dev', { isManager: true });
+  present(crew, r.id, alice.id);
+  const wk = workerFor(crew, r.id, alice.id).auth();
+  oneTask(crew, r, alice, a);
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const job = crew.jobs.claim(wk);
+    assert.ok(job, `attempt ${attempt} handed out`);
+    crew.db.run('UPDATE jobs SET lease_until = 1 WHERE id = ?', job.id);
+    crew.jobs.sweep();
+    crew.work.schedule();
+  }
+  let recorded = 0;
+  const record = crew.crash.record;
+  crew.crash.record = (...args) => { recorded++; return record(...args); };
+  crew.work.kick();
+  close();
+  crew.work.kick();
+  assert.doesNotThrow(() => t.mock.timers.tick(60_000), 'the agent\u2019s status reset no longer fires');
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.strictEqual(recorded, 0, 'and the scheduler did not run against a closed database');
+});
+
 test('attended workers follow their owner; always-on workers do not', async (t) => {
   const { crew, close } = makeCrew();
   t.after(close);
