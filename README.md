@@ -48,8 +48,9 @@ which is not AI — its agents follow fixed scripts and say so. With a key:
 
 **What is real and what is not.** Agents call real models (Anthropic via the official SDK,
 OpenAI, or any OpenAI-compatible local server), use real tools, and produce real files; a
-task completes only with evidence the host can check. Not built: a relay for NAT
-traversal (use a VPN mesh, port forwarding, a tunnel or a dedicated server), network
+task completes only with evidence the host can check. Internet hosting needs a
+connectivity service to be deployed, which is one small program you can run yourself (see
+[its deployment guide](docs/developer/connectivity-service.md)). Not built: network
 isolation in the default process sandbox (use `CREW_SANDBOX=docker`), and horizontal
 scaling. Docker deployment is written but was not run in the environment it was built in.
 

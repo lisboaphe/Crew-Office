@@ -45,11 +45,13 @@ if [ "$(uname -s)" != "Darwin" ]; then
 Type=Application
 Name=Crew Office
 Comment=Host or join a multiplayer AI office
-Exec=$HOME/.local/bin/crew-office
+Exec=$HOME/.local/bin/crew-office %u
 Icon=$TARGET/assets/icon-192.png
 Terminal=true
 Categories=Office;Development;
+MimeType=x-scheme-handler/crewoffice;
 EOF
+  command -v xdg-mime >/dev/null 2>&1 && xdg-mime default crew-office.desktop x-scheme-handler/crewoffice || true
 fi
 
 echo "Installed. Run: crew-office   (and crew-office-worker for your agents)"

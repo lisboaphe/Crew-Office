@@ -27,7 +27,7 @@ const INCLUDE = [
   'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.txt', 'README.md', '.env.example',
   'assets', 'crew', 'lib', 'src', 'vendor', 'admin', 'agent-setup', 'docs/images', 'docs/site', 'docs/examples',
   'bin/crew-app.cjs', 'bin/crew-host.cjs', 'bin/crew-worker.cjs', 'bin/crew-relay.cjs', 'bin/crew-demo.cjs', 'bin/crew-demo-bot.cjs', 'bin/lib/cli-flags.cjs',
-  'installer/windows/install.ps1', 'installer/windows/uninstall.ps1', 'installer/unix/install.sh',
+  'installer/windows/install.ps1', 'installer/windows/uninstall.ps1', 'installer/windows/register-protocol.ps1', 'installer/windows/open-invitation.vbs', 'installer/unix/install.sh',
 ];
 for (const f of fs.readdirSync(path.join(ROOT, 'docs'))) if (f.endsWith('.html')) INCLUDE.push(`docs/${f}`);
 
@@ -43,7 +43,12 @@ function copy(rel, stage) {
 function buildStamp() {
   const git = (...args) => { try { return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
   const origin = /github\.com[/:]([^/]+\/[^/]+?)(\.git)?$/.exec(git('remote', 'get-url', 'origin'))?.[1];
-  return { version, build: Number(process.env.GITHUB_RUN_NUMBER) || 0, commit: process.env.GITHUB_SHA || git('rev-parse', 'HEAD') || null, repo: process.env.GITHUB_REPOSITORY || origin || null };
+  // The internet service this build finds by itself (lib/crew/relay-client.cjs). No address here
+  // means no internet hosting out of the box, and the app says so rather than pretending.
+  const service = (process.env.CREW_CONNECTIVITY_URL || '').trim();
+  if (service && !/^https:\/\//.test(service)) throw new Error('CREW_CONNECTIVITY_URL has to be an https:// address.');
+  if (!service) console.log('No CREW_CONNECTIVITY_URL: this build has no automatic internet service.');
+  return { version, build: Number(process.env.GITHUB_RUN_NUMBER) || 0, commit: process.env.GITHUB_SHA || git('rev-parse', 'HEAD') || null, repo: process.env.GITHUB_REPOSITORY || origin || null, ...(service ? { connectivity: { url: service } } : {}) };
 }
 
 function main() {

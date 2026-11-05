@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Deploying the connectivity service — The Roving Office</title>
+  <meta name="description" content="How the office is built, and how to change it." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html">For everyone</a>
+      <a href="/docs/developer/index.html" aria-current="page">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="developer documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/index.html">Where to look</a>
+        </li>
+        <li>
+          <a href="/docs/developer/getting-the-code.html">Getting the code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/developing.html">Developing on it</a>
+        </li>
+        <li>
+          <a href="/docs/developer/npm-scripts.html">Every npm script</a>
+        </li>
+      </ul>
+      <h2>How it works</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/architecture.html">Architecture</a>
+        </li>
+        <li>
+          <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
+        </li>
+        <li>
+          <a href="/docs/developer/connectivity-service.html" aria-current="page">Deploying the connectivity service</a>
+        </li>
+        <li>
+          <a href="/docs/developer/upgrade-report.html">Upgrade report: Git, rules, budgets</a>
+        </li>
+        <li>
+          <a href="/docs/developer/ai-providers.html">AI providers: billing rules and test status</a>
+        </li>
+        <li>
+          <a href="/docs/developer/9router-assessment.html">9Router: compatibility and licensing</a>
+        </li>
+        <li>
+          <a href="/docs/developer/physics.html">The physics of the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/scene-internals.html">Scene internals</a>
+        </li>
+        <li>
+          <a href="/docs/developer/job-delivery.html">Job delivery</a>
+        </li>
+        <li>
+          <a href="/docs/developer/editor.html">The furniture editor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/layout-algorithm.html">The layout algorithm</a>
+        </li>
+        <li>
+          <a href="/docs/developer/tuning-the-layouts.html">Tuning the layout generator</a>
+        </li>
+        <li>
+          <a href="/docs/developer/sources.html">The source model</a>
+        </li>
+        <li>
+          <a href="/docs/developer/test-data.html">The Test Data source</a>
+        </li>
+      </ul>
+      <h2>Changing it</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/extending.html">Extending the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/prop-portraits.html">Photographing a prop</a>
+        </li>
+        <li>
+          <a href="/docs/developer/visual-assets.html">Visual assets and their rights</a>
+        </li>
+        <li>
+          <a href="/docs/developer/coplanar-probe.html">The coplanar-face probe</a>
+        </li>
+        <li>
+          <a href="/docs/developer/plugin-distribution.html">Publishing the plugins</a>
+        </li>
+        <li>
+          <a href="/docs/developer/admin-console.html">The admin console</a>
+        </li>
+      </ul>
+      <h2>The protocol</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/protocol/aop-spec.html">The AOP spec</a>
+        </li>
+        <li>
+          <a href="/docs/developer/protocol/aop-harness-adapters.html">Adapter notes</a>
+        </li>
+        <li>
+          <a href="/agent-setup/">What an agent is told to do <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+      <h2>Adapters</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/adapters/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/muse.html">Muse</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="deploying-the-connectivity-service" tabindex="-1">Deploying the connectivity service</h1>
+<p>How to run the service that makes Host Office work over the internet, and how a build of the app finds it.</p>
+<p>Until one is deployed and a build knows its address, <strong>internet hosting does not work</strong>: Host Office says <strong>Internet service unavailable</strong> and offers no link or room code. That is the correct behaviour, and nothing in the code can substitute for a running server. Somebody has to run this once. Friends never touch it.</p>
+<h2 id="what-it-is" tabindex="-1">What it is</h2>
+<p><code>bin/crew-relay.cjs</code>: one Node program with no dependencies. It does three things.</p>
+<ul>
+<li><strong>Tunnels.</strong> A host dials out and keeps the connection open. Visitors' requests travel down it, so nobody forwards a port, and CGNAT does not matter.</li>
+<li><strong>Rendezvous.</strong> Hosts publish the SHA-256 of each room code. <code>GET /_relay/resolve/&lt;code&gt;</code> turns a code into the office's address. It cannot list the codes it holds.</li>
+<li><strong>A front door.</strong> On the bare domain, <code>/</code> asks for a code and <code>/j/&lt;code&gt;</code> redirects, for a friend with a code and nothing installed.</li>
+</ul>
+<p>It writes nothing to disk. A restart forgets every tunnel and code until the hosts dial back in, which they do by themselves, keeping their address.</p>
+<h2 id="why-a-reverse-tunnel" tabindex="-1">Why a reverse tunnel</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Fit with Crew Office</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WebRTC with ICE, STUN and TURN</td>
+<td>Node has no built-in WebRTC, so a native dependency. A browser cannot load a page over a data channel, Git's HTTP client cannot use one, and TURN is a relay anyway</td>
+<td>Rejected: every transport would be rewritten</td>
+</tr>
+<tr>
+<td>Iroh and other QUIC libraries</td>
+<td>Good for native peers. Native code, and browsers cannot join, so friends would have to install something</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Cloudflare Quick Tunnels</td>
+<td>Free with no account, but its documentation says they do not support Server-Sent Events, which every live update here uses, cap in-flight requests at 200, and are meant for testing</td>
+<td>Rejected</td>
+</tr>
+<tr>
+<td>Reverse tunnel, as e4mc does</td>
+<td>All traffic here is already HTTP, including Git and workers, and it needs no dependency</td>
+<td><strong>Chosen</strong></td>
+</tr>
+</tbody>
+</table>
+<p>What that gives up: over the internet there is no direct path, so everything through the service costs its bandwidth. On the same network the app connects directly instead: a host announces a slow hash of each code by UDP, and a friend's app that hears its code goes to the host's LAN address. So &quot;direct&quot; is real, and limited to one network. Hole-punching between home routers is not implemented, because a browser friend could not use it.</p>
+<h2 id="deploying-with-docker" tabindex="-1">Deploying with Docker</h2>
+<p>You need a small server with Docker, ports 80 and 443 open, and a domain you control. Add two DNS records pointing at the server: <code>relay.example.org</code> and <code>*.relay.example.org</code>.</p>
+<pre><code class="language-bash">cp deploy/relay/.env.example deploy/relay/.env      # set the domain and email
+docker compose -f deploy/relay/docker-compose.yml up -d --build
+curl https://relay.example.org/_relay/info
+</code></pre>
+<p>Caddy gets each office's certificate from Let's Encrypt the first time it is asked for, after checking with the relay that the office exists. There is no wildcard certificate, so no DNS API credentials. Let's Encrypt limits how many certificates a domain may get per week, and each new office uses one, so a very busy service needs a wildcard certificate instead.</p>
+<p>CI builds the image and runs it under the limits the compose file sets, and checks that the compose file and Caddy configuration are valid. That is <code>test/relay-image.test.cjs</code>. It cannot try real DNS, a real certificate or a whole deployment, none of which has been done yet, so do the checks below on the first deployment.</p>
+<h3 id="without-docker" tabindex="-1">Without Docker</h3>
+<pre><code class="language-bash">CREW_RELAY_OPEN=1 CREW_RELAY_DOMAIN=relay.example.org CREW_RELAY_TRUST_PROXY=1 node bin/crew-relay.cjs 8443
+</code></pre>
+<p>Put any TLS proxy that passes <code>Upgrade</code> and does not buffer in front of it. Or set <code>CREW_RELAY_TLS_CERT</code> and <code>CREW_RELAY_TLS_KEY</code> to terminate TLS itself.</p>
+<h3 id="one-office-no-domain-of-its-own" tabindex="-1">One office, no domain of its own</h3>
+<p>Leave out <code>CREW_RELAY_DOMAIN</code>. The relay then serves one office on its whole address, which needs only one hostname and certificate. A second host is refused. Hosts add it under Advanced settings.</p>
+<h2 id="telling-the-app" tabindex="-1">Telling the app</h2>
+<p>The app looks in three places, first match wins:</p>
+<ol>
+<li><strong>Advanced settings</strong> on that computer, as a relay address and key.</li>
+<li><code>CREW_CONNECTIVITY_URL</code> in the environment or the app's <code>.env</code>, with <code>CREW_CONNECTIVITY_KEY</code> if the service wants one.</li>
+<li><code>build.json</code>, stamped by <code>installer/build.cjs</code> from <code>CREW_CONNECTIVITY_URL</code> when the app is built.</li>
+</ol>
+<p>The third is what makes it automatic for everyone. Set the repository variable <code>CREW_CONNECTIVITY_URL</code> and <code>release.yml</code> stamps every build with it. A build refuses an address that is not <code>https://</code>, and so does the app, other than for loopback. A build with none prints that it has none.</p>
+<p>The address is not secret, since it ships in a download. Nor can a key be, so a service baked into a public build runs with <code>CREW_RELAY_OPEN=1</code> and relies on its limits. Use <code>CREW_RELAY_KEY</code> for a private service whose hosts each enter the key.</p>
+<h2 id="authentication-and-encryption" tabindex="-1">Authentication and encryption</h2>
+<ul>
+<li><strong>Host to service:</strong> TLS, then optionally the key. Each office then holds a secret for its tunnel, which is what keeps its address and lets it publish codes.</li>
+<li><strong>Visitor to service:</strong> TLS. <strong>It ends at the service</strong>, so whoever runs it can read what passes through, including session cookies and Git tokens. <code>docs/security/NETWORK_SECURITY.md</code> says why end-to-end encryption is not possible for browser clients. Run your own, or use one run by someone you trust.</li>
+<li><strong>Visitor to office:</strong> invitations and membership are checked by the host. The service decides nothing about who may enter an office.</li>
+</ul>
+<h2 id="limits" tabindex="-1">Limits</h2>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Default</th>
+<th>What it limits</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CREW_RELAY_MAX_TUNNELS</code></td>
+<td>50</td>
+<td>Offices remembered. The one gone longest is forgotten first</td>
+</tr>
+<tr>
+<td><code>CREW_RELAY_TUNNELS_PER_IP</code></td>
+<td>5</td>
+<td>Offices connected from one address</td>
+</tr>
+<tr>
+<td><code>CREW_RELAY_MAX_STREAMS</code></td>
+<td>200</td>
+<td>Concurrent requests per office</td>
+</tr>
+<tr>
+<td><code>CREW_RELAY_RATE</code></td>
+<td>1200</td>
+<td>Requests a minute per visitor address</td>
+</tr>
+<tr>
+<td><code>CREW_RELAY_RESOLVE_RATE</code></td>
+<td>20</td>
+<td>Code look-ups a minute per address</td>
+</tr>
+<tr>
+<td><code>CREW_RELAY_MAX_BODY_MB</code></td>
+<td>512</td>
+<td>One request's body</td>
+</tr>
+<tr>
+<td><code>CREW_RELAY_DAILY_MB</code></td>
+<td>5120 when open, otherwise none</td>
+<td>Traffic per office per day, both directions together</td>
+</tr>
+</tbody>
+</table>
+<p>An open service can be used by anyone running a copy of the program, to serve anything under your domain. So use a domain you do not use for anything else, and watch the metrics.</p>
+<h2 id="monitoring" tabindex="-1">Monitoring</h2>
+<pre><code class="language-bash">curl https://relay.example.org/_relay/health
+curl -H &quot;Authorization: Bearer $KEY&quot; https://relay.example.org/_relay/metrics
+</code></pre>
+<p><code>health</code> is public: up, how long, how many offices. <code>metrics</code> needs <code>CREW_RELAY_METRICS_KEY</code>, or <code>CREW_RELAY_KEY</code>, and gives offices, streams, codes, bytes, refusals and the ten busiest offices by shortened name. Neither ever holds a code, a secret or a full office address.</p>
+<p>The app checks more than this. After connecting, and every minute, a host fetches its own public address from outside and looks for a one-time nonce arriving down the tunnel. <strong>Internet room available</strong> appears only after that succeeds. It covers DNS, certificates and the proxy, and a failure shows up as the reason in Host Office.</p>
+<h2 id="what-it-costs" tabindex="-1">What it costs</h2>
+<p>Nothing here needs a subscription: the program is open source, and any cheap server runs it. You pay for the server, the domain and the traffic.</p>
+<ul>
+<li><strong>Server and domain:</strong> see the table in <code>docs/security/NETWORK_SECURITY.md</code>. Prices vary, so check first.</li>
+<li><strong>Traffic:</strong> agents' model calls never pass through it, since they go from each player's computer to their provider. Chat, tasks and status are small. <strong>Git pushes and project files are the cost</strong>: everything crosses the service twice, once in and once out, so a 1 GB push by a friend is about 2 GB of the server's traffic. Hosts on one network connect directly and use none. Lower <code>CREW_RELAY_DAILY_MB</code> to bound it, and check your provider's included transfer.</li>
+</ul>
+<h2 id="checking-a-deployment" tabindex="-1">Checking a deployment</h2>
+<p>Do this on the first deployment. None of it can be checked from one computer, and the automated tests do not cover real DNS, certificates or NAT.</p>
+<ol>
+<li><code>curl https://relay.example.org/_relay/info</code> shows <code>&quot;service&quot;:&quot;crew-relay&quot;</code>.</li>
+<li>On computer A, with <code>CREW_CONNECTIVITY_URL</code> set, press Host Office. <strong>Internet room available</strong> should appear within about thirty seconds, the first certificate being the slow part. If it says <strong>Internet service unavailable</strong>, the reason names what failed.</li>
+<li>From a different connection, such as a phone hotspot, follow the rest of <code>docs/security/SECURITY_TESTS.md</code>.</li>
+</ol>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#what-it-is">What it is</a></li>
+<li><a href="#why-a-reverse-tunnel">Why a reverse tunnel</a></li>
+<li><a href="#deploying-with-docker">Deploying with Docker</a><ul><li><a href="#without-docker">Without Docker</a></li>
+<li><a href="#one-office-no-domain-of-its-own">One office, no domain of its own</a></li></ul></li>
+<li><a href="#telling-the-app">Telling the app</a></li>
+<li><a href="#authentication-and-encryption">Authentication and encryption</a></li>
+<li><a href="#limits">Limits</a></li>
+<li><a href="#monitoring">Monitoring</a></li>
+<li><a href="#what-it-costs">What it costs</a></li>
+<li><a href="#checking-a-deployment">Checking a deployment</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone with a checkout. If you just want to use the thing,
+      <a href="/docs/user/index.html">the user docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

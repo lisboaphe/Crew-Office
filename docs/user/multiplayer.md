@@ -47,19 +47,26 @@ host's address, and uses whatever the host runs.
 
 1. Open Crew Office. Pick a name and a colour; that is all it asks, and this browser remembers
    you.
-2. Press **Host Office**. Choose a name, a privacy setting and a player cap:
-   - **Invite link** — only people you send the link to. This is the default.
-   - **Password** — anyone with the room code and the password can join.
-   - **Open** — anyone who can reach this host can join, and it is announced on your network.
-3. Copy the invitation link it shows and send it to the people you want. It works for 72
-   hours and 20 people; make more under Dashboard → Office.
-4. **Enter office**.
+2. Press **Host Office**. Choose an office you already have, or name a new one, then who can join
+   and how many players, and press **Host Office** again:
+   - **Invitation only** — only people you send the invitation to. This is the default.
+   - **Invitation, or room code and password** — a room code alone also asks for the password.
+   - **Invitation, or anyone on my network** — also announced to computers on your own network.
+3. Crew Office makes the office reachable and checks that it really is, from outside. When it
+   says **Internet room available**, you get an invitation link and a short room code.
+4. Press **Copy Invitation** and send it to your friends. It works for 72 hours and 20 people.
+   Press **Revoke Invitation** to stop it working at once, and make a new one any time.
+5. **Enter office**. The same screen shows who is connected. **Stop Hosting** closes the office to
+   everyone and keeps everything in it.
+
+If it says **Internet service unavailable** instead, it gives the reason and offers no link, because
+it would not work. See [Playing over the internet](#playing-over-the-internet).
 
 The office runs while the Crew Office window is open, and **closing the last window stops it**.
 To keep one running without a window, use `npm run host` from a checkout, or a
 [dedicated server](#playing-over-the-internet). Everything — players, agents, projects, tasks, messages
-and files — is saved on the host and is still there after a restart. The host can **Stop** an
-office (it keeps everything but accepts no work) and start it again.
+and files — is saved on the host and is still there after a restart. When you open it again, an
+office you were hosting comes back online by itself, on the same link.
 
 ### Your name
 
@@ -86,36 +93,61 @@ copy. To keep everything and just stop it for a while, use **Stop** instead.
 
 ## Joining an office
 
-From your own lobby, **Join Office** offers three ways in:
+**If someone sent you an invitation link**, just open it in a browser. It shows the office and who
+is hosting it. Pick a name and a colour and press **Join office**. You do not need to install
+anything to join; you only need the app if you want to bring your own agents.
 
-- **On your network** lists offices announced on the same Wi-Fi or LAN.
-- **Room code** joins an office on the host whose lobby you are looking at.
-- **Another host's address** (`http://192.168.1.20:8080`) takes you to that host's lobby,
-  where you pick a name for that host.
+**With Crew Office installed**, press **Join Office** and either paste the link or enter the room
+code, then press **Join**. If you click a `crewoffice://` link, the app opens and shows you which
+office it is before you go in. On Windows and Linux the installer sets that up. On macOS, open the
+ordinary link instead.
 
-If someone sent you an invitation link (`…/crew/join?invite=…`), just open it in a browser:
-pick a name and a colour and you are in. You do not need to install anything to join; you
-only need the app if you want to bring your own agents.
+Room codes look like `ABCDE-FGHIJ`. Capitals, spaces and dashes do not matter. A code is
+an invitation you can read aloud, so it stops working when the invitation does. If you and the host
+are on the same network, Crew Office connects to them directly instead of over the internet.
+
+**Recent Offices** takes you back to one you have been in. Under **Advanced settings** are offices
+announced on your network, joining by a computer's address, and joining by an office's keycard.
 
 ## Playing over the internet
 
-Host Office → Create gives you an invitation link. If a relay is set up, it works from anywhere: your friend opens it, picks a name, and is in, with nothing to install. If not, it says the link only works on your own network.
+Friends need nothing but the invitation: no VPN, no router settings, no port forwarding, nothing to
+install. Neither do you. Your office and its files stay on your computer.
 
-A relay is a small program on a server, which lets friends reach your computer with no port forwarding. **There is no free public one: someone has to run it**, typically on a server costing a few dollars a month, plus a domain name. It stores nothing, but whoever runs it can read what passes through, so run your own or use one you trust. Add it under Host Office → Advanced. The security docs in the repository cover setting one up and what it costs.
+**This needs a connectivity service to be running somewhere.** It is a small program on a server,
+which carries traffic between your friends and your computer. Crew Office finds it by itself once
+your copy has been built knowing its address. There is no free public one, so someone has to run
+it, typically on a server costing a few dollars a month plus a domain name. Until then Host
+Office says so, and you can add a relay under **Advanced settings**, or use one of the other ways
+below. Instructions for running one are in the [developer docs on deploying the connectivity
+service](../developer/connectivity-service.md) (→ developer docs).
 
-The status always says what is true: **Hosting locally**, **Connected through relay**, **Reconnecting**, or **Internet hosting unavailable**. No public link is offered until the connection is really up.
+The service stores nothing, but whoever runs it can read what passes through, so run your own or use
+one you trust. Your AI sign-ins never pass through it. Git pushes and large files do, and they are
+what uses its bandwidth.
 
-Other ways in, without a relay:
+The status always says what is true now:
 
-On the same network, nothing extra is needed. Over the internet a direct connection
-usually does not work on its own, because a home router hides the computers behind it.
-The app does not pretend otherwise, and it has no built-in relay. Pick one:
+| Status | What it means |
+| --- | --- |
+| **Hosting locally** | Only your own network can reach this office |
+| **Connecting to internet service** | Connecting, and checking from outside |
+| **Internet room available** | Checked from outside, and working. Only now is there a link |
+| **Relay connection** | Your traffic is going through the service |
+| **Direct connection** | You are connected over your own network, not through a service |
+| **Reconnecting** | Lost the connection, and trying again. Friends come back by themselves |
+| **Internet service unavailable** | It cannot work right now, and the reason is shown |
+
+These have automated tests on one computer. They have not yet been tried between two real internet
+connections, so try it with a friend before relying on it.
+
+Other ways in, without a service:
 
 | Option | What you do | Notes |
 | --- | --- | --- |
-| VPN mesh (Tailscale, ZeroTier) | Everyone installs it; friends use the host's VPN address | Easiest and private. Recommended. |
+| VPN mesh (Tailscale, ZeroTier) | Everyone installs it; friends use the host's VPN address | Private, and needs no server. Everyone has to install it |
 | Port forwarding | Forward the host's port (8080) on your router; share your public IP | Exposes the host to the internet: use a strong room password, ideally HTTPS through a reverse proxy |
-| A tunnel (Cloudflare Tunnel, ngrok) | Run the tunnel on the host; share its HTTPS address | No router changes |
+| A tunnel (Cloudflare Tunnel, ngrok) | Run the tunnel on the host; share its HTTPS address | No router changes. Live updates need one that supports streaming |
 | A dedicated server | Run the host on a VPS or home server (Docker supported) | Offices stay up when their creator is offline |
 
 ## Your AI employees

@@ -1,0 +1,24 @@
+# HTTPS for the service and each office's own hostname. Only a wildcard DNS record is needed: Caddy
+# gets each office's certificate the first time it is asked for, and first checks with the relay
+# that the office exists, so made-up hostnames cannot use up the domain's certificate allowance.
+
+{
+	email {$ACME_EMAIL}
+	on_demand_tls {
+		ask http://relay:8443/_relay/tls-check
+	}
+}
+
+{$CREW_RELAY_DOMAIN}, *.{$CREW_RELAY_DOMAIN} {
+	tls {
+		on_demand
+	}
+	reverse_proxy relay:8443 {
+		# Live updates are long-lived streams, and must not sit in a buffer.
+		flush_interval -1
+		transport http {
+			read_timeout 0
+			write_timeout 0
+		}
+	}
+}
