@@ -8,7 +8,7 @@ Host Office now makes an office reachable by itself, once a connectivity service
 
 - **One-press hosting.** The app finds its service, connects, checks from outside that the room is reachable, and only then shows an invitation link and room code. It reconnects by itself, on the same link.
 - **Room codes** that resolve through the service, are separate from an office's keycard, and can be revoked with their invitation.
-- **`crewoffice://` links**, registered by the installer on Windows and Linux. The app shows which office it is before going there.
+- **`crewoffice://` links**, registered by the installer on Windows and Linux, and on Windows again each time the installed app starts, so a copy updated from inside the app gets them too. The app shows which office it is before going there.
 - **Direct connections on the same network**, found by room code.
 - **A deployable service.** Docker and HTTPS recipes, rendezvous, a page for entering a code, monitoring, and limits on offices per address, code guesses and daily traffic.
 - **New Host and Join screens**, with networking details moved under Advanced settings.

@@ -85,6 +85,7 @@ async function waitUntilRunning() {
 function startHost() {
   if (PRIVATE) process.env.HOST = process.env.HOST || '127.0.0.1';
   process.env.PORT = String(PORT);
+  keepLinkHandler();
   require('./crew-host.cjs');
 }
 
@@ -96,6 +97,15 @@ function startInBackground() {
   spawn(process.execPath, [__filename, '--serve', ...(PRIVATE ? ['--private'] : []), ...(invitation ? [invitation] : [])], { detached: true, stdio: ['ignore', out, out], windowsHide: true, cwd: path.join(__dirname, '..') }).unref();
   fs.closeSync(out);
   return log;
+}
+
+/** Keeps crewoffice:// links pointing here. The script does nothing unless this is the installed copy. */
+function keepLinkHandler() {
+  const script = path.join(__dirname, '..', 'installer', 'windows', 'register-protocol.ps1');
+  if (process.platform !== 'win32' || !fs.existsSync(script)) return;
+  spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', script, '-Node', process.execPath, '-OnlyIfInstalled'], { stdio: 'ignore', windowsHide: true })
+    .on('error', () => {})
+    .unref();
 }
 
 /** Stop the office once the app's windows are gone. Two looks, in case one lands mid-restart. */
