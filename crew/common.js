@@ -12,7 +12,7 @@ export function h(tag, attrs, ...children) {
   for (const [k, v] of Object.entries(attrs ?? {})) {
     if (v == null || v === false) continue;
     if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
-    else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+    else if (k === 'style' && typeof v === 'object') { for (const [p, val] of Object.entries(v)) { if (p.startsWith('--')) el.style.setProperty(p, val); else el.style[p] = val; } }
     else if (k === 'class') el.className += ` ${v}`;
     else if (k in el && k !== 'list' && k !== 'form') el[k] = v;
     else el.setAttribute(k, v === true ? '' : v);
@@ -53,6 +53,108 @@ export function modal(title, build) {
   });
 }
 
+const COLOURS = ['#e07a5f', '#f15bb5', '#9b5de5', '#3d85c6', '#00bbf9', '#2a9d8f', '#81b29a', '#f2cc8f'];
+
+/** A row of colour swatches. Read the choice from the element's `.value`. */
+export function colourPicker(initial) {
+  const row = h('div.cr-swatches', { role: 'radiogroup', 'aria-label': 'Colour' });
+  row.value = initial && COLOURS.includes(initial) ? initial : COLOURS[Math.floor(Math.random() * COLOURS.length)];
+  const paint = () => { for (const b of row.children) { const on = b.dataset.colour === row.value; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); } };
+  row.append(...COLOURS.map((c) => h('button', { type: 'button', role: 'radio', 'aria-label': c, 'data-colour': c, style: { background: c }, onclick: () => { row.value = c; paint(); } })));
+  paint();
+  return row;
+}
+
+/** A small “?” that explains something on hover or keyboard focus. */
+export function helpTip(title, lines) {
+  return h('span.cr-help', { tabIndex: 0, role: 'button', 'aria-label': `Help: ${title}` }, '?',
+    h('span.cr-help-tip', { role: 'tooltip' }, h('b', title), h('ol', ...lines.map((l) => h('li', l)))));
+}
+
+const ICONS = {
+  office: '<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01"/>',
+  agents: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.7-3.6 3.3-5.5 6.5-5.5s5.8 1.9 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.9c1.6.8 2.6 2.4 3 5.1"/>',
+  orchestrator: '<circle cx="5" cy="6" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="12" r="2.5"/><path d="M7.5 6c5 0 4 6 9 6M7.5 18c5 0 4-6 9-6"/>',
+  projects: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  connections: '<path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0zM12 16v5"/>',
+  usage: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+};
+
+export function icon(name) {
+  const box = h('span.cr-icon', { 'aria-hidden': 'true' });
+  box.innerHTML = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] ?? ''}</svg>`;
+  return box;
+}
+
+/** Deleting an office cannot be undone, so the name has to be typed. Resolves true if it went. */
+export function confirmDeleteOffice(room) {
+  return modal('Delete this office?', (close) => {
+    const name = h('input', { placeholder: room.name, autocomplete: 'off' });
+    const err = h('p.error');
+    const go = async () => {
+      err.textContent = '';
+      try {
+        await api('POST', `/api/crew/rooms/${room.id}/delete`, { confirm: name.value });
+        close(true);
+      } catch (e) { err.textContent = e.message; }
+    };
+    return h('div',
+      h('p', 'This permanently deletes the office and everything in it: its projects, tasks, messages, files, Git repositories and agents. Everyone in it is sent back to the lobby. It cannot be undone.'),
+      h('p.hint', 'Want to keep a copy? Press Export office under Dashboard → Office first.'),
+      h('label', `Type “${room.name}” to confirm`), name, err,
+      h('div.actions', h('button.btn', { onclick: () => close(false) }, 'Keep it'), h('button.btn.danger', { onclick: go }, 'Delete office')));
+  });
+}
+
+let updateCheck = null;
+
+/** “Update available”, only on the computer that hosts, and only once there is one. */
+export function updateNotice() {
+  const slot = h('span.cr-update');
+  updateCheck ??= api('GET', '/api/crew/update').catch(() => null);
+  updateCheck.then((u) => {
+    if (u?.available) slot.replaceChildren(h('button.btn.primary', { onclick: () => askToUpdate(u), title: `Build ${u.latest.build} is ready to install` }, 'Update available'));
+  });
+  return slot;
+}
+
+function askToUpdate(u) {
+  modal('Update Crew Office', (close) => {
+    const err = h('p.error');
+    const go = async () => {
+      err.textContent = '';
+      try {
+        await api('POST', '/api/crew/update/install');
+        close();
+        waitForUpdate(u.current.build);
+      } catch (e) { err.textContent = e.message; }
+    };
+    return h('div',
+      h('p', `Build ${u.latest.build} is ready. You have build ${u.current.build}.`),
+      u.canInstall
+        ? [h('p.hint', 'The office stops for a moment and everyone in it is disconnected until it is back. Your offices, projects and sign-ins are kept. Close any worker window first: it runs from the same folder and would block the update.'),
+          err, h('div.actions', h('button.btn', { onclick: () => close() }, 'Not now'), h('button.btn.primary', { onclick: go }, 'Update now'))]
+        : [h('p.hint', u.reason), h('div.actions', h('button.btn', { onclick: () => close() }, 'Close'), h('a.btn.primary', { href: u.latest.url, target: '_blank', rel: 'noopener' }, 'Open the download page'))]);
+  });
+}
+
+function waitForUpdate(from) {
+  const note = h('p.hint', 'Installing. This usually takes under a minute.');
+  const back = h('div.cr.cr-modal-back', h('div.cr-modal', h('h2', 'Updating Crew Office…'), note));
+  document.body.append(back);
+  const started = Date.now();
+  const poll = setInterval(async () => {
+    let info = null;
+    try { info = await api('GET', '/api/crew/host-info'); } catch { /* still restarting */ }
+    if (info && info.build !== from) { clearInterval(poll); location.reload(); return; }
+    if (Date.now() - started > 180_000) {
+      clearInterval(poll);
+      note.textContent = info ? 'The update did not install, so you are still on the old build. The reason is in update.log in the Crew Office data folder.' : 'The office has not come back. Start Crew Office from its shortcut.';
+      back.firstChild.append(h('div.actions', h('button.btn', { onclick: () => back.remove() }, 'Close')));
+    }
+  }, 2000);
+}
+
 export function initials(name) {
   return String(name ?? '?').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('') || '?';
 }
@@ -74,7 +176,7 @@ export const money = (usd) => `$${Number(usd || 0).toFixed(usd < 1 ? 4 : 2)}`;
 /** Errors in the page become crash logs on the host, rate-limited there. */
 export function reportErrors(context) {
   const send = (message, stack) => {
-    try { navigator.sendBeacon?.('/api/crew/client-error', new Blob([JSON.stringify({ context, message, stack, url: location.pathname })], { type: 'application/json' })); } catch {}
+    fetch('/api/crew/client-error', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json', 'X-Crew': '1' }, body: JSON.stringify({ context, message, stack, url: location.pathname }) }).catch(() => {});
   };
   window.addEventListener('error', (e) => send(e.message, e.error?.stack));
   window.addEventListener('unhandledrejection', (e) => send(String(e.reason?.message ?? e.reason), e.reason?.stack));

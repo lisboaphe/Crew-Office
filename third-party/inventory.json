@@ -99,7 +99,7 @@
     },
     {
       "path": ".github/workflows/deploy.yml",
-      "sha256": "a671c6349fa2fe96a4c4f50bd8747c161a8c30e286c733b7f8500bd49e6a0e4e"
+      "sha256": "2c34211d4bccd4ed0f85d755969877f8508f7366bdc701ec51d203ac4b7c7bec"
     },
     {
       "path": "bin/fly-deploy.sh",
@@ -647,7 +647,7 @@
         },
         {
           "path": ".github/workflows/deploy.yml",
-          "sha256": "a671c6349fa2fe96a4c4f50bd8747c161a8c30e286c733b7f8500bd49e6a0e4e"
+          "sha256": "2c34211d4bccd4ed0f85d755969877f8508f7366bdc701ec51d203ac4b7c7bec"
         },
         {
           "path": "Dockerfile.fly",

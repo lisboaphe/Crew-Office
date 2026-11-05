@@ -30,10 +30,21 @@ Recovery point: the Git tag `checkpoint/pre-upgrade-2026-11-03`, on the branch `
 | Never Use Paid API default, no fallback | Works | Billing tests | |
 | Budget Manager, estimates, reserve, concurrency, warnings | Works | `budget.cjs`, budget tests | Lives on the worker's page, not the office HUD, by design: the host must not see it. Team, project and agent scopes are not separate; owner/provider and task are |
 | Provider status, Test Connection | Works | `provider-status.cjs` | |
-| ChatGPT plan via Sign in with ChatGPT | Partial | `chatgpt-plan.cjs`, tested against a stand-in server | **Never run against the real service.** See below |
+| ChatGPT plan via Sign in with ChatGPT | Partial | `chatgpt-plan.cjs`. On 2026-11-05 a real sign-in succeeded with plan usage allowed, and Test Connection got a real answer, confirmed from the worker's own status | No agent has done a real task on it yet. Token refresh, which the documents do not specify, has not been exercised against the real service |
 | ChatGPT plan via the Codex CLI | Partial | `cli-providers.cjs`, tested against a stand-in | Not run against a real CLI or account |
 | Claude plan: manual handoff | Works | `handoff.cjs`, handoff test | Inherently manual |
 | Claude plan: automated (opt-in) | Limited | Off by default | See below |
+| Name-only entry, invite link on hosting, host computer remembered | Works | `auth.enter`, `machine.key`, `test/crew-entry-update.test.cjs` | Clearing cookies loses a joining player's identity |
+| Delete office, holiday, fire | Works | `rooms.remove`, same test file | Holiday and fire are the existing pause and remove, renamed |
+| App window without a console | Partial | `bin/crew-app.cjs`, run by hand on Windows 11 | It is Edge or Chrome in app mode, not a native shell. Worker still needs a terminal |
+| In-app updates from GitHub | Partial | `update.cjs`, tested against a stand-in for GitHub | Windows only; see the matrix note in `multiplayer.md` |
+| Global redesign, grouped navigation, animations, reduced motion | Works | `crew/crew.css`, `overlay.js`; checked on screen at 1440x900 | Light mode not checked on screen in this pass |
+| AI Connections cards | Works | `connections.js`, `setup.cjs`; worker-security test | Sign-in for Codex and Claude Code has not run against the real tools. Install buttons have not run for real |
+| Add Worker wizard, no terminal on the host | Works | `wizard.js`, `local-worker.cjs`; run on screen up to the sign-in step | Not walked through with a real sign-in. Avatar is a colour and initials; there is no image picker |
+| Agent editor | Works | `agent-editor.js`; save-and-reopen checked on screen, settings proven in the agent's context | MCP servers are stated as not available. Git worktree and working directory are shown, not settable: each task always gets its own clone |
+| Orchestrator: playbooks, runs, monitor | Works | `playbooks.cjs`, `orchestrator.js`, `test/crew-playbooks.test.cjs`; run on screen | Run with the scripted provider only, not a real model. Dragging nodes and connecting by hand were not exercised by a test. Lent agents need their owner to use the existing project lending screen |
+| Usage page, warnings, pause line | Partial | `quota.cjs`, usage test | Parsing is tested against the documented shapes, not a real CLI run. ChatGPT plan has no readable figure, so it always says unavailable. Context-window usage is not shown, because nothing reports it |
+| Backup AIs, token saver, OpenRouter free models | Works | `router.cjs`, `token-saver.cjs`, `test/crew-router.test.cjs`. Decided in [the 9Router assessment](9router-assessment.md) | Tested against stand-ins. Not run with a real OpenRouter key or across real provider limits |
 | Backups | Partial | `createBackup`, tested for creation | Restoring is manual: stop the host and unpack the archive over its data folder. No restore test |
 | Agent panel | Partial | Status, connection, tasks, messages, logs | Rules and files are in dashboard tabs rather than the panel |
 | Activity feed, Kanban | Partial | Live feed, Task board, Git history | No dependency graph drawing |
@@ -46,7 +57,7 @@ Recovery point: the Git tag `checkpoint/pre-upgrade-2026-11-03`, on the branch `
 
 **OpenAI.** The Sign in with ChatGPT documents say plan usage "is available to all open-source partners and selected private clients", through OAuth with PKCE, a `127.0.0.1` loopback callback, a dynamic client registration, and the scopes `offline_access resource.invoke chatgpt.tokens.use.direct`. Requests go to `POST /v1/responses` with `store: false` and `stream: true`; function tools are allowed. On `subscription_sharing_usage_limit_exceeded` the app must pause and point to ChatGPT Settings → Usage, and the documents say OpenAI does not silently switch billing paths. This project is Apache-2.0 and runs locally, which is why this route was chosen.
 
-What is unverified: nothing has been sent to the real service, because that needs your account. The documents do not show the token refresh request, so the standard OAuth `refresh_token` grant is used. They do not say whether an open-source client needs any further approval, nor whether unattended multi-agent use fits the program; a pause on `subscription_sharing_user_not_eligible` will say so if not. Check it with **Sign in with ChatGPT**, then **Test Connection**, on the worker's page. The help-centre article on plan usage could not be fetched (403), so its details on the weekly cap are from the prompt, not verified.
+What was verified on 2026-11-05: a real sign-in and one real request, on one account. What is still unverified: the documents do not show the token refresh request, so the standard OAuth `refresh_token` grant is used, and it has not yet run for real. They do not say whether unattended multi-agent use fits the program; a pause on `subscription_sharing_user_not_eligible` will say so if not. The help-centre article on plan usage could not be fetched (403), so its details on the weekly cap are from the prompt, not verified.
 
 **Anthropic.** The Claude Code legal page says developers "should use API key authentication" and that Anthropic "does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests through Free, Pro, Max, or Ultra plan credentials on behalf of their users". It also says this does not prevent "an end user from signing in to the unmodified Claude Code binary with their own Claude subscription", and that running Claude Code in a product requires agreeing to the Commercial Terms, leaving the binary unmodified, and each user authenticating themselves.
 
@@ -78,8 +89,8 @@ Agents in these tests use the **scripted provider**: fixed scripts, not AI. Ever
 | 7. Manual / Balanced / Autonomous | Passes |
 | 8. Quota exhaustion pauses with no paid fallback; overlapping estimates warn | Passes against a stand-in provider returning OpenAI's documented error |
 | 9. Network loss during upload resumes; overlapping edits conflict | Passes. Upload resume is tested by stopping and continuing, not by cutting a real connection |
-| 10. Real OpenAI and Claude integrations | **Not done: needs your accounts.** See the checklist |
-| 11. Build and launch the desktop app | The installer is rebuilt and its install script tested into a temporary folder. The `.exe` itself has not been run. The app is a local server and browser page, not a native window |
+| 10. Real OpenAI and Claude integrations | ChatGPT sign-in and Test Connection pass on a real account; a real task has not been run. Claude is not done |
+| 11. Build and launch the desktop app | The `.exe` was run on Windows 11 and installs and starts the app. Its first real run installed nothing and exited 0, because a batch file launched from the package never ran; it now launches PowerShell directly. No automated test runs the `.exe`. The app is a local server and browser page, not a native window |
 
 ## Checklist for real connections
 
@@ -103,5 +114,8 @@ The bot demo (`npm run demo:bot`: three players, five agents) applies these proj
 It also sets a 25% estimated budget on each task, with paid API left off. For that percentage to bite, set a capacity for the connection on the worker's page; without one, only the provider's own limits apply.
 
 ## Security notes
+
+On Windows, `test/server-startup.test.js` sets `HOME`, which Node ignores there in favour of `USERPROFILE`, so those tests read the real `~/.roving-office` of whoever runs them, and fail if that folder has offices in it. They are among the failures listed as environmental.
+
 
 The Git host trusts a worker's commit trailers for test results, so a player could misreport their own agent's tests; it cannot do so for another player's. `run_command` remains Node-only, and the default process sandbox does not block network access; `CREW_SANDBOX=docker` does. Python projects therefore cannot run their tests in the default sandbox yet. Self-hosted traffic is plain HTTP unless you put HTTPS in front of it, so on anything but a trusted network use a VPN or a reverse proxy.

@@ -28,14 +28,14 @@ npm install            # optional: installs the Anthropic SDK used by workers
 npm run host           # host an office on this computer → http://localhost:8080/crew
 ```
 
-Open the lobby, create an account, **Host Office**, then connect a worker for your agents
-(Dashboard → My workers). To watch the whole thing with no API key, in a second terminal:
+Open the lobby, pick a name and a colour, **Host Office**, then add a worker for your agents
+(Dashboard → My Crew). To watch the whole thing with no API key, in a second terminal:
 
 ```bash
 npm run demo           # Alice & Bob, six agents, "Build a simple task management web app"
 ```
 
-and sign in as `alice` / `demo-alice-pass`. The demo uses the **scripted test provider**,
+then `npm run app` and choose `Alice` from the players it lists. The demo uses the **scripted test provider**,
 which is not AI — its agents follow fixed scripts and say so. With a key:
 `npm run demo -- --provider anthropic` (reads `ANTHROPIC_API_KEY`).
 

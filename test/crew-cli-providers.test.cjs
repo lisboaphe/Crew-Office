@@ -45,8 +45,8 @@ function main(prompt) {
   const transcript = [{ role: 'user', text: 'Do the task' }];
   const r1 = await ad.complete({ system: 'You are Ada.', transcript, tools: ['read_file', 'complete_task'], model: 'sonnet' });
   const argv = JSON.parse(fs.readFileSync(path.join(dir, 'ARGV'), 'utf8'));
-  assert.deepStrictEqual(argv.slice(0, 6), ['-p', '--output-format', 'json', '--tools', '', '--strict-mcp-config'], 'built-in tools are switched off with an empty --tools');
-  assert.deepStrictEqual(argv.slice(6), ['--model', 'sonnet']);
+  assert.deepStrictEqual(argv.slice(0, 7), ['-p', '--output-format', 'stream-json', '--verbose', '--tools', '', '--strict-mcp-config'], 'built-in tools are switched off with an empty --tools');
+  assert.deepStrictEqual(argv.slice(7), ['--model', 'sonnet']);
   assert.strictEqual(r1.toolCalls[0].name, 'read_file');
   assert.deepStrictEqual(r1.toolCalls[0].input, { path: 'a.txt' });
   assert.deepStrictEqual(r1.usage, { in: 120, out: 30 });

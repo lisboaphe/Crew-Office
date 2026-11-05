@@ -127,6 +127,25 @@ nothing more. This project is not affiliated with, endorsed by, or sponsored by
 Anthropic, OpenAI, Anysphere or the OpenClaw Foundation.
 
 
+ALETHE ORCHESTRATE SKILL
+------------------------
+
+The idea of named orchestration strategies, and the field shapes used to read
+usage events from the official CLIs, come from alethe-orchestrate-skill
+(https://github.com/Kc1t/alethe-orchestrate-skill), MIT License, Copyright (c)
+2026 Kaua Miguel. No code from it, or from the AGPL-3.0 alethe-agents project,
+is included in this repository.
+
+
+RTK AND 9ROUTER
+---------------
+
+The idea of compressing tool output before it reaches a model comes from RTK
+(https://github.com/rtk-ai/rtk, Apache-2.0) and 9Router
+(https://github.com/decolua/9router, MIT, Copyright (c) 2024-2026 decolua and
+contributors). No code from either is included in this repository.
+
+
 EVERYTHING ELSE
 ---------------
 

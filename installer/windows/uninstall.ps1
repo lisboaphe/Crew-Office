@@ -13,6 +13,7 @@ Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyC
 Remove-Item -Recurse -Force (Join-Path ([Environment]::GetFolderPath('Programs')) 'Crew Office') -ErrorAction SilentlyContinue
 Remove-Item -Force (Join-Path ([Environment]::GetFolderPath('Desktop')) 'Crew Office.lnk') -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\CrewOffice' -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force (Join-Path $env:LOCALAPPDATA 'CrewOffice') -ErrorAction SilentlyContinue   # the app window's profile
 
 if ($RemoveData -or (Ask 'Also delete your offices, projects and worker keys (~\.roving-office\crew, ~\.crew-worker)?')) {
   Remove-Item -Recurse -Force (Join-Path $HOME '.roving-office\crew') -ErrorAction SilentlyContinue

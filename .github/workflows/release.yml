@@ -1,0 +1,50 @@
+# A push to main becomes a build every installed copy can update to.
+#
+# Tests first, because whatever this publishes is offered to everyone: a red run publishes
+# nothing and installed copies stay where they are. On Windows, because the setup program is
+# built with IExpress, which only ships there.
+#
+# It runs only on `push` to main, which no pull request can cause, so forks' code never gets
+# the write access this job holds. The same reasoning as the header of `deploy.yml`.
+#
+# The tag is `build-<run number>`, which only ever goes up. lib/crew/update.cjs compares that
+# number, and needs the two asset names below to stay exactly as they are.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+# Later pushes wait their turn, so builds publish in order.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Test and publish a build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run test:crew
+      - run: node installer/build.cjs
+      - name: Publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "build-$env:GITHUB_RUN_NUMBER"
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          Copy-Item "dist/CrewOffice-$version.zip" dist/CrewOffice.zip
+          $hash = (Get-FileHash dist/CrewOffice.zip -Algorithm SHA256).Hash.ToLower()
+          Set-Content dist/CrewOffice.zip.sha256 "$hash  CrewOffice.zip" -NoNewline
+          gh release create $tag dist/CrewOffice.zip dist/CrewOffice.zip.sha256 dist/CrewOfficeSetup.exe --title "Crew Office build $env:GITHUB_RUN_NUMBER" --generate-notes --latest

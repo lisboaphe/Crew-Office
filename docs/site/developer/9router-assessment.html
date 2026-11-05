@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>9Router: compatibility and licensing — The Roving Office</title>
+  <meta name="description" content="How the office is built, and how to change it." />
+  
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
+  <link rel="preload" href="/docs/assets/Inter-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="/docs/assets/ui-theme.css" />
+  <link rel="stylesheet" href="/docs/assets/docs.css" />
+</head>
+<body>
+  <a class="skip" href="#doc">Skip to content</a>
+
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/assets/logo-64.png" alt="" width="26" height="26" />
+      <span>The Roving Office</span>
+    </a>
+    <nav class="tabs" aria-label="Documentation sets">
+      <a href="/docs/user/index.html">For everyone</a>
+      <a href="/docs/developer/index.html" aria-current="page">For developers</a>
+    </nav>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="sidebar">Contents</button>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar" id="sidebar" aria-label="developer documentation">
+      <h2>Start here</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/index.html">Where to look</a>
+        </li>
+        <li>
+          <a href="/docs/developer/getting-the-code.html">Getting the code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/developing.html">Developing on it</a>
+        </li>
+        <li>
+          <a href="/docs/developer/npm-scripts.html">Every npm script</a>
+        </li>
+      </ul>
+      <h2>How it works</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/architecture.html">Architecture</a>
+        </li>
+        <li>
+          <a href="/docs/developer/multiplayer.html">The multiplayer layer</a>
+        </li>
+        <li>
+          <a href="/docs/developer/upgrade-report.html">Upgrade report: Git, rules, budgets</a>
+        </li>
+        <li>
+          <a href="/docs/developer/9router-assessment.html" aria-current="page">9Router: compatibility and licensing</a>
+        </li>
+        <li>
+          <a href="/docs/developer/physics.html">The physics of the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/scene-internals.html">Scene internals</a>
+        </li>
+        <li>
+          <a href="/docs/developer/job-delivery.html">Job delivery</a>
+        </li>
+        <li>
+          <a href="/docs/developer/editor.html">The furniture editor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/layout-algorithm.html">The layout algorithm</a>
+        </li>
+        <li>
+          <a href="/docs/developer/tuning-the-layouts.html">Tuning the layout generator</a>
+        </li>
+        <li>
+          <a href="/docs/developer/sources.html">The source model</a>
+        </li>
+        <li>
+          <a href="/docs/developer/test-data.html">The Test Data source</a>
+        </li>
+      </ul>
+      <h2>Changing it</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/extending.html">Extending the office</a>
+        </li>
+        <li>
+          <a href="/docs/developer/prop-portraits.html">Photographing a prop</a>
+        </li>
+        <li>
+          <a href="/docs/developer/visual-assets.html">Visual assets and their rights</a>
+        </li>
+        <li>
+          <a href="/docs/developer/coplanar-probe.html">The coplanar-face probe</a>
+        </li>
+        <li>
+          <a href="/docs/developer/plugin-distribution.html">Publishing the plugins</a>
+        </li>
+        <li>
+          <a href="/docs/developer/admin-console.html">The admin console</a>
+        </li>
+      </ul>
+      <h2>The protocol</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/protocol/aop-spec.html">The AOP spec</a>
+        </li>
+        <li>
+          <a href="/docs/developer/protocol/aop-harness-adapters.html">Adapter notes</a>
+        </li>
+        <li>
+          <a href="/agent-setup/">What an agent is told to do <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+      <h2>Adapters</h2>
+      <ul>
+        <li>
+          <a href="/docs/developer/adapters/rovo-cli.html">Rovo CLI</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/claude-code.html">Claude Code</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/cursor.html">Cursor</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/codex.html">Codex</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/openclaw.html">OpenClaw</a>
+        </li>
+        <li>
+          <a href="/docs/developer/adapters/muse.html">Muse</a>
+        </li>
+      </ul>
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          <a href="/docs/character-movements.html">Every character movement <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/item-movements.html">Every object, turning <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-seeds.html">Two dozen generated offices <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+        <li>
+          <a href="/docs/office-variety.html">Thirty offices, thirty seeds <span class="ext" aria-label="standalone page">↗</span></a>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="doc" class="doc">
+      <h1 id="9router-compatibility-and-licensing-assessment" tabindex="-1">9Router: compatibility and licensing assessment</h1>
+<p>Whether <a href="https://github.com/decolua/9router">9Router</a> should be part of Crew Office, what it would risk, and what was built instead. Assessed on 2026-11-05 against its default branch (1,933 files) and each provider's own published terms. Terms change, so check them again before relying on this.</p>
+<p><strong>The decision: 9Router is not integrated, and no code was taken from it.</strong> Its licence allows reuse. The problem is what most of the useful code does. Four small original pieces give the same benefits by permitted routes: backup AIs, a token saver, a free tier with a real quota, and loop limits.</p>
+<h2 id="architecture" tabindex="-1">Architecture</h2>
+<p>A Next.js app with a local proxy (<code>open-sse</code>) that exposes an OpenAI-compatible endpoint, translates between request formats, and switches between provider accounts when one runs out. Around that: 40+ provider adapters, OAuth flows, a usage dashboard, a token saver (<code>open-sse/rtk</code>), a certificate-installing interception proxy (<code>src/mitm</code>), tunnels and cloud sync.</p>
+<h2 id="licensing" tabindex="-1">Licensing</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Licence</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>9Router</td>
+<td>MIT</td>
+<td>Compatible with this project's Apache-2.0. Reuse needs the copyright notice kept</td>
+</tr>
+<tr>
+<td><code>open-sse/rtk</code> filters</td>
+<td>MIT, but they describe themselves as a port of <a href="https://github.com/rtk-ai/rtk">RTK</a>, which is Apache-2.0</td>
+<td>Provenance is not clean enough to copy without checking that RTK's notices were carried through. Written fresh instead</td>
+</tr>
+<tr>
+<td>Provider client IDs and request shapes inside the adapters</td>
+<td>Not the project's to license</td>
+<td>Copying them would mean presenting this app as someone else's client, whatever the licence says</td>
+</tr>
+</tbody>
+</table>
+<p>The licence answers whether the code may be copied. It says nothing about whether a provider allows what the code does, which is where this was decided.</p>
+<h2 id="what-the-providers-allow" tabindex="-1">What the providers allow</h2>
+<table>
+<thead>
+<tr>
+<th>Route in 9Router</th>
+<th>What it does</th>
+<th>What the provider says</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code OAuth</td>
+<td>Takes a Claude plan sign-in into a third-party proxy and reads its usage with that token</td>
+<td>Anthropic &quot;does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests through Free, Pro, Max, or Ultra plan credentials on behalf of their users&quot;</td>
+<td><strong>Rejected</strong></td>
+</tr>
+<tr>
+<td>Antigravity and Gemini CLI OAuth</td>
+<td>Uses Google's sign-in from a third-party tool</td>
+<td>Both sets of terms name this as a breach that &quot;may be grounds for suspension or termination&quot; of the account</td>
+<td><strong>Rejected</strong></td>
+</tr>
+<tr>
+<td>Codex OAuth and usage</td>
+<td>Identifies itself as <code>codex_cli_rs</code>, and reads usage from an internal endpoint with the token</td>
+<td>OpenAI offers Sign in with ChatGPT to apps instead, which this project already uses. Posing as another client is not that route</td>
+<td><strong>Rejected.</strong> The official route stays</td>
+</tr>
+<tr>
+<td><code>chatgpt-web</code>, <code>gemini-web</code></td>
+<td>Uses a pasted browser session cookie, and solves OpenAI's Sentinel and Turnstile bot checks</td>
+<td>Extracts a session and defeats a bot check. OpenAI's terms page could not be fetched for this assessment, but no reading of a bot check makes solving it permitted</td>
+<td><strong>Rejected</strong></td>
+</tr>
+<tr>
+<td><code>src/mitm</code></td>
+<td>Installs a root certificate, redirects DNS, intercepts Copilot, Cursor, Kiro and Antigravity traffic, and rewrites a host to a development endpoint to avoid rate limits</td>
+<td>Circumvents limits on other companies' services, and weakens the machine's TLS trust</td>
+<td><strong>Rejected</strong></td>
+</tr>
+<tr>
+<td>Cursor, Copilot and other subscription routes</td>
+<td>Same approach as above</td>
+<td>Cursor's terms restrict reverse engineering. Copilot's terms for this use were not conclusively read</td>
+<td><strong>Rejected</strong>: nothing shows them to be permitted</td>
+</tr>
+<tr>
+<td>Multi-account switching, &quot;unlimited free&quot;</td>
+<td>Rotates accounts when a limit is reached</td>
+<td>Evades limits rather than respecting them</td>
+<td><strong>Rejected</strong></td>
+</tr>
+<tr>
+<td>Cloud sync, tunnels</td>
+<td>Copies credentials and settings off the computer, or exposes the proxy</td>
+<td>Conflicts with keeping each player's credentials on their own computer</td>
+<td><strong>Rejected</strong></td>
+</tr>
+<tr>
+<td>Own API keys and local models</td>
+<td>Standard, documented APIs</td>
+<td>Permitted</td>
+<td>Already supported here</td>
+</tr>
+<tr>
+<td>OpenRouter free models</td>
+<td>Own API key, documented API, documented free limit</td>
+<td>Permitted. See below</td>
+<td><strong>Added</strong></td>
+</tr>
+<tr>
+<td>Fallback across chosen providers</td>
+<td>Moves work when one reports a limit</td>
+<td>Permitted between routes that are each permitted</td>
+<td><strong>Added, with limits</strong></td>
+</tr>
+<tr>
+<td>Compressing tool output</td>
+<td>Local text processing</td>
+<td>Nothing to permit</td>
+<td><strong>Added</strong></td>
+</tr>
+</tbody>
+</table>
+<p>For a friend group the Google and Anthropic rows are not abstract: the consequence falls on each person's own account. The same goes for running 9Router separately and pointing a Local model connection at it, which this project does not stop, because that connection accepts any address. It is the owner's account and decision, and it is not a supported setup.</p>
+<h2 id="what-was-built" tabindex="-1">What was built</h2>
+<p>All of it runs inside each player's existing worker, on their own computer. There is no new server, and the room host still never sees credentials or usage.</p>
+<p><strong>Backup AIs</strong> (<code>lib/crew-worker/router.cjs</code>). An owner can list AIs for an agent to move to when one reports a limit, under Agent editor → Overview. This is the routing that is permitted, and it has these limits:</p>
+<ul>
+<li>Only what the owner listed. An agent with no list behaves exactly as before: it pauses.</li>
+<li>Paid APIs and the manual handoff can never be on the list. The host refuses them, and the worker checks again, so a stale list cannot reach one.</li>
+<li>Only a provider's limit or sign-in problem moves the work. An ordinary error does not, because trying the next AI on a bad request would just spend more.</li>
+<li>Each AI is tried at most once per job, so it cannot loop. When all of them are out, the job pauses and says so.</li>
+<li>An AI that reported a limit is skipped for an hour by agents that have an alternative, so no request is spent on a known answer.</li>
+</ul>
+<p>The task's whole context goes to the next AI, which is a real consequence of listing it. The editor says so.</p>
+<p><strong>Token saver</strong> (<code>lib/crew-worker/token-saver.cjs</code>). On by default, with a switch on the worker's page. It repeats nothing and hides nothing silently: colour codes go, repeated lines become one with a count, and very long command output keeps its start, its end and any line naming an error, with a note saying how many lines were left out. Older tool results in a long job are shortened with a note saying to read again if needed. Files an agent reads in the current step are never touched. The Usage page reports characters kept out of prompts, which is measured, rather than tokens or money, which would be guesses.</p>
+<p><strong>OpenRouter free models</strong> (<code>lib/crew-worker/providers.cjs</code>). A way for a friend with no subscription to bring a worker, on their own OpenRouter key. It cannot bill: the worker refuses any model that is not <code>openrouter/free</code> or ending in <code>:free</code>, and sends OpenRouter's documented <code>max_price</code> of zero as well. Its usage is the second real figure on the Usage page, read from the documented <code>GET /api/v1/key</code>. Free models can log prompts, and the card says so.</p>
+<p><strong>Loop limits.</strong> Already enforced before this work: a step limit, a time limit and a bounded number of task retries per job. Backup AIs add no new retry path.</p>
+<h2 id="what-this-gives-up" tabindex="-1">What this gives up</h2>
+<p>Compared with 9Router, this has far fewer free routes, no Claude or Google plan automation, and a shorter list of usage figures. Claude Code stays a manual handoff, and ChatGPT plan usage stays &quot;unavailable&quot;. Each of those exists because the alternative risks someone's account. Usage figures in 9Router for Claude and Codex come from endpoints reached with a plan token, so showing them here would need the very thing being avoided.</p>
+<p>Groq's free tier is a reasonable future addition, with documented rate-limit headers. It was left out because a Groq account on its paid plan would be billed, and unlike OpenRouter there is no model suffix or price cap to enforce that it cannot be.</p>
+<h2 id="what-was-and-was-not-tested" tabindex="-1">What was and was not tested</h2>
+<p>The router, token saver and free-model guard are tested with stand-ins for the providers (<code>test/crew-router.test.cjs</code>). Nothing here has been run against a real OpenRouter key or across real provider limits. Those need an account, and the first real run may show differences, particularly in how free models handle tools.</p>
+
+    </main>
+
+    <aside class="aside" aria-label="On this page">
+      <h2>On this page</h2>
+      <nav class="toc"><ul><li><a href="#architecture">Architecture</a></li>
+<li><a href="#licensing">Licensing</a></li>
+<li><a href="#what-the-providers-allow">What the providers allow</a></li>
+<li><a href="#what-was-built">What was built</a></li>
+<li><a href="#what-this-gives-up">What this gives up</a></li>
+<li><a href="#what-was-and-was-not-tested">What was and was not tested</a></li></ul></nav>
+    </aside>
+  </div>
+
+  <footer class="footer">
+    <p>
+      
+      Written for anyone with a checkout. If you just want to use the thing,
+      <a href="/docs/user/index.html">the user docs</a> are the other door.
+      
+    </p>
+    <p class="wink">It's very alpha. It was written mostly on a plane.</p>
+  </footer>
+
+  <script src="/docs/assets/docs.js"></script>
+</body>
+</html>

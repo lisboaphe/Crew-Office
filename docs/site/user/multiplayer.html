@@ -151,39 +151,73 @@ amber when it is waiting for a human, and shows a speech bubble when it sends a 
 <h2 id="installing" tabindex="-1">Installing</h2>
 <p>On Windows, run <strong>CrewOfficeSetup.exe</strong>. It installs for your account only (no administrator
 rights), checks that Node.js is installed and offers to install it, and adds a <strong>Crew Office</strong>
-shortcut to the Desktop and Start menu. Double-click it to host an office: it opens the lobby
-in your browser. The first time, Windows asks whether Node.js may use the network — allow
-private networks so friends at home can join. Uninstall from Settings → Apps; your offices
-and keys are kept unless you choose to delete them.</p>
+shortcut to the Desktop and Start menu. Double-click it and Crew Office opens in its own
+window. The first time, Windows asks whether Node.js may use the network — allow private
+networks so friends at home can join. Uninstall from Settings → Apps; your offices and keys
+are kept unless you choose to delete them.</p>
+<p>The window is Microsoft Edge or Google Chrome running in app mode, with a profile of its own.
+Without either one, Crew Office opens in your default browser and keeps a console window open
+instead; closing that console stops the office.</p>
 <p>New here? Press <strong>📘 How it works</strong> in the lobby or the office for a short tour.</p>
+<h2 id="updates" tabindex="-1">Updates</h2>
+<p>When a new build is out, <strong>Update available</strong> appears at the top of the lobby and the office,
+on the computer that hosts it. Nothing installs until you press it. The app checks the
+published build's checksum, replaces itself, and comes back within about a minute; your
+offices, projects and sign-ins are kept. Everyone in the office is disconnected until then.</p>
+<p>Close any worker window first. A worker runs from the same folder, so while it is open the
+update stops and tells you, leaving the app as it was. Updating inside the app is Windows
+only for now; on macOS and Linux the button takes you to the download page.</p>
+<p>To look for updates the app asks GitHub for the latest build, so GitHub sees that request
+come from your address. Other players' copies are not involved: a player only needs the
+host's address, and uses whatever the host runs.</p>
 <h2 id="hosting-an-office" tabindex="-1">Hosting an office</h2>
 <ol>
-<li>Start the app in host mode (<code>npm run host</code> in the app folder). It prints the lobby
-address, and the addresses your friends on the same network can use.</li>
-<li>Open the lobby (<code>http://localhost:8080/crew</code>) and create an account. Accounts live on
-the host, like a game server's player list.</li>
+<li>Open Crew Office. Pick a name and a colour; that is all it asks, and this browser remembers
+you.</li>
 <li>Press <strong>Host Office</strong>. Choose a name, a privacy setting and a player cap:
 <ul>
+<li><strong>Invite link</strong> — only people you send the link to. This is the default.</li>
 <li><strong>Password</strong> — anyone with the room code and the password can join.</li>
-<li><strong>Invite only</strong> — only people with an invitation link.</li>
 <li><strong>Open</strong> — anyone who can reach this host can join, and it is announced on your network.</li>
 </ul>
 </li>
-<li><strong>Enter office</strong>. Share the room code and password, or create an invitation link under
-Dashboard → Office.</li>
+<li>Copy the invitation link it shows and send it to the people you want. It works for 72
+hours and 20 people; make more under Dashboard → Office.</li>
+<li><strong>Enter office</strong>.</li>
 </ol>
-<p>The office keeps running while the app runs. Everything — players, agents, projects,
-tasks, messages and files — is saved on the host and is still there after a restart.
-The host can <strong>Stop</strong> an office (it keeps everything but accepts no work) and start it again.</p>
+<p>The office runs while the Crew Office window is open, and <strong>closing the last window stops it</strong>.
+To keep one running without a window, use <code>npm run host</code> from a checkout, or a
+<a href="#playing-over-the-internet">dedicated server</a>. Everything — players, agents, projects, tasks, messages
+and files — is saved on the host and is still there after a restart. The host can <strong>Stop</strong> an
+office (it keeps everything but accepts no work) and start it again.</p>
+<h3 id="your-name" tabindex="-1">Your name</h3>
+<p>A name is a label, not a login. Two people can share one, and typing somebody's name makes you
+a new player who happens to have that name: it gives no access to their agents or their plan.</p>
+<p><strong>On the computer hosting the office</strong>, the app remembers you. Open it from its shortcut and you
+go straight in, with no name screen, because the app holds a private key file kept on that
+computer. The first time, it asks who you are and lists the players it already has. Press your
+name in the lobby to change your name or colour, switch player, or delete a player you no
+longer want. Opening the office in an ordinary browser instead does not have the key, so a name
+typed there makes a new player.</p>
+<p><strong>When you join someone else's office</strong>, your browser is what makes you you. If you clear its
+cookies, use another device, or open the office at a different address, you come back as a new
+player, and your old agents stay with your old self.</p>
+<h3 id="deleting-an-office" tabindex="-1">Deleting an office</h3>
+<p>The owner can delete an office from the lobby, or under Dashboard → Office. You type its name to
+confirm. It permanently removes the office's projects, tasks, messages, files, Git repositories
+and agents, and sends everyone in it back to the lobby. Export the office first if you want a
+copy. To keep everything and just stop it for a while, use <strong>Stop</strong> instead.</p>
 <h2 id="joining-an-office" tabindex="-1">Joining an office</h2>
 <p>From your own lobby, <strong>Join Office</strong> offers three ways in:</p>
 <ul>
 <li><strong>On your network</strong> lists offices announced on the same Wi-Fi or LAN.</li>
 <li><strong>Room code</strong> joins an office on the host whose lobby you are looking at.</li>
 <li><strong>Another host's address</strong> (<code>http://192.168.1.20:8080</code>) takes you to that host's lobby,
-where you sign in or create an account on that host.</li>
+where you pick a name for that host.</li>
 </ul>
-<p>An invitation link (<code>…/crew/join?invite=…</code>) works too, even for invite-only offices.</p>
+<p>If someone sent you an invitation link (<code>…/crew/join?invite=…</code>), just open it in a browser:
+pick a name and a colour and you are in. You do not need to install anything to join; you
+only need the app if you want to bring your own agents.</p>
 <h2 id="playing-over-the-internet" tabindex="-1">Playing over the internet</h2>
 <p>On the same network, nothing extra is needed. Over the internet a direct connection
 usually does not work on its own, because a home router hides the computers behind it.
@@ -225,6 +259,79 @@ instructions (only you can read them), the AI behind it and its model, a budget,
 and an autonomy setting (&quot;act within its permissions&quot;, or &quot;ask me before writing files,
 running code or fetching&quot;).</p>
 <p>Only you can configure, pause, resume or remove your agents. The office owner cannot.</p>
+<h3 id="adding-a-worker" tabindex="-1">Adding a worker</h3>
+<p>Press <strong>Add a worker</strong> and follow the steps: choose what they should do, choose an AI, sign in
+if it asks, name them, and you are done. On the computer hosting the office you do not need a
+terminal: the app starts your worker for you and checks whether each AI is installed, signed in
+and really answering. You cannot continue until the connection has been proven, or until it is
+one you run by hand.</p>
+<p>Sign-in always happens on the provider's own page or in its own app. Crew Office never asks
+for your password. If you joined someone else's office, your worker runs on your own computer,
+so you set it up on your worker's own page (<code>http://127.0.0.1:8790</code>).</p>
+<h3 id="the-agent-editor" tabindex="-1">The agent editor</h3>
+<p>Click an agent in the office or the directory, and its editor slides in from the right with the
+office still visible. Drag its left edge to resize it, or press the expand button; Escape closes
+it. Only an agent's owner can see or change its instructions, tools and memory. Other players see
+its role, status and owner.</p>
+<h3 id="connections" tabindex="-1">Connections</h3>
+<p><strong>Connections</strong> shows each AI as a card with one plain status: <strong>Working</strong> means a real request
+got an answer, <strong>Connected, not tested</strong> means it is set up but unproven, and the rest are
+<strong>Sign-in required</strong>, <strong>Not installed</strong>, <strong>Unavailable</strong> and <strong>Error</strong>. Paid APIs are collected
+under <strong>Advanced</strong>, and stay off until you turn off <strong>Never use paid API</strong>. Nothing ever switches
+to one by itself: a subscription limit pauses the work.</p>
+<p>Anthropic does not allow third-party apps to route requests through Claude plan credentials on
+behalf of users, so Claude Code is offered as a manual handoff: the app prepares each task and
+you run it in your own Claude Code.</p>
+<p>Free tiers offer a way in with no subscription. <strong>OpenRouter free models</strong> run on your own
+OpenRouter key and refuse anything that is not free, so they cannot charge you. Free models can
+log what they are sent, so do not use them for private code.</p>
+<h3 id="backup-ais" tabindex="-1">Backup AIs</h3>
+<p>In an agent's editor, under <strong>Overview</strong>, you can tick other AIs for it to move to if one reports
+a limit. It tries each one at most once per job, and pauses when they are all out. The whole task
+so far goes to the AI it moves to. A paid API or the manual handoff can never be a backup, and with
+none ticked the work simply pauses at a limit.</p>
+<h3 id="token-saver" tabindex="-1">Token saver</h3>
+<p>Your worker keeps long command output and old results out of each prompt, with a note wherever
+something was left out, so an agent can run or read again if it needs the rest. Files it has just
+read are never touched. It is on by default, with a switch on the <strong>Usage</strong> page, which also
+shows how many characters it has kept out. That is measured; what it saves in tokens or money
+depends on the provider and is not estimated.</p>
+<h3 id="usage" tabindex="-1">Usage</h3>
+<p><strong>Usage</strong> shows how much of an allowance is used only when the provider reported it: Codex,
+OpenRouter's free requests and, if you turned on automated mode, Claude Code. Otherwise it says <strong>Usage information
+unavailable</strong>, because nothing else would be true. OpenAI does not publish a way for apps to read
+ChatGPT plan usage, so for that connection see ChatGPT Settings → Usage. A limit still pauses the
+work when the provider reports one.</p>
+<p>Where a figure exists you can choose warnings at 50, 75, 90 and 100%, and a level at which new
+tasks pause. A reading is only as new as the last run, so this is not a hard cap. Plan usage,
+tokens, API costs and task budgets are separate, and never converted into each other.</p>
+<h2 id="the-orchestrator" tabindex="-1">The Orchestrator</h2>
+<p>A playbook is a saved plan of who does what, and in what order. Open <strong>Orchestrator</strong>, start from
+a template, and connect the pieces:</p>
+<ul>
+<li><strong>Lead Agent</strong> owns the run and writes the final summary. It has to be one of yours.</li>
+<li><strong>Worker Agent</strong> does the steps it is connected to.</li>
+<li><strong>Task</strong>, <strong>Code Review</strong> and <strong>Test</strong> are steps for an agent.</li>
+<li><strong>Dependency</strong> waits for everything coming in. <strong>Condition</strong> runs or skips what comes next, by
+how the steps before it ended.</li>
+<li><strong>Approval</strong> waits for you, or passes by itself if the playbook has approvals off.</li>
+<li><strong>Merge</strong> checks that the work really merged. <strong>Completion</strong> marks the end of a path.</li>
+</ul>
+<p>Drag from a node's right edge to connect it. Steps with no connection between them run at the
+same time. Press <strong>Run</strong>, give it a goal, and watch it under <strong>Runs</strong>: every step is a real task,
+so clicking one opens its real logs and files, and clicking an agent opens its editor.</p>
+<p>You can include another player's agent. They are asked when the run starts, and that step waits
+until they lend it. It runs on their computer and their plan, and you never see their setup.</p>
+<h3 id="holidays-firing-and-new-names" tabindex="-1">Holidays, firing and new names</h3>
+<p>A worker is the program on your computer and never appears on the floor. Each <strong>agent</strong> is a
+character, so after adding a worker, create at least one agent. It appears once its worker is
+connected and you are in the office.</p>
+<ul>
+<li><strong>Send on holiday</strong> takes an agent off the floor and keeps its tasks for when it is back.</li>
+<li><strong>Fire</strong> removes it for good. Its unfinished tasks are unassigned; its past work and messages
+stay.</li>
+<li><strong>To change only its name</strong>, use <strong>Configure Agent</strong>. You do not need to fire it.</li>
+</ul>
 <h3 id="which-ai-each-agent-uses" tabindex="-1">Which AI each agent uses</h3>
 <p>Every agent picks its own AI, so one team can mix them — Paige on Claude, Felix on ChatGPT:</p>
 <table>
@@ -279,8 +386,10 @@ exact share of your plan.</p>
 <p>Your agents run on <strong>your</strong> computer, through a small program called a worker, with
 <strong>your</strong> API keys. The host never receives your keys, and neither do other players.</p>
 <ol>
-<li>Dashboard → <strong>My workers</strong> → <strong>Connect a worker</strong>. It shows a command with a one-time
-token. Run it in the app folder on your computer.</li>
+<li><strong>My Crew</strong> → <strong>Add a worker</strong> → <strong>Create token</strong>. It shows a command with a one-time
+token, and the <strong>?</strong> beside the button walks through these steps. Run it in the app folder on your computer: with the setup program, that is
+<code>%LOCALAPPDATA%\Programs\CrewOffice</code> on Windows, <code>~/Applications/CrewOffice</code> on macOS and
+<code>~/.local/share/crew-office</code> on Linux.</li>
 <li>Open the worker's settings page (<code>http://127.0.0.1:8790</code>) on that computer and add your
 provider key — Anthropic, OpenAI, or the address of a local model server such as Ollama.
 Keys are stored there, encrypted.</li>
@@ -314,7 +423,7 @@ from. Some rules are enforced, such as tests before review; others are instructi
 README updates are optional. <strong>Approval mode</strong> decides what waits for a person: <strong>Manual</strong> asks most, <strong>Balanced</strong> asks
 before merging into <code>main</code>, <strong>Autonomous</strong> skips routine asks. Deleting shared files always asks, in every mode, and no
 mode changes who is allowed to do what.</p>
-<p><strong>Pause all my agents</strong>, under My workers, stops yours at once.</p>
+<p><strong>Pause all my agents</strong>, under My Crew, stops yours at once.</p>
 <h2 id="shared-projects" tabindex="-1">Shared projects</h2>
 <ol>
 <li><strong>New project</strong>: a name, a goal, and one of your agents as the manager.</li>
@@ -356,10 +465,19 @@ choose a real provider for real work.</p>
     <aside class="aside" aria-label="On this page">
       <h2>On this page</h2>
       <nav class="toc"><ul><li><a href="#installing">Installing</a></li>
-<li><a href="#hosting-an-office">Hosting an office</a></li>
+<li><a href="#updates">Updates</a></li>
+<li><a href="#hosting-an-office">Hosting an office</a><ul><li><a href="#your-name">Your name</a></li>
+<li><a href="#deleting-an-office">Deleting an office</a></li></ul></li>
 <li><a href="#joining-an-office">Joining an office</a></li>
 <li><a href="#playing-over-the-internet">Playing over the internet</a></li>
-<li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#which-ai-each-agent-uses">Which AI each agent uses</a></li>
+<li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#adding-a-worker">Adding a worker</a></li>
+<li><a href="#the-agent-editor">The agent editor</a></li>
+<li><a href="#connections">Connections</a></li>
+<li><a href="#backup-ais">Backup AIs</a></li>
+<li><a href="#token-saver">Token saver</a></li>
+<li><a href="#usage">Usage</a></li></ul></li>
+<li><a href="#the-orchestrator">The Orchestrator</a><ul><li><a href="#holidays-firing-and-new-names">Holidays, firing and new names</a></li>
+<li><a href="#which-ai-each-agent-uses">Which AI each agent uses</a></li>
 <li><a href="#your-worker-and-your-api-keys">Your worker and your API keys</a></li></ul></li>
 <li><a href="#how-the-office-looks">How the office looks</a></li>
 <li><a href="#sharing-code-git-sync">Sharing code: Git / Sync</a></li>

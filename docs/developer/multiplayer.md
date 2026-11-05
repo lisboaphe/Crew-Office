@@ -48,7 +48,8 @@ behind NAT need no open port. Only the host must be reachable.
 lib/crew/
   index.cjs        assembly, boot recovery, background sweep
   db.cjs           SQLite schema (append-only migrations) and helpers
-  auth.cjs         accounts (scrypt), sessions (HttpOnly cookie, digest stored)
+  auth.cjs         names, sessions (HttpOnly cookie, digest stored); password accounts for demos and tests
+  update.cjs       in-app updates from GitHub releases (see "Releases and updates")
   rooms.cjs        rooms, privacy, password, cap, invites, roles, `can()`
   hub.cjs          per-room SSE, replay buffer, presence with a reload grace
   agents.cjs       agent CRUD; owner-only control; availability; usage
@@ -81,8 +82,28 @@ bin/crew-worker.cjs, bin/crew-demo.cjs
 
 ## Security model
 
-**Identity.** Accounts are per host. Browser requests authenticate with a session cookie;
-state-changing requests also need `X-Crew: 1`, which a cross-origin page cannot send
+**Identity.** A player is a name and a colour, per host, created by `POST /api/crew/enter`
+with no password. The session cookie is the identity and lasts a year. Accounts never kept
+strangers out, since anyone who could reach a host could register; what keeps them out is the
+room's privacy. What a password did do is stop someone *being* you, so a name is deliberately
+not a credential: entering an existing name makes a new player. `register` and `login` remain
+for the demos and tests; the UI no longer reaches them. New players are rate-limited per address.
+
+**The owner of the host computer** is remembered, so the app never shows them a name screen
+twice. Being on that computer is deliberately not enough, because the owner's agents are too,
+and a loopback check would let one approve its own work as its owner. So `ownerOfComputer()`
+needs both `localMachine()` (a direct loopback connection to a local hostname with no forwarding
+headers, since a tunnel also connects from loopback) and `machine.key` from the crew data folder.
+`bin/crew-app.cjs` reads the key and puts it in the window's address as `?this-pc=`; the lobby
+trades it for an HttpOnly, SameSite=Strict cookie and strips it from the address. The key also
+guards updates, switching player and deleting a player. This holds against an agent only while
+the sandbox keeps it out of the data folder: `CREW_SANDBOX` must not be widened to include it.
+
+**Deleting an office** (`rooms.destroy`) removes rows by column, every table with a `room_id` or
+`project_id`, so a table added later cannot be forgotten, plus the three that only reach a room
+through another row, and the room's files and bare repositories. The API re-checks the typed name.
+
+Browser requests authenticate with a session cookie; state-changing requests also need `X-Crew: 1`, which a cross-origin page cannot send
 without a CORS preflight the host never grants. Workers authenticate with a bearer token
 minted by their owner; the host stores only its SHA-256.
 
@@ -188,8 +209,95 @@ like any provider's. Cost is reported as $0 (the plan's limits apply). `CREW_CLA
 The tags above agents come from the host's `activity` hub events (`lib/crew/office.cjs`),
 sent at each job start, tool call, wait and idle.
 
+## The browser, the worker and the host
+
+`crew/connections.js` talks straight from the page to the worker on the same computer, so a
+sign-in state or usage figure never passes through a room host. The worker allows this only from
+`http://localhost` and `http://127.0.0.1` origins, and checks `Host` on every request. A remote
+office's page is refused on purpose: it is code from someone else's machine, and it could
+otherwise turn off "Never use paid API". Players on a remote host use the worker's own page,
+which serves the same module from `/ui/`. `test/crew-playbooks.test.cjs` holds this line.
+
+`lib/crew/local-worker.cjs` lets the host's own app start a worker without a terminal. It is
+behind `ownerOfComputer()`, and the token goes directly to the worker rather than through a page.
+That worker stops with the office. One someone started by hand is left alone.
+
+## Agent settings
+
+`lib/crew/profiles.cjs` holds what is not on the agents row. Its text is appended to the agent's
+standing instructions on every job (`buildContext`), the orchestration role steers reviewer
+choice, and `delegationTargets` is enforced in the `delegate_task` tool. Toggles in the editor are
+rules at agent scope, through the existing policy chain, so they are enforced where rules already
+are. `crew/agent-editor.js` redraws only its header on live events, so a form is never reset
+while someone is typing. MCP servers are deliberately not offered: the runner has no MCP client,
+and the panel says so rather than showing a control that does nothing.
+
+## Playbooks
+
+`lib/crew/playbooks.cjs` compiles a graph into an ordinary project. Work nodes become tasks with
+the graph's dependencies. Condition, Approval, Merge and Completion become tasks of kind `gate`
+with no agent, settled by `tick()`, which runs with every scheduling pass. A graph is copied into
+its run, so editing a playbook cannot change a run already going. Starting a run lends only your
+own agents; another player's are requested, and `tick()` assigns the work once they lend them.
+The Merge node verifies rather than merges, because merging belongs to the review flow.
+
+Alethe was the reference. `alethe-agents` is AGPL-3.0, and copying from it would put this
+Apache-2.0 project under AGPL, so nothing was taken from it. `alethe-orchestrate-skill` is MIT;
+the idea of named strategies and the field shapes of the CLI usage events come from it, and
+`NOTICE` credits it. The implementation is original.
+
+## Usage figures
+
+`lib/crew-worker/quota.cjs` records only what the official CLIs printed during a run this worker
+made: Codex's `rate_limits` and Claude Code's `rate_limit_event`. Neither is a promised interface,
+so a reading that does not parse is dropped, and a new CLI version could make these figures
+disappear rather than go wrong. Alethe also reads Codex's session files and has usage polling
+for other tools; this does not, because those are undocumented sources of the same data. ChatGPT
+plan usage has no documented reading at all. A reading stops counting once its window has reset,
+and stops pausing work once it is six hours old.
+
+## The app window
+
+`bin/crew-app.cjs` is what the shortcuts run. It starts itself again as `--serve`, detached
+and with no console, writing to `app.log` in the crew data folder, then opens Edge or Chrome
+with `--app=` and a dedicated `--user-data-dir`. The server watches the lock the browser holds
+in that profile and stops when it is released, which is how closing the window stops the
+office. It watches the lock rather than the child process because a second launch hands off to
+the first and exits at once. With neither browser installed it falls back to a console and the
+default browser. Set `CREW_APP_NO_WINDOW=1` to force that fallback, or `=headless` to also skip
+opening a browser.
+
+## Releases and updates
+
+`.github/workflows/release.yml` runs on every push to `main`: the multiplayer tests, then
+`installer/build.cjs`, then a GitHub release tagged `build-<run number>` with
+`CrewOffice.zip`, its `.sha256`, and the setup program. The build stamps `build.json` into the
+app, naming the build number, commit and repository. A build made by hand is build 0 of
+whatever `origin` points at, so any release is newer than it.
+
+`lib/crew/update.cjs` asks `GET /repos/<repo>/releases/latest`, at most every ten minutes and
+only when the host's own app opens a page. The routes refuse anyone but `ownerOfComputer()`.
+Installing downloads the zip, checks the checksum, copies `install.ps1` out of the folder it is
+about to replace, starts it detached and stops the server. The installer waits for the server
+to exit, builds the new copy beside the old one, swaps the folders by renaming, and starts the
+app again whether or not that worked, so a failure leaves the old build running. The reason is
+in `update.log` in the crew data folder. The page polls `host-info` and reloads when the build
+changes.
+
+The checksum catches a damaged download. It does not protect against a compromised repository,
+since it is published in the same place: **push access to `main` is the ability to offer code
+to every installed copy.** So protect the branch, and keep the tests in the workflow.
+
+Set `CREW_UPDATE_API` to point the updater at a stand-in for GitHub. `deploy.yml` is off unless
+the repository variable `DEPLOY_TO_FLY` is `true`.
+
 ## Known limits
 
+- Updating inside the app is Windows only; macOS and Linux get a link to the release.
+- A worker also runs from the app folder, so an open worker window blocks an update, which then
+  stops and says so. Workers are not updated or restarted for you.
+- Clearing cookies costs a player joining someone else's host their identity and their agents.
+  There is no recovery key yet. Only the host computer's owner is remembered beyond a cookie.
 - No built-in relay or NAT traversal: remote play needs a VPN mesh, port forwarding, a
   tunnel, or a dedicated server.
 - The process sandbox does not block network access; use Docker mode where that matters.

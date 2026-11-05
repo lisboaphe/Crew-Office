@@ -26,7 +26,9 @@ async function startHost({ stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cre
   }
   return {
     url, stateDir, port, child, log: () => out,
-    async stop() { if (child.exitCode === null) { child.kill(); await new Promise((r) => child.once('exit', r)); } },
+    // A process ended by a signal has a null exitCode for ever, so that alone would wait for an
+    // exit that has already happened.
+    async stop() { if (child.exitCode === null && child.signalCode === null) { child.kill(); await new Promise((r) => child.once('exit', r)); } },
   };
 }
 

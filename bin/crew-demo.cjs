@@ -10,7 +10,7 @@
 //   npm run demo -- --alice claude-cli --bob codex-cli   # Alice's team on her Claude
 //                                         # subscription, Bob's on his ChatGPT one
 //
-// Then sign in at the printed address as alice or bob (the passwords are printed) and
+// Then run `npm run app` and choose Alice or Bob from the players it lists, and
 // watch the office. Both players stay "in the office" while this runs, because their
 // workers are attended. Ctrl-C stops the workers, and the agents leave the floor.
 
@@ -89,7 +89,7 @@ async function main() {
   for (const a of [be, qa, sec]) await bob.post(`${P}/grants`, { agentId: a.id, budgetUsd: 5, requiresApproval: true });
   await alice.post(`${P}/start`);
   say('Project “Task app” started — Paige is planning.');
-  say(`Watch it: ${HOST}/office/${room.code}  (sign in as alice / ${PASS.alice}  or  bob / ${PASS.bob})`);
+  say(`Watch it: run npm run app and choose Alice or Bob, then enter office ${room.code}`);
   if (MANUAL) say('Manual mode: approve the plan as Alice, and the assignments for Bob’s agents as Bob, in Dashboard → Approvals.');
 
   const decided = new Set();

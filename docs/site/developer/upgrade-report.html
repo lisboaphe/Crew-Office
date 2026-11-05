@@ -56,6 +56,9 @@
           <a href="/docs/developer/upgrade-report.html" aria-current="page">Upgrade report: Git, rules, budgets</a>
         </li>
         <li>
+          <a href="/docs/developer/9router-assessment.html">9Router: compatibility and licensing</a>
+        </li>
+        <li>
           <a href="/docs/developer/physics.html">The physics of the office</a>
         </li>
         <li>
@@ -301,8 +304,8 @@
 <tr>
 <td>ChatGPT plan via Sign in with ChatGPT</td>
 <td>Partial</td>
-<td><code>chatgpt-plan.cjs</code>, tested against a stand-in server</td>
-<td><strong>Never run against the real service.</strong> See below</td>
+<td><code>chatgpt-plan.cjs</code>. On 2026-11-05 a real sign-in succeeded with plan usage allowed, and Test Connection got a real answer, confirmed from the worker's own status</td>
+<td>No agent has done a real task on it yet. Token refresh, which the documents do not specify, has not been exercised against the real service</td>
 </tr>
 <tr>
 <td>ChatGPT plan via the Codex CLI</td>
@@ -321,6 +324,72 @@
 <td>Limited</td>
 <td>Off by default</td>
 <td>See below</td>
+</tr>
+<tr>
+<td>Name-only entry, invite link on hosting, host computer remembered</td>
+<td>Works</td>
+<td><code>auth.enter</code>, <code>machine.key</code>, <code>test/crew-entry-update.test.cjs</code></td>
+<td>Clearing cookies loses a joining player's identity</td>
+</tr>
+<tr>
+<td>Delete office, holiday, fire</td>
+<td>Works</td>
+<td><code>rooms.remove</code>, same test file</td>
+<td>Holiday and fire are the existing pause and remove, renamed</td>
+</tr>
+<tr>
+<td>App window without a console</td>
+<td>Partial</td>
+<td><code>bin/crew-app.cjs</code>, run by hand on Windows 11</td>
+<td>It is Edge or Chrome in app mode, not a native shell. Worker still needs a terminal</td>
+</tr>
+<tr>
+<td>In-app updates from GitHub</td>
+<td>Partial</td>
+<td><code>update.cjs</code>, tested against a stand-in for GitHub</td>
+<td>Windows only; see the matrix note in <code>multiplayer.md</code></td>
+</tr>
+<tr>
+<td>Global redesign, grouped navigation, animations, reduced motion</td>
+<td>Works</td>
+<td><code>crew/crew.css</code>, <code>overlay.js</code>; checked on screen at 1440x900</td>
+<td>Light mode not checked on screen in this pass</td>
+</tr>
+<tr>
+<td>AI Connections cards</td>
+<td>Works</td>
+<td><code>connections.js</code>, <code>setup.cjs</code>; worker-security test</td>
+<td>Sign-in for Codex and Claude Code has not run against the real tools. Install buttons have not run for real</td>
+</tr>
+<tr>
+<td>Add Worker wizard, no terminal on the host</td>
+<td>Works</td>
+<td><code>wizard.js</code>, <code>local-worker.cjs</code>; run on screen up to the sign-in step</td>
+<td>Not walked through with a real sign-in. Avatar is a colour and initials; there is no image picker</td>
+</tr>
+<tr>
+<td>Agent editor</td>
+<td>Works</td>
+<td><code>agent-editor.js</code>; save-and-reopen checked on screen, settings proven in the agent's context</td>
+<td>MCP servers are stated as not available. Git worktree and working directory are shown, not settable: each task always gets its own clone</td>
+</tr>
+<tr>
+<td>Orchestrator: playbooks, runs, monitor</td>
+<td>Works</td>
+<td><code>playbooks.cjs</code>, <code>orchestrator.js</code>, <code>test/crew-playbooks.test.cjs</code>; run on screen</td>
+<td>Run with the scripted provider only, not a real model. Dragging nodes and connecting by hand were not exercised by a test. Lent agents need their owner to use the existing project lending screen</td>
+</tr>
+<tr>
+<td>Usage page, warnings, pause line</td>
+<td>Partial</td>
+<td><code>quota.cjs</code>, usage test</td>
+<td>Parsing is tested against the documented shapes, not a real CLI run. ChatGPT plan has no readable figure, so it always says unavailable. Context-window usage is not shown, because nothing reports it</td>
+</tr>
+<tr>
+<td>Backup AIs, token saver, OpenRouter free models</td>
+<td>Works</td>
+<td><code>router.cjs</code>, <code>token-saver.cjs</code>, <code>test/crew-router.test.cjs</code>. Decided in <a href="9router-assessment.html">the 9Router assessment</a></td>
+<td>Tested against stand-ins. Not run with a real OpenRouter key or across real provider limits</td>
 </tr>
 <tr>
 <td>Backups</td>
@@ -368,7 +437,7 @@
 </table>
 <h2 id="provider-rules-as-read-on-2026-11-03" tabindex="-1">Provider rules, as read on 2026-11-03</h2>
 <p><strong>OpenAI.</strong> The Sign in with ChatGPT documents say plan usage &quot;is available to all open-source partners and selected private clients&quot;, through OAuth with PKCE, a <code>127.0.0.1</code> loopback callback, a dynamic client registration, and the scopes <code>offline_access resource.invoke chatgpt.tokens.use.direct</code>. Requests go to <code>POST /v1/responses</code> with <code>store: false</code> and <code>stream: true</code>; function tools are allowed. On <code>subscription_sharing_usage_limit_exceeded</code> the app must pause and point to ChatGPT Settings → Usage, and the documents say OpenAI does not silently switch billing paths. This project is Apache-2.0 and runs locally, which is why this route was chosen.</p>
-<p>What is unverified: nothing has been sent to the real service, because that needs your account. The documents do not show the token refresh request, so the standard OAuth <code>refresh_token</code> grant is used. They do not say whether an open-source client needs any further approval, nor whether unattended multi-agent use fits the program; a pause on <code>subscription_sharing_user_not_eligible</code> will say so if not. Check it with <strong>Sign in with ChatGPT</strong>, then <strong>Test Connection</strong>, on the worker's page. The help-centre article on plan usage could not be fetched (403), so its details on the weekly cap are from the prompt, not verified.</p>
+<p>What was verified on 2026-11-05: a real sign-in and one real request, on one account. What is still unverified: the documents do not show the token refresh request, so the standard OAuth <code>refresh_token</code> grant is used, and it has not yet run for real. They do not say whether unattended multi-agent use fits the program; a pause on <code>subscription_sharing_user_not_eligible</code> will say so if not. The help-centre article on plan usage could not be fetched (403), so its details on the weekly cap are from the prompt, not verified.</p>
 <p><strong>Anthropic.</strong> The Claude Code legal page says developers &quot;should use API key authentication&quot; and that Anthropic &quot;does not permit third-party developers to offer Claude.ai login into their own applications, or to route requests through Free, Pro, Max, or Ultra plan credentials on behalf of their users&quot;. It also says this does not prevent &quot;an end user from signing in to the unmodified Claude Code binary with their own Claude subscription&quot;, and that running Claude Code in a product requires agreeing to the Commercial Terms, leaving the binary unmodified, and each user authenticating themselves.</p>
 <p>So: <strong>manual handoff is the default</strong>. The app prepares the task; you run it yourself in your own Claude Code and press Done. The automated route (<code>claude-cli</code>) drives your own unmodified Claude Code, but is <strong>off unless you opt in on your own worker</strong>, and is labelled Limited, because whether unattended orchestration counts as routing requests on your behalf is not something this project can settle. If you need certainty, ask Anthropic, or use an API key, which is permitted and billed separately. The app never handles a Claude sign-in.</p>
 <p><strong>Billing protection, either way.</strong> Paid API is off by default and enforced in <code>createProvider</code>, which every model call passes through. The worker removes <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code> and similar from the environment of subscription CLIs, because Claude Code prefers an API key over a signed-in plan when it finds one. Limits pause work; they never trigger a retry or another provider.</p>
@@ -425,11 +494,11 @@ npm test               # everything
 </tr>
 <tr>
 <td>10. Real OpenAI and Claude integrations</td>
-<td><strong>Not done: needs your accounts.</strong> See the checklist</td>
+<td>ChatGPT sign-in and Test Connection pass on a real account; a real task has not been run. Claude is not done</td>
 </tr>
 <tr>
 <td>11. Build and launch the desktop app</td>
-<td>The installer is rebuilt and its install script tested into a temporary folder. The <code>.exe</code> itself has not been run. The app is a local server and browser page, not a native window</td>
+<td>The <code>.exe</code> was run on Windows 11 and installs and starts the app. Its first real run installed nothing and exited 0, because a batch file launched from the package never ran; it now launches PowerShell directly. No automated test runs the <code>.exe</code>. The app is a local server and browser page, not a native window</td>
 </tr>
 </tbody>
 </table>
@@ -450,6 +519,7 @@ npm test               # everything
 </code></pre>
 <p>It also sets a 25% estimated budget on each task, with paid API left off. For that percentage to bite, set a capacity for the connection on the worker's page; without one, only the provider's own limits apply.</p>
 <h2 id="security-notes" tabindex="-1">Security notes</h2>
+<p>On Windows, <code>test/server-startup.test.js</code> sets <code>HOME</code>, which Node ignores there in favour of <code>USERPROFILE</code>, so those tests read the real <code>~/.roving-office</code> of whoever runs them, and fail if that folder has offices in it. They are among the failures listed as environmental.</p>
 <p>The Git host trusts a worker's commit trailers for test results, so a player could misreport their own agent's tests; it cannot do so for another player's. <code>run_command</code> remains Node-only, and the default process sandbox does not block network access; <code>CREW_SANDBOX=docker</code> does. Python projects therefore cannot run their tests in the default sandbox yet. Self-hosted traffic is plain HTTP unless you put HTTPS in front of it, so on anything but a trusted network use a VPN or a reverse proxy.</p>
 
     </main>

@@ -48,6 +48,10 @@ jobs:
   deploy:
     name: Deploy to Fly
     runs-on: ubuntu-latest
+    # Off unless a repository opts in with this variable. This app is a download now: a push
+    # to main publishes a build through `release.yml`, and most copies of this repository
+    # have no Fly app to deploy to, where this job could only ever fail.
+    if: vars.DEPLOY_TO_FLY == 'true'
 
     # The whole of deployment tracking. GitHub records a deployment per run against this
     # environment, so Settings → Environments → production becomes the history: which

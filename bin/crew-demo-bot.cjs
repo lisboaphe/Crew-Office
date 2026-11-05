@@ -8,7 +8,7 @@
 //
 // Real models instead, each player's own connection on their own worker:
 //   npm run demo:bot -- --provider codex-cli
-// Then sign in at the printed address and open Dashboard → Git / Sync.
+// Then run `npm run app`, choose Ana from the players it lists, and open Dashboard → Git / Sync.
 
 'use strict';
 
@@ -81,7 +81,7 @@ async function main() {
   await ana.req('PUT', `${R}/rules/project/${project.id}`, { rules: PROJECT_RULES });
   await ana.post(`${P}/start`);
   say('Project started: Smart Sync, progress reports on, review required, Balanced approvals, paid API off.');
-  say(`Watch it: ${HOST}/office/${room.code}  (sign in as ana / ${PLAYERS.ana.password})  then Dashboard → Git / Sync`);
+  say(`Watch it: run npm run app and choose Ana, enter office ${room.code}, then Dashboard → Git / Sync`);
   if (MANUAL) say('Manual mode: approve in Dashboard → Approvals as each player.');
 
   const decided = new Set();

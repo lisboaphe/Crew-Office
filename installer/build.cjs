@@ -37,6 +37,15 @@ function copy(rel, stage) {
   fs.cpSync(from, path.join(stage, rel), { recursive: true, filter: (src) => !/[\\/](node_modules|\.git)([\\/]|$)/.test(src) });
 }
 
+// What the app's updater reads (lib/crew/update.cjs). In the release workflow GitHub supplies
+// the run number and repository; a build by hand is build 0 of whatever `origin` points at,
+// so any release counts as newer than it.
+function buildStamp() {
+  const git = (...args) => { try { return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); } catch { return ''; } };
+  const origin = /github\.com[/:]([^/]+\/[^/]+?)(\.git)?$/.exec(git('remote', 'get-url', 'origin'))?.[1];
+  return { version, build: Number(process.env.GITHUB_RUN_NUMBER) || 0, commit: process.env.GITHUB_SHA || git('rev-parse', 'HEAD') || null, repo: process.env.GITHUB_REPOSITORY || origin || null };
+}
+
 function main() {
   fs.mkdirSync(DIST, { recursive: true });
   // IExpress and makecab cannot cope with non-ASCII or very long paths, so build in a short
@@ -44,6 +53,7 @@ function main() {
   const work = fs.mkdtempSync(path.join(os.tmpdir(), 'crewpkg-'));
   const stage = path.join(work, 'app');
   for (const rel of INCLUDE) copy(rel, stage);
+  fs.writeFileSync(path.join(stage, 'build.json'), `${JSON.stringify(buildStamp(), null, 2)}\n`);
 
   const zip = path.join(work, 'app.zip');
   // bsdtar ships with Windows 10+ and every Unix; -a picks the zip format from the name.
@@ -61,7 +71,6 @@ function main() {
   fs.mkdirSync(pkg);
   fs.copyFileSync(zip, path.join(pkg, 'app.zip'));
   fs.copyFileSync(path.join(ROOT, 'installer/windows/install.ps1'), path.join(pkg, 'install.ps1'));
-  fs.copyFileSync(path.join(ROOT, 'installer/windows/setup.cmd'), path.join(pkg, 'setup.cmd'));
   const exe = path.join(work, 'CrewOfficeSetup.exe');
   const sed = [
     '[Version]', 'Class=IEXPRESS', 'SEDVersion=3',
@@ -71,9 +80,11 @@ function main() {
     'FriendlyName=%FriendlyName%', 'AppLaunched=%AppLaunched%', 'PostInstallCmd=%PostInstallCmd%',
     'AdminQuietInstCmd=%AdminQuietInstCmd%', 'UserQuietInstCmd=%UserQuietInstCmd%', 'SourceFiles=SourceFiles',
     '[Strings]', 'InstallPrompt=', 'DisplayLicense=', 'FinishMessage=', `TargetName=${exe}`,
-    `FriendlyName=Crew Office ${version} Setup`, 'AppLaunched=cmd /c setup.cmd', 'PostInstallCmd=<None>',
-    'AdminQuietInstCmd=', 'UserQuietInstCmd=', 'FILE0="setup.cmd"', 'FILE1="install.ps1"', 'FILE2="app.zip"',
-    '[SourceFiles]', `SourceFiles0=${pkg}\\`, '[SourceFiles0]', '%FILE0%=', '%FILE1%=', '%FILE2%=',
+    // PowerShell directly: a batch file launched from the package silently never ran, and the
+    // setup then exited 0 having installed nothing. install.ps1 finds app.zip beside itself.
+    `FriendlyName=Crew Office ${version} Setup`, 'AppLaunched=powershell.exe -NoProfile -ExecutionPolicy Bypass -File install.ps1', 'PostInstallCmd=<None>',
+    'AdminQuietInstCmd=', 'UserQuietInstCmd=', 'FILE0="install.ps1"', 'FILE1="app.zip"',
+    '[SourceFiles]', `SourceFiles0=${pkg}\\`, '[SourceFiles0]', '%FILE0%=', '%FILE1%=',
   ].join('\r\n');
   const sedFile = path.join(work, 'setup.sed');
   fs.writeFileSync(sedFile, sed);

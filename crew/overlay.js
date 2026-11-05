@@ -5,9 +5,13 @@
 // State comes from one snapshot plus a stream of events; a reconnect that missed too much
 // is told to resync and fetches the snapshot again, so no state lives only in the page.
 
-import { h, api, toast, modal, avatar, ago, money, BRAND, reportErrors } from './common.js';
+import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteOffice, updateNotice, BRAND, reportErrors } from './common.js';
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 import { gitTab, filesTab, rulesTab } from './workspace.js';
+import { createAgentEditor } from './agent-editor.js';
+import { createOrchestrator } from './orchestrator.js';
+import { addWorkerWizard } from './wizard.js';
+import { workerLink, connectionsView, usageView, usageBar } from './connections.js';
 
 const code = (location.pathname.match(/^\/office\/([^/]+)/) ?? [])[1];
 const S = { room: null, me: null, members: [], agents: [], projects: [], tasks: [], channels: [], approvals: [], notifications: [], workers: [], feed: [], artifacts: [], permissions: {}, providers: {}, host: {} };
@@ -31,6 +35,7 @@ async function boot() {
   const h1 = document.querySelector('#title-bar h1');
   if (h1) h1.lastChild.textContent = BRAND;
   await refresh();
+  ui.ownerOfComputer = (await api('GET', '/api/crew/this-computer').catch(() => ({}))).owner === true;
   buildChrome();
   connect();
   tutorialOnFirstVisit({ showMe: tourShowMe });
@@ -61,7 +66,9 @@ function connect() {
   on('resync', () => refresh());
   // The owner gets the agent twice — the public view, then their own with the brief — in that order.
   on('agent', (a) => { upsert(S.agents, a); render(); });
+  on('playbooks', () => ui.orchestrator?.changed());
   on('agent.removed', ({ id }) => { S.agents = S.agents.filter((a) => a.id !== id); render(); });
+  on('room.deleted', () => { location.href = '/crew'; });
   on('members', ({ members }) => { S.members = members; render(); });
   on('project', (p) => { upsert(S.projects, p); render(); });
   on('task', (t) => { upsert(S.tasks, t); render(); });
@@ -113,7 +120,9 @@ function buildChrome() {
   pillLayer = h('div', { id: 'crew-pills' });
   meetingLayer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   meetingLayer.id = 'crew-meetings';
-  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.dash, ui.side);
+  ui.orchestrator = createOrchestrator(editorContext());
+  ui.editor = createAgentEditor(editorContext());
+  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.dash, ui.side, ui.editor.el);
   render();
 }
 
@@ -127,6 +136,7 @@ function render() {
     renderBar();
     if (!ui.dash.classList.contains('hidden')) renderDash();
     if (!ui.side.classList.contains('hidden')) renderSide();
+    ui.editor?.refresh();
   };
   // A frame when one is coming; the timer for a hidden or background window, which gets none.
   requestAnimationFrame(draw);
@@ -140,7 +150,10 @@ function renderBar() {
   ui.bar.replaceChildren(
     h('span.room-name', S.room.name, S.room.status !== 'open' ? ' · stopped' : ''),
     players,
+    updateNotice(),
     h('button.btn', { onclick: () => toggleDash() }, 'Dashboard'),
+    h('button.btn', { onclick: () => toggleDash('crew') }, 'My Crew'),
+    h('button.btn', { onclick: () => toggleDash('playbooks') }, 'Orchestrator'),
     h('button.btn', { onclick: () => openSide('chat') }, 'Chat'),
     h('button.btn', { onclick: () => toggleDash('approvals') }, 'Approvals', pending ? h('span.badge', pending) : null),
     h('button.btn', { onclick: () => toggleDash('notifications') }, '🔔', unread ? h('span.badge', unread) : null),
@@ -165,22 +178,51 @@ function toggleDash(tab) {
 
 // --- dashboard --------------------------------------------------------------
 
-const TABS = [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['agents', 'Agents'], ['teams', 'Teams'], ['feed', 'Live feed'], ['deliverables', 'Deliverables'], ['approvals', 'Approvals'], ['rules', 'Rules'], ['costs', 'Costs'], ['workers', 'My workers'], ['notifications', 'Notifications'], ['room', 'Office']];
+// Six places to go, with what belongs together inside each. Each remembers which tab was open.
+const SECTIONS = [
+  { key: 'office', label: 'Office', tabs: [['room', 'Overview'], ['feed', 'Live feed'], ['approvals', 'Approvals'], ['notifications', 'Notifications'], ['rules', 'Rules & settings'], ['teams', 'Teams']] },
+  { key: 'agents', label: 'Agents', tabs: [['agents', 'Directory'], ['crew', 'My Crew']] },
+  { key: 'orchestrator', label: 'Orchestrator', tabs: [['playbooks', 'Playbooks'], ['runs', 'Runs']] },
+  { key: 'projects', label: 'Projects', tabs: [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['deliverables', 'Deliverables']] },
+  { key: 'connections', label: 'Connections', tabs: [['connections', 'AI connections']] },
+  { key: 'usage', label: 'Usage', tabs: [['usage', 'Plan usage'], ['costs', 'Task costs']] },
+];
+const sectionOf = (tab) => SECTIONS.find((s) => s.tabs.some(([k]) => k === tab)) ?? SECTIONS[0];
+const onThisComputer = () => ['localhost', '127.0.0.1'].includes(location.hostname);
+const localWorker = () => workerLink(`http://127.0.0.1:${S.host?.workerPort ?? 8790}`);
 
 function renderDash() {
+  // These hold their own state and update themselves. A half-drawn playbook, its zoom and a
+  // connection card's progress all survive the office's updates by simply not being redrawn.
+  if (['playbooks', 'runs', 'connections', 'usage'].includes(ui.tab) && ui.dash.dataset.tab === ui.tab) return;
   const body = h('div.body');
   const wsCtx = { S, roomId, ui, render, taskDetail };
-  ({ git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, workers: dashWorkers, notifications: dashNotifications, room: dashRoom })[ui.tab](body);
+  const section = sectionOf(ui.tab);
+  (ui.lastTab ??= {})[section.key] = ui.tab;
+  ({ git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()) })[ui.tab](body);
+  // Only a real change of place animates: the office repaints this on every event.
+  if (ui.drawnTab !== ui.tab) { body.classList.add('cr-fade'); ui.drawnTab = ui.tab; }
+  const scroll = ui.dash.querySelector('.body')?.scrollTop ?? 0;
+  ui.dash.dataset.tab = ui.tab;
   ui.dash.replaceChildren(
-    h('header', h('h2', 'Dashboard'), h('button.btn.small', { onclick: () => ui.dash.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
-    h('nav.cr-tabs', ...TABS.map(([k, label]) => h('button', { class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; render(); } }, label))),
-    body);
+    h('nav.cr-rail', { 'aria-label': 'Sections' }, ...SECTIONS.map((s) => h('button', { class: s === section ? 'on' : '', title: s.label, 'aria-current': s === section ? 'page' : null, onclick: () => { ui.tab = ui.lastTab[s.key] ?? s.tabs[0][0]; render(); } }, icon(s.key), h('span', s.label)))),
+    h('div.cr-dash-main',
+      h('header', h('h2', section.label), h('button.btn.small', { onclick: () => ui.dash.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
+      section.tabs.length > 1 ? h('nav.cr-tabs', { role: 'tablist' }, ...section.tabs.map(([k, label]) => h('button', { role: 'tab', 'aria-selected': ui.tab === k ? 'true' : 'false', class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; render(); } }, label))) : null,
+      body));
+  if (ui.drawnScrollTab === ui.tab) body.scrollTop = scroll;
+  ui.drawnScrollTab = ui.tab;
 }
 
 const agentById = (id) => S.agents.find((a) => a.id === id);
 const userById = (id) => S.members.find((m) => m.userId === id);
 const STATUS_COLOR = { IDLE: '#8d99ae', ASSIGNED: '#3d85c6', PLANNING: '#9b5de5', WORKING: '#2a8a4a', WAITING: '#c27c0e', REVIEW: '#00a3b4', COMPLETED: '#2a8a4a', FAILED: '#c0392b', PAUSED: '#8d99ae', BLOCKED: '#c0392b', OFFLINE: '#b9bfcb', CANCELLED: '#8d99ae' };
-const statusPill = (s) => h('span.pill', { style: { color: STATUS_COLOR[s] ?? 'inherit' } }, h('span.dot', { style: { background: STATUS_COLOR[s] ?? '#999' } }), s);
+const statusPill = (s) => h('span.pill', { style: { color: STATUS_COLOR[s] ?? 'inherit' } }, h('span.dot', { style: { background: STATUS_COLOR[s] ?? '#999' } }), s === 'PAUSED' ? 'ON HOLIDAY' : s);
+
+// The same two actions wherever an agent appears. Holiday keeps its tasks for when it is back;
+// firing takes them off it. Changing a name needs neither: Configure Agent does that.
+const holidayButton = (a, cls = 'button.btn') => h(cls, { onclick: (e) => { e.stopPropagation(); act(() => api('POST', `/api/crew/rooms/${roomId}/agents/${a.id}/${a.paused ? 'resume' : 'pause'}`), a.paused ? `${a.name} is back` : `${a.name} is on holiday`); } }, a.paused ? 'Back from holiday' : 'Send on holiday');
+const fireButton = (a, cls = 'button.btn.danger') => h(cls, { onclick: (e) => { e.stopPropagation(); if (confirm(`Fire ${a.name}? They leave the office and their unfinished tasks are unassigned. Their past work and messages stay. This cannot be undone.\n\nOnly want a new name? Cancel and use Configure Agent.`)) act(() => api('DELETE', `/api/crew/rooms/${roomId}/agents/${a.id}`), `${a.name} has been fired`); } }, 'Fire');
 
 function dashProjects(body) {
   body.append(h('div.row', h('h2.grow', 'Projects'), S.room.myRole !== 'guest' ? h('button.btn.primary', { onclick: newProject }, 'New project') : null));
@@ -218,11 +260,56 @@ function dashBoard(body) {
       h('div', h('b', t.title)), h('div.muted', `${t.kind} · ${t.assignedAgentName ?? 'unassigned'}`), h('div.hint', t.status.replace(/_/g, ' '), t.artifacts.length ? ` · ${t.artifacts.length} file(s)` : '')))))));
 }
 
+/** The narrowest reported limit, for an agent card. Nothing at all when none was reported. */
+function agentUsage(a) {
+  if (a.ownerId !== S.me.id) return null;
+  const windows = Object.values(ui.usageData?.reported?.[a.provider]?.windows ?? {});
+  if (!windows.length) return null;
+  const top = Math.max(...windows.map((w) => w.usedPercent));
+  return h('div.cr-card-usage', { title: `${Math.round(top)}% of a limit used, as the provider reports it` }, usageBar(top, { small: true }));
+}
+
 function dashAgents(body) {
-  body.append(h('div.row', h('h2.grow', 'Agent directory'), S.room.myRole !== 'guest' ? h('button.btn.primary', { onclick: () => agentForm() }, 'New agent') : null));
-  body.append(h('div.cr-list', ...S.agents.map((a) => h('div.cr-item.click.row', { onclick: () => openAgent(a.id) },
-    avatar(a.name, a.color, { ai: true, online: a.available }), h('div.grow', h('b', a.name), ' ', h('span.muted', a.role), h('div.hint', `${a.ownerName}'s team · ${a.provider}/${a.model}`)),
-    statusPill(a.status)))));
+  const search = h('input', { type: 'search', placeholder: 'Search agents, roles or owners', 'aria-label': 'Search agents', value: ui.agentQuery ?? '' });
+  const rows = S.agents.map((a) => {
+    const row = h('div.cr-item.click.row', { onclick: () => openAgent(a.id), onkeydown: (e) => { if (e.key === 'Enter') openAgent(a.id); }, tabIndex: 0, role: 'button' },
+      avatar(a.name, a.color, { ai: true, online: a.available }), h('div.grow', h('b', a.name), ' ', h('span.muted', a.role), h('div.hint', `${a.ownerName}${a.ownerId === S.me.id ? ' (you)' : ''} · ${S.providers[a.provider]?.label ?? a.provider}`), agentUsage(a)),
+      statusPill(a.status));
+    row.dataset.search = `${a.name} ${a.role} ${a.ownerName} ${a.skills.join(' ')}`.toLowerCase();
+    return row;
+  });
+  const filter = () => { const q = search.value.trim().toLowerCase(); ui.agentQuery = search.value; for (const r of rows) r.hidden = Boolean(q) && !r.dataset.search.includes(q); };
+  search.addEventListener('input', filter);
+  filter();
+  body.append(h('div.row', h('div.grow', search), S.room.myRole !== 'guest' ? h('button.btn.primary', { onclick: () => addWorkerWizard(editorContext()) }, 'Add a worker') : null));
+  body.append(h('div.cr-list', { style: { marginTop: '12px' } }, ...rows));
+  if (!S.agents.length) body.append(h('p.hint', 'No agents yet. Add a worker to put someone on the floor.'));
+  if (ui.agentQueryFocus) { search.focus(); search.setSelectionRange(search.value.length, search.value.length); }
+  search.addEventListener('focus', () => { ui.agentQueryFocus = true; });
+  search.addEventListener('blur', () => { ui.agentQueryFocus = false; });
+}
+
+const startMyWorker = (reload) => h('button.btn.primary', { onclick: async () => {
+  try { await api('POST', `/api/crew/rooms/${roomId}/workers/start-here`, { name: 'This computer' }); await refresh(); reload(); } catch (e) { toast(e.message, 6000); }
+} }, 'Start my worker');
+const noWorker = (reload) => (ui.ownerOfComputer ? startMyWorker(reload)
+  : h('p.hint', 'Open ', h('a', { href: 'http://127.0.0.1:8790', target: '_blank', rel: 'noopener' }, 'your worker’s page'), ' on your own computer. It has this same screen. This office cannot reach your worker, on purpose: its page comes from someone else’s computer.'));
+
+function dashConnections(body) {
+  ui.connectionsView ??= connectionsView(localWorker(), { offline: noWorker, onChange: () => refreshUsage() });
+  body.append(ui.connectionsView);
+  ui.connectionsView.reload();
+}
+
+function dashUsage(body) {
+  ui.usageView = usageView(localWorker(), { offline: noWorker, agents: S.agents.filter((a) => a.ownerId === S.me.id) });
+  body.append(ui.usageView);
+}
+
+async function refreshUsage() {
+  if (!onThisComputer()) return null;
+  try { ui.usageData = await localWorker().get('/usage'); } catch { ui.usageData = null; }
+  return ui.usageData;
 }
 
 function dashTeams(body) {
@@ -286,19 +373,36 @@ function dashCosts(body) {
     const done = S.tasks.filter((t) => t.assignedAgentId === a.id && t.status === 'completed').length;
     const bad = S.tasks.filter((t) => t.assignedAgentId === a.id && t.status === 'failed').length;
     return h('div.cr-item.row', avatar(a.name, a.color, { ai: true }), h('div.grow', h('b', a.name), h('div.hint', `${a.ownerName} · ${done} done · ${bad} failed`)),
-      h('div', { style: { textAlign: 'right' } }, h('b', `${money(a.spentUsd)} / ${money(a.budgetUsd)}`), h('div.hint', `${(a.tokensIn + a.tokensOut).toLocaleString()} tokens`)));
+      h('div', { style: { textAlign: 'right' } }, h('b', S.providers[a.provider]?.billing === 'subscription' ? 'Plan' : `${money(a.spentUsd)} / ${money(a.budgetUsd)}`), h('div.hint', `${(a.tokensIn + a.tokensOut).toLocaleString()} tokens`)));
   })));
   body.append(h('p.hint', 'Costs are computed on each owner’s worker from the provider’s reported token usage and a price table; local and unpriced models count as $0.'));
 }
 
-function dashWorkers(body) {
-  body.append(h('h2', 'Your workers'), h('p.hint', 'A worker is a small program on your computer that runs your agents with your own sign-ins and keys. The office host never receives them. Without a connected worker your agents are unavailable.'));
-  body.append(h('div.cr-list', ...(S.workers.length ? S.workers.map((w) => h('div.cr-item.row', h('span.dot', { style: { background: w.online ? 'var(--cr-ok)' : '#bbb' } }), h('b.grow', w.name), h('span.muted', w.alwaysOn ? 'always-on' : 'attended (runs while you are here)'), h('span.muted', w.online ? 'online' : 'offline'),
-    h('button.btn.small.danger', { onclick: () => act(() => api('DELETE', `/api/crew/rooms/${roomId}/workers/${w.id}`), 'Worker revoked') }, 'Revoke'))) : [h('p.hint', 'No workers yet.')])));
-  body.append(h('div.row', { style: { marginTop: '10px' } }, h('button.btn.primary', { onclick: connectWorker }, 'Connect a worker'),
+function dashCrew(body) {
+  body.append(h('div.row', h('h2.grow', 'My Crew'),
+    h('button.btn.primary', { onclick: () => addWorkerWizard(editorContext()) }, 'Add a worker'),
+    helpTip('How to add a worker', [
+      'Press Add a worker and choose what they should do.',
+      'Choose an AI. The app checks this computer for it.',
+      'If it asks, sign in on the provider’s own page. The app never sees your password.',
+      'Name them and press Create.',
+      'They appear in the office once your worker is connected and you are here.',
+    ])));
+  body.append(h('p.hint', 'A worker is a small program on your computer that runs your agents with your own sign-ins and keys. The office host never receives them. Without a connected worker your agents are unavailable.'));
+
+  body.append(h('h3', 'Workers'), h('div.cr-list', ...(S.workers.length ? S.workers.map((w) => h('div.cr-item.row', h('span.dot', { style: { background: w.online ? 'var(--cr-ok)' : '#bbb' } }), h('b.grow', w.name), h('span.muted', w.alwaysOn ? 'always-on' : 'attended (runs while you are here)'), h('span.muted', w.online ? 'online' : 'offline'),
+    h('button.btn.small.danger', { onclick: () => act(() => api('DELETE', `/api/crew/rooms/${roomId}/workers/${w.id}`), 'Worker revoked') }, 'Revoke'))) : [h('p.hint', 'No workers yet. Add one to bring your agents online.')])));
+
+  const mine = S.agents.filter((a) => a.ownerId === S.me.id);
+  body.append(h('h3', 'My agents'), h('div.cr-list', ...(mine.length ? mine.map((a) => h('div.cr-item.click.row', { onclick: () => openAgent(a.id) }, avatar(a.name, a.color, { ai: true }),
+    h('div.grow', h('b', a.name), h('div.hint', S.providers[a.provider]?.label ?? a.provider)), statusPill(a.status), holidayButton(a, 'button.btn.small'), fireButton(a, 'button.btn.small.danger'))) : [h('p.hint', 'No agents yet. Create them under Agents.')])));
+
+  body.append(h('div.row', { style: { marginTop: '12px' } },
+    h('a.btn', { href: 'http://127.0.0.1:8790', target: '_blank', rel: 'noopener' }, 'Open my worker’s settings'),
+    h('button.btn', { onclick: connectWorker, title: 'Run your agents on a different computer from this one' }, 'Run on another computer'),
     h('button.btn.danger', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: true }), 'All your agents are paused') }, 'Pause all my agents'),
     h('button.btn', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: false }), 'Your agents are back') }, 'Resume all')));
-  body.append(h('p.hint', 'Spending, sign-ins, budgets and Test Connection are on your worker’s own page: http://127.0.0.1:8790 on the computer running it. Paid API use is off unless you turn it on there.'));
+  body.append(h('p.hint', 'Sign-ins, budgets and Test Connection are on your worker’s own page, on the computer running it. Paid API use is off unless you turn it on there.'));
 }
 
 function quietMode() { try { return localStorage.getItem('crew.quiet') === '1'; } catch { return false; } }
@@ -318,9 +422,10 @@ function dashRoom(body) {
   if (admin) {
     body.append(h('div.row', h('button.btn', { onclick: invite }, 'Create invitation link'), h('button.btn', { onclick: roomSettings }, 'Office settings'),
       h('a.btn', { href: `/api/crew/rooms/${roomId}/export`, download: `office-${r.code}.json` }, 'Export office (JSON)'),
-      r.myRole === 'owner' ? h('button.btn.danger', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/status`, { status: r.status === 'open' ? 'stopped' : 'open' }), r.status === 'open' ? 'Office stopped' : 'Office started') }, r.status === 'open' ? 'Stop office' : 'Start office') : null));
+      r.myRole === 'owner' ? h('button.btn.danger', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/status`, { status: r.status === 'open' ? 'stopped' : 'open' }), r.status === 'open' ? 'Office stopped' : 'Office started') }, r.status === 'open' ? 'Stop office' : 'Start office') : null,
+      r.myRole === 'owner' ? h('button.btn.danger', { onclick: () => confirmDeleteOffice(r).then((gone) => { if (gone) location.href = '/crew'; }) }, 'Delete office') : null));
   }
-  body.append(h('h3', 'Players'), h('div.cr-list', ...S.members.map((m) => h('div.cr-item.row', avatar(m.displayName, m.color, { online: m.online }), h('b.grow', m.displayName), h('span.muted', `@${m.username}`),
+  body.append(h('h3', 'Players'), h('div.cr-list', ...S.members.map((m) => h('div.cr-item.row', avatar(m.displayName, m.color, { online: m.online }), h('b.grow', m.displayName),
     admin && m.role !== 'owner' && m.userId !== S.me.id ? h('select', { onchange: (e) => act(() => api('POST', `/api/crew/rooms/${roomId}/members/${m.userId}/role`, { role: e.target.value }), 'Role changed') }, ...['guest', 'member', 'admin'].map((x) => h('option', { value: x, selected: m.role === x }, x))) : h('span.pill', m.role),
     admin && m.role !== 'owner' && m.userId !== S.me.id ? h('button.btn.small.danger', { onclick: () => confirm(`Remove ${m.displayName} and take their agents off the floor?`) && act(() => api('DELETE', `/api/crew/rooms/${roomId}/members/${m.userId}`), 'Player removed') }, 'Remove') : null))));
   body.append(h('h3', 'Your profile'), h('div.row', h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
@@ -335,15 +440,26 @@ function openSide(mode) {
   render();
 }
 
-function openAgent(id) {
-  ui.agentId = id;
-  ui.agentDetail = null;
-  openSide('agent');
-  api('GET', `/api/crew/rooms/${roomId}/agents/${id}`).then((d) => { ui.agentDetail = d; render(); }).catch((e) => toast(e.message));
+function openAgent(id) { ui.editor.open(id).catch((e) => toast(e.message)); }
+
+/** What the editor, the wizard and the Orchestrator need from the office. */
+function editorContext() {
+  return {
+    S, roomId, ui, ownerOfComputer: ui.ownerOfComputer, statusPill, taskDetail, jobLogs, assignTask, holidayButton, fireButton, messageView, viewFile, openAgent,
+    refreshState: refresh,
+    workerLink: localWorker,
+    chatWith: (a, channelId) => { if (!channelId) return; ui.channelId = channelId; if (!S.channels.find((c) => c.id === channelId)) S.channels.push({ id: channelId, kind: 'dm', name: 'dm', dmAgentId: a.id }); openSide('chat'); },
+    usage: () => refreshUsage(),
+    privateMemory: (agentId) => (onThisComputer() ? localWorker().get(`/agent-memory?agent=${encodeURIComponent(agentId)}`).then((r) => r.memory).catch(() => null) : Promise.resolve(null)),
+    playbooksUsing: (agentId) => ui.orchestrator?.playbooksUsing(agentId) ?? [],
+    playbooks: () => ui.orchestrator?.playbooks() ?? [],
+    addToPlaybook: (id, agent) => ui.orchestrator.addToPlaybook(id, agent),
+    showRuns: (runId) => { ui.tab = 'runs'; ui.dash.classList.remove('hidden'); ui.dash.dataset.tab = ''; render(); ui.orchestrator.showRuns(runId); },
+    firstTask: (a) => { if (S.projects.length) assignTask(a); else newProject(); },
+  };
 }
 
 function renderSide() {
-  if (ui.sideMode === 'agent') return renderAgent();
   const ch = S.channels.find((c) => c.id === ui.channelId) ?? S.channels[0];
   if (!ch) { ui.side.replaceChildren(h('header', h('h2', 'Chat'))); return; }
   ui.channelId = ch.id;
@@ -386,44 +502,6 @@ function messageView(m) {
       h('div.text', m.body)));
 }
 
-function renderAgent() {
-  const a = agentById(ui.agentId);
-  if (!a) { ui.side.replaceChildren(h('header', h('h2', 'Agent'), h('button.btn.small', { onclick: () => openSide('chat') }, 'Back'))); return; }
-  const d = ui.agentDetail;
-  const mine = a.ownerId === S.me.id;
-  const task = S.tasks.find((t) => t.id === a.currentTaskId);
-  const body = h('div.body',
-    h('div.cr-agent-head', avatar(a.name, a.color, { ai: true, online: a.available }), h('div.grow', h('h2', { style: { margin: 0 } }, a.name), h('div.muted', a.role)), statusPill(a.status)),
-    h('dl.cr-kv',
-      h('dt', 'Owner'), h('dd', `${a.ownerName}${mine ? ' (you)' : ''}`),
-      h('dt', 'Model'), h('dd', `${S.providers[a.provider]?.label ?? a.provider} · ${a.model}`),
-      h('dt', 'Connection'), h('dd', S.providers_?.[a.ownerId]?.[a.provider] ? `${S.providers_[a.ownerId][a.provider].state}: ${S.providers_[a.ownerId][a.provider].reason}` : 'No report from the owner’s worker yet'),
-      h('dt', 'Assigned task'), h('dd', task ? task.title : '—'),
-      h('dt', 'Skills'), h('dd', a.skills.join(', ') || '—'),
-      h('dt', 'Tools'), h('dd', a.tools.join(', ') || '—'),
-      h('dt', 'Autonomy'), h('dd', a.autonomy === 'ask' ? 'asks before writing files, running code or fetching' : 'acts within its permissions'),
-      h('dt', 'Usage'), h('dd', `${money(a.spentUsd)} of ${money(a.budgetUsd)} · ${(a.tokensIn + a.tokensOut).toLocaleString()} tokens`),
-      h('dt', 'Availability'), h('dd', a.available ? 'on the floor' : a.paused ? 'paused' : 'unavailable — owner’s worker offline or owner away'),
-      h('dt', 'Host'), h('dd', 'online (you are connected to it)')),
-    h('div.cr-actions',
-      h('button.btn.primary', { onclick: () => assignTask(a) }, 'Assign Task'),
-      mine ? h('button.btn', { onclick: () => { ui.channelId = d?.dmChannelId; if (ui.channelId) { if (!S.channels.find((c) => c.id === ui.channelId)) S.channels.push({ id: ui.channelId, kind: 'dm', name: 'dm', dmAgentId: a.id }); openSide('chat'); } } }, 'Chat') : null,
-      mine ? (a.paused ? h('button.btn', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/agents/${a.id}/resume`), `${a.name} resumed`) }, 'Resume') : h('button.btn', { onclick: () => act(() => api('POST', `/api/crew/rooms/${roomId}/agents/${a.id}/pause`), `${a.name} paused`) }, 'Pause')) : null,
-      h('button.btn', { onclick: () => { ui.agentTab = 'work'; render(); } }, 'View Work'),
-      h('button.btn', { onclick: () => { ui.agentTab = 'messages'; render(); } }, 'View Messages'),
-      mine ? h('button.btn', { onclick: () => agentForm(a) }, 'Configure Agent') : null,
-      mine ? h('button.btn.danger', { onclick: () => confirm(`Remove ${a.name}? Its history stays; it leaves the office.`) && act(() => api('DELETE', `/api/crew/rooms/${roomId}/agents/${a.id}`), 'Agent removed') }, 'Remove') : null),
-    mine && a.instructions ? h('details', h('summary', 'Instructions (only you see these)'), h('pre', a.instructions)) : null);
-  if (!d) body.append(h('p.hint', 'Loading history…'));
-  else if (ui.agentTab === 'messages') body.append(h('h3', 'Messages'), h('div.cr-list', ...(d.messages.length ? d.messages.slice().reverse().map(messageView) : [h('p.hint', 'No messages yet.')])));
-  else {
-    body.append(h('h3', 'Projects'), h('p', d.projects.map((p) => `${p.name} (${p.status})`).join(', ') || '—'));
-    body.append(h('h3', 'Task history'), h('div.cr-list', ...(d.tasks.length ? d.tasks.map((t) => h('div.cr-item.click', { onclick: () => taskDetail(t) }, h('div.row', h('b.grow', t.title), h('span.pill', t.status)), t.resultSummary ? h('div.hint', t.resultSummary.slice(0, 200)) : null)) : [h('p.hint', 'No tasks yet.')])));
-    body.append(h('h3', 'Executions'), h('div.cr-list', ...d.jobs.slice(0, 12).map((j) => h('div.cr-item.click.row', { onclick: () => jobLogs(j) }, h('span.grow', `${j.type} · ${j.status}`), h('span.hint', ago(j.updatedAt)), j.error ? h('span.pill.bad', 'error') : null))));
-  }
-  ui.side.replaceChildren(h('header', h('h2', 'AI employee'), h('button.btn.small', { onclick: () => openSide('chat') }, 'Chat'), h('button.btn.small', { onclick: () => ui.side.classList.add('hidden'), 'aria-label': 'Close' }, '✕')), body);
-}
-
 // --- forms ----------------------------------------------------------------------
 
 async function act(fn, ok) {
@@ -431,64 +509,6 @@ async function act(fn, ok) {
 }
 
 function field(label, el, hint) { return [h('label', label), el, hint ? h('div.hint', hint) : null]; }
-
-function agentForm(existing = null) {
-  const a = existing ?? {};
-  return modal(existing ? `Configure ${a.name}` : 'New AI employee', (close) => {
-    const name = h('input', { value: a.name ?? '' });
-    const role = h('input', { value: a.role ?? '', placeholder: 'e.g. Backend Developer' });
-    const skills = h('input', { value: (a.skills ?? []).join(', '), placeholder: 'node, api, testing' });
-    const instructions = h('textarea', { value: a.instructions ?? '', placeholder: 'Standing instructions: how this agent should work. Only you can see these.' });
-    const provider = h('select', ...Object.entries(S.providers).map(([k, p]) => h('option', { value: k, selected: (a.provider ?? 'chatgpt-plan') === k }, p.label)));
-    const model = h('input', { value: a.model ?? S.providers[a.provider ?? 'chatgpt-plan']?.defaultModel ?? '' });
-    const models = h('div.hint');
-    const note = h('div.cr-provider-note');
-    const showModels = () => {
-      const p = S.providers[provider.value];
-      models.textContent = p.models.length ? `Models: ${p.models.join(', ')}` : 'Use the model name your local server serves.';
-      note.textContent = p.subscription
-        ? `Your own plan, on your own computer; no per-token bill, and your plan’s limits apply. ${p.setup}`
-        : p.billing === 'paid' ? 'Billed per token to your API key. Agents on this will not run until you turn off “Never use paid API” on your own worker. It is on by default.'
-          : provider.value === 'scripted' ? 'Not an AI model: fixed scripts, for demos and tests.' : 'A model running on your own computer.';
-      if (!existing || provider.value !== a.provider) model.value = p.defaultModel;
-    };
-    provider.addEventListener('change', showModels);
-    showModels();
-    if (existing) model.value = a.model;
-    const color = h('input', { type: 'color', value: a.color ?? '#3d85c6' });
-    const budget = h('input', { type: 'number', min: 0, step: 0.5, value: a.budgetUsd ?? 5 });
-    const autonomy = h('select', h('option', { value: 'auto', selected: a.autonomy !== 'ask' }, 'Act within its permissions'), h('option', { value: 'ask', selected: a.autonomy === 'ask' }, 'Ask me before writing files, running code or fetching'));
-    const manager = h('input', { type: 'checkbox', checked: Boolean(a.isManager) });
-    const tools = Object.entries(S.permissions).map(([k, label]) => { const c = h('input', { type: 'checkbox', value: k, checked: (a.tools ?? ['messaging', 'files.read', 'files.write', 'memory', 'git']).includes(k) }); return { k, c, el: h('label', c, h('span', h('b', k), ' — ', label)) }; });
-    const presetSel = h('select', { onchange: (e) => {
-      const pr = presets.find((x) => x.id === e.target.value);
-      if (!pr) return;
-      role.value = pr.role; skills.value = pr.skills.join(', '); instructions.value = pr.instructions;
-      for (const t of tools) t.c.checked = pr.tools.includes(t.k);
-      manager.checked = pr.name === 'Project Manager';
-      if (!name.value) name.value = pr.name;
-    } }, h('option', { value: '' }, 'Start from a preset…'));
-    let presets = [];
-    api('GET', `/api/crew/rooms/${roomId}/presets`).then((r) => { presets = r.presets; presetSel.append(...presets.map((x) => h('option', { value: x.id }, x.name))); }).catch(() => {});
-    const err = h('p.error');
-    const save = async () => {
-      const body = { name: name.value, role: role.value, skills: skills.value, instructions: instructions.value, provider: provider.value, model: model.value, color: color.value, budgetUsd: Number(budget.value), autonomy: autonomy.value, isManager: manager.checked, tools: tools.filter((t) => t.c.checked).map((t) => t.k) };
-      try {
-        if (existing) await api('PATCH', `/api/crew/rooms/${roomId}/agents/${a.id}`, body);
-        else await api('POST', `/api/crew/rooms/${roomId}/agents`, body);
-        close(true);
-        toast(existing ? 'Saved' : `${body.name} joins your team. It appears on the floor once your worker is connected.`);
-      } catch (e) { err.textContent = e.message; }
-    };
-    return h('div', existing ? null : presetSel, ...field('Name', name), ...field('Role', role), ...field('Skills', skills, 'Comma-separated; used to match tasks.'), ...field('Instructions', instructions),
-      h('div.row', h('div.grow', ...field('AI behind this agent', provider)), h('div.grow', ...field('Model', model))), models, note,
-      h('div.row', h('div', ...field('Shirt colour', color)), h('div.grow', ...field('Budget (USD, total)', budget)), h('div.grow', ...field('Autonomy', autonomy))),
-      h('label', manager, ' Can manage projects (plans and assigns work)'),
-      h('label', 'Permissions (projects can narrow these further)'), h('div.cr-checks', ...tools.map((t) => t.el)),
-      h('p.hint', 'API keys are not entered here. They live in your worker on your own computer.'),
-      err, h('div.actions', h('button.btn', { onclick: () => close(null) }, 'Cancel'), h('button.btn.primary', { onclick: save }, existing ? 'Save' : 'Create agent')));
-  });
-}
 
 function newProject() {
   const mine = S.agents.filter((a) => a.ownerId === S.me.id);
@@ -600,18 +620,21 @@ async function jobLogs(j) {
 }
 
 function connectWorker() {
-  return modal('Connect a worker', (close) => {
+  return modal('Add a worker', (close) => {
     const name = h('input', { value: `${S.me.displayName}'s computer` });
     const always = h('input', { type: 'checkbox' });
     const out = h('div');
     const go = async () => {
       const { worker } = await api('POST', `/api/crew/rooms/${roomId}/workers`, { name: name.value, alwaysOn: always.checked });
-      const host = location.origin;
+      // 169.254.x.x is an adapter with no network behind it. Open the office that way and
+      // it is still only ever this computer, so give the worker the address that lasts.
+      const host = location.hostname.startsWith('169.254.') ? `http://localhost:${location.port}` : location.origin;
       const cmd = `node bin/crew-worker.cjs --host ${host} --token ${worker.token}`;
       out.replaceChildren(
-        h('p', 'Run this in the app folder on the computer whose API keys should pay for your agents. The token is shown once.'),
+        h('p', 'On the computer that should run your agents, open a terminal in the app folder and run this. The token is shown once.'),
         h('pre', cmd), h('button.btn.small', { onclick: () => navigator.clipboard?.writeText(cmd).then(() => toast('Copied')) }, 'Copy command'),
-        h('p.hint', 'Then open http://127.0.0.1:8790 on that computer to add your provider keys. They stay on that computer.'),
+        h('p.hint', 'Installed with the setup program? The app folder is %LOCALAPPDATA%\\Programs\\CrewOffice on Windows (in PowerShell: cd "$env:LOCALAPPDATA\\Programs\\CrewOffice"), ~/Applications/CrewOffice on macOS and ~/.local/share/crew-office on Linux.'),
+        h('p.hint', 'Then open http://127.0.0.1:8790 on that computer to sign in or add your keys. They stay on that computer.'),
         host.includes('localhost') || host.includes('127.0.0.1') ? h('p.hint', 'From another computer, replace the address with this host’s network address.') : null);
       render();
     };

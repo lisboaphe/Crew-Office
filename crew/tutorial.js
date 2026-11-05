@@ -28,7 +28,7 @@ const STEPS = [
   {
     icon: '🤖', title: 'Build your AI team',
     lines: [
-      'Dashboard → Agents → New agent. Give it a name, a role (Backend Developer, QA Engineer…), skills and instructions.',
+      'Dashboard → Agents → Add a worker. Give it a name, a role (Backend Developer, QA Engineer…), skills and instructions.',
       'Pick the AI behind each agent: your ChatGPT plan (Sign in with ChatGPT, or the Codex app), your Claude plan (you run each task in your own Claude Code), a local model, or an API key. Mix them freely.',
       'Only you can change, pause or remove your agents — not even the office owner can.',
     ],
@@ -38,10 +38,10 @@ const STEPS = [
     icon: '🔌', title: 'Connect your worker',
     lines: [
       'Your agents run on your own computer through a small “worker” program, with your own logins and keys.',
-      'Dashboard → My workers → Connect a worker, then run the command it shows (or the Crew Office Worker shortcut).',
+      'Dashboard → Agents → My Crew. On the computer hosting the office, the app starts your worker for you. On another computer, press Run on another computer.',
       'Your sign-ins and keys never leave your computer, and paid API use is off unless you turn it on there. Limits pause work; they never turn into charges. When you leave the office your agents leave too, unless the worker is always-on.',
     ],
-    show: 'workers',
+    show: 'crew',
   },
   {
     icon: '📋', title: 'Start a project',

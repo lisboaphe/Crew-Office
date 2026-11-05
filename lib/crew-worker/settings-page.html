@@ -21,6 +21,7 @@
   .hint { color: var(--soft); font-size: 13px; } .notice { border-left: 3px solid var(--warn); padding: 6px 10px; margin: 8px 0; font-size: 14px; }
   .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; } label { font-size: 14px; }
 </style>
+<link rel="stylesheet" href="/ui/crew.css">
 </head>
 <body>
 <h1>Agent worker</h1>
@@ -34,15 +35,20 @@
   <p class="hint">While this is on, agents set to an Anthropic or OpenAI API key do not run. They wait; nothing falls back to them, and subscription limits never turn into charges. A key in your shell cannot switch Claude Code or Codex to API billing either: the worker removes it before starting them.</p>
 </section>
 
+<section class="cr" id="connections"><h2>AI connections</h2></section>
+<section class="cr" id="usage"><h2>Usage</h2></section>
+
 <section>
-  <h2>AI connections</h2>
+  <details><summary>AI connections: technical table</summary>
   <table id="providers"></table>
   <p class="hint"><b>Working</b> means a real test request got an answer. <b>Connected</b> means set up but not proven yet.</p>
+  </details>
 </section>
 
 <section>
   <h2>Sign in with ChatGPT</h2>
   <div id="chatgpt"></div>
+  <p id="chatgptLink" class="hint"></p>
   <p class="hint">Uses OpenAI’s own sign-in page. Usage comes from your ChatGPT plan. OpenAI lets you cap this app in ChatGPT Settings → Usage; that cap is for the whole app, not per task. If a limit is reached, work pauses. It never switches to API billing.</p>
 </section>
 
@@ -69,6 +75,12 @@
   <div id="vault" class="hint"></div>
 </section>
 
+<script type="module">
+import { workerLink, connectionsView, usageView } from '/ui/connections.js';
+const link = workerLink('');
+document.getElementById('connections').append(connectionsView(link));
+document.getElementById('usage').append(usageView(link));
+</script>
 <script>
 const H = { 'Content-Type': 'application/json', 'X-Crew': '1' };
 const post = (p, b) => fetch(p, { method: 'POST', headers: H, body: JSON.stringify(b ?? {}) }).then((r) => r.json());
@@ -81,7 +93,7 @@ async function load() {
   document.getElementById('neverPaid').checked = s.budget.neverPaidApi;
   document.getElementById('claudeAuto').checked = s.budget.allowClaudeAutomation;
   if (document.activeElement.id !== 'taskDefault') document.getElementById('taskDefault').value = s.budget.taskDefaultPct ?? '';
-  document.getElementById('conns').innerHTML = s.connections.length ? s.connections.map((c) => '<div><b>' + esc(c.room ? c.room.name : c.host) + '</b> — ' + (c.connected ? 'connected' : 'not connected') + ' · running ' + c.running + ' · finished ' + c.completed + (c.lastError ? ' · ' + esc(c.lastError) : '') + '</div>').join('') : 'No office yet. In the office open Dashboard → My workers → Connect a worker, and run the command it shows.';
+  document.getElementById('conns').innerHTML = s.connections.length ? s.connections.map((c) => '<div><b>' + esc(c.room ? c.room.name : c.host) + '</b> — ' + (c.connected ? 'connected' : 'not connected') + ' · running ' + c.running + ' · finished ' + c.completed + (c.lastError ? ' · ' + esc(c.lastError) : '') + '</div>').join('') : 'No office yet. In the office open Dashboard → My Crew → Add a worker, and run the command it shows.';
   document.getElementById('providers').innerHTML = '<tr><th>Connection</th><th>State</th><th>Why</th><th></th></tr>' + Object.entries(s.providers).filter(([k]) => k !== 'scripted').map(([k, p]) => '<tr><td>' + esc(p.label) + '<br><span class="hint">' + esc(p.billing) + '</span></td><td class="state ' + esc(p.state.split(' ')[0]) + '">' + esc(p.state) + '</td><td class="hint">' + esc(p.reason) + '</td><td>' + (k === 'claude-handoff' ? '' : '<button onclick="testConn(\'' + k + '\', this)">Test Connection</button>') + '</td></tr>').join('');
   const g = s.chatgpt;
   document.getElementById('chatgpt').innerHTML = g.signedIn ? '<div class="row">Signed in' + (g.planScope ? ' with plan usage allowed.' : ', but plan usage was not allowed.') + ' <button onclick="chatgptOut()">Sign out</button></div>' : '<button class="primary" onclick="chatgptIn()">Sign in with ChatGPT</button>';
@@ -103,7 +115,13 @@ document.getElementById('claudeAuto').onchange = async (e) => {
   await post('/settings', { allowClaudeAutomation: e.target.checked }); load();
 };
 async function testConn(p, btn) { btn.disabled = true; btn.textContent = 'Testing…'; const r = await post('/test', { provider: p }); alert(r.reason || (r.ok ? 'It answered.' : 'It did not answer.')); load(); }
-async function chatgptIn() { const r = await post('/chatgpt/login'); if (r.url) window.open(r.url, '_blank'); else alert(r.error); }
+async function chatgptIn() {
+  const r = await post('/chatgpt/login');
+  if (!r.url) { alert(r.error); return; }
+  // Browsers often block a window opened after a request, so the link is always offered too.
+  window.open(r.url, '_blank');
+  document.getElementById('chatgptLink').innerHTML = 'If no window opened, <a target="_blank" rel="noopener" href="' + esc(r.url) + '">open OpenAI’s sign-in page here</a>. This page updates by itself when you are done.';
+}
 async function chatgptOut() { await post('/chatgpt/logout'); load(); }
 async function handoffDone(jobId) { const r = await post('/handoff/done', { jobId }); if (r.error) alert(r.error); load(); }
 async function saveKey(p, f, id) { const el = document.getElementById(id); await post('/keys', { provider: p, [f]: el.value }); el.value = ''; load(); }
