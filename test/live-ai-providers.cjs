@@ -12,6 +12,9 @@
 
 'use strict';
 
+// `node --test` runs every file under test/, and this one calls real services.
+if (process.env.NODE_TEST_CONTEXT) process.exit(0);
+
 const fs = require('fs');
 const os = require('os');
 const path = require('path');

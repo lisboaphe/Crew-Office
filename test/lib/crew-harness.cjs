@@ -7,6 +7,7 @@
 // sandbox on purpose. test/crew-security.test.cjs turns this off to check the refusal itself.
 process.env.CREW_ALLOW_WEAK_SANDBOX ??= '1';
 
+const net = require('net');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -15,7 +16,20 @@ const { player, startWorker } = require('../../lib/crew/demo-kit.cjs');
 
 const ROOT = path.join(__dirname, '..', '..');
 
-async function startHost({ stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-host-')), port = 8300 + Math.floor(Math.random() * 600), env = {} } = {}) {
+/** A port the system says nothing is using. */
+function freePort() {
+  return new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.once('error', reject);
+    probe.listen(0, '127.0.0.1', () => { const { port } = probe.address(); probe.close(() => resolve(port)); });
+  });
+}
+
+async function startHost({ stateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-host-')), port = null, env = {} } = {}) {
+  // Test files run side by side. A port drawn at random from a short list sometimes lands on another
+  // file's host, which then answers this one's "are you up?" while this one's server has already
+  // given up, and the test fails on a file or an address that was never its own.
+  port ??= await freePort();
   const child = spawn(process.execPath, [path.join(ROOT, 'server.cjs'), String(port)], {
     cwd: ROOT, env: { ...process.env, ROVING_OFFICE_STATE_DIR: stateDir, CREW_LAN: '0', HOST: '127.0.0.1', ...env }, stdio: ['ignore', 'pipe', 'pipe'],
   });
