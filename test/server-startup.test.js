@@ -34,8 +34,11 @@ function start(args = [], { home, waitMs = 8000, env = {} } = {}) {
     const done = (fn, value) => { clearInterval(tick); clearTimeout(deadline); fn(value); };
     const deadline = setTimeout(() => done(reject, new Error(`server did not start: ${out}`)), waitMs);
     const tick = setInterval(() => {
+      // Ready means the whole banner is out, not just its first line. Tests read lines further
+      // down straight after this, and one that checks a line is absent would otherwise pass
+      // without testing anything. It failed the other way too: red CI with nothing wrong.
       const hit = /running at http:\/\/localhost:(\d+)/.exec(out);
-      if (hit) return done(resolve, Number(hit[1]));
+      if (hit && /adapter credentials in .*\n|restart with --publish\.\r?\n/.test(out)) return done(resolve, Number(hit[1]));
       // A refusal is a signal, not an absence. The server says why it will not start —
       // a taken port, a bad argument — and waiting out the deadline to learn that turns
       // a decisive answer into three seconds of nothing. Rejecting on the message keeps
