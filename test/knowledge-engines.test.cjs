@@ -103,10 +103,16 @@ test('real Mem0 stores locally, finds by meaning, keeps scopes apart, and forget
   const herOwn = await k.search(rm.id, k.person(alice.id), { query: 'invoices', projectId: p.id, limit: 5 });
   assert.ok(herOwn.memories.some((r) => r.id === hers.id), 'Alice does');
 
-  k.update(rm.id, alice.id, other.id, { body: 'Deliveries go out by bicycle courier every morning.' });
-  await new Promise((resolve) => { setTimeout(resolve, 3000); });
-  const moved = await k.search(rm.id, k.person(alice.id), { query: 'how are parcels sent out?', projectId: p.id, limit: 1 });
-  assert.strictEqual(moved.memories[0].id, other.id, 'an edit reaches the engine');
+  // Before the edit, nothing about this memory is near these words. If the new text was not embedded,
+  // one of the others ranks first. It has to wait for the edit to arrive, which is asynchronous.
+  const newText = 'Deliveries go out by bicycle courier every morning.';
+  k.update(rm.id, alice.id, other.id, { title: 'Deliveries', body: newText });
+  let moved = null;
+  await waitFor(async () => {
+    moved = await k.search(rm.id, k.person(alice.id), { query: `Deliveries ${newText}`, projectId: p.id, limit: 1 });
+    return moved.memories[0]?.id === other.id;
+  }, { what: `the edit to reach Mem0 (first was: ${moved?.memories[0]?.title})`, timeout: 30_000 });
+  assert.strictEqual(moved.engine, 'mem0', moved.note);
 
   k.remove(rm.id, alice.id, shared.id);
   await new Promise((resolve) => { setTimeout(resolve, 2000); });
