@@ -20,6 +20,7 @@
 
 - The tour no longer says internet play needs a VPN.
 - **Chat channels** wrap instead of being cut off at the panel's edge, and project channels no longer show their internal ID.
+- **The scene menu** no longer shows light text on a white background, and the office's controls and the top-right controls now line up.
 - **On a phone**, the dock has its own row instead of covering the open panel.
 - **Updates** now work on a copy built without a Git remote. A copy that already has this problem needs the new installer once.
 
