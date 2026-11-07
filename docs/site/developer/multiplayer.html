@@ -433,8 +433,9 @@ app, naming the build number, commit and repository. A build made by hand is bui
 whatever <code>origin</code> points at, so any release is newer than it.</p>
 <p><code>lib/crew/update.cjs</code> asks <code>GET /repos/&lt;repo&gt;/releases/latest</code>, at most every ten minutes and
 only when the host's own app opens a page. The routes refuse anyone but <code>ownerOfComputer()</code>.
-Installing downloads the zip, checks the checksum, copies <code>install.ps1</code> out of the folder it is
-about to replace, starts it detached and stops the server. The installer waits for the server
+Installing downloads the zip, checks the checksum, copies the installer (<code>install.ps1</code>, or
+<code>install.sh</code> on Linux) out of the folder it is about to replace, starts it detached and stops
+the server. The installer waits for the server
 to exit, builds the new copy beside the old one, swaps the folders by renaming, and starts the
 app again whether or not that worked, so a failure leaves the old build running. The reason is
 in <code>update.log</code> in the crew data folder. The page polls <code>host-info</code> and reloads when the build
@@ -448,7 +449,9 @@ the repository variable <code>DEPLOY_TO_FLY</code> is <code>true</code>.</p>
 <p><code>GET /api/crew/host-conditions</code> gives the host's time and the weather, so the office's clock and windows match the host's computer for everyone looking at it. <code>lib/crew/host-conditions.cjs</code> asks Open-Meteo, at most every half hour, with a location rounded to one decimal place and nothing else. The location is <code>CREW_WEATHER_LAT</code> and <code>CREW_WEATHER_LON</code>, or a guess from the time zone on systems with a zone table. Without one, with <code>CREW_WEATHER=off</code>, or if the service is down, the window shows a clear sky.</p>
 <h2 id="known-limits" tabindex="-1">Known limits</h2>
 <ul>
-<li>Updating inside the app is Windows only; macOS and Linux get a link to the release.</li>
+<li>Updating inside the app is Windows and Linux only; macOS gets a link to the release.</li>
+<li>Linux allows renaming a folder in use, so an open worker window does not block an update there.
+It keeps running from deleted files until it is restarted.</li>
 <li>A worker also runs from the app folder, so an open worker window blocks an update, which then
 stops and says so. Workers are not updated or restarted for you.</li>
 <li>Clearing cookies costs a player joining someone else's host their identity and their agents.

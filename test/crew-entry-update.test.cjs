@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const crypto = require('crypto');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 const os = require('os');
@@ -210,6 +211,8 @@ function installedCopy(stamp) {
   fs.writeFileSync(path.join(root, 'build.json'), JSON.stringify(stamp));
   fs.mkdirSync(path.join(root, 'installer', 'windows'), { recursive: true });
   fs.writeFileSync(path.join(root, 'installer', 'windows', 'install.ps1'), '# the installer\n');
+  fs.mkdirSync(path.join(root, 'installer', 'unix'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'installer', 'unix', 'install.sh'), '# the unix installer\n');
   return root;
 }
 
@@ -273,8 +276,11 @@ test('the updater offers only a newer build, and says so plainly when it cannot 
     assert.equal(broken.available, false);
     assert.match(broken.error, /500/);
     const linux = await createUpdater({ root, apiBase: newer.base, platform: 'linux' }).status();
-    assert.equal(linux.canInstall, false, 'offered honestly as a download where installing is not built');
+    assert.equal(linux.canInstall, true);
     assert.equal(linux.available, true);
+    const mac = await createUpdater({ root, apiBase: newer.base, platform: 'darwin' }).status();
+    assert.equal(mac.canInstall, false, 'offered honestly as a download where installing is not built');
+    assert.equal(mac.available, true);
   } finally { for (const s of [newer, same, none, down]) s.close(); }
 });
 
@@ -303,4 +309,84 @@ test('a verified download reaches the installer, with a copy of the script that 
     assert.deepEqual(launched.appArgs, ['--private']);
     await assert.rejects(updater.install(), /already being installed/);
   } finally { good.close(); }
+});
+
+test('on Linux a verified download reaches the shell installer, copied out of the folder it replaces', async () => {
+  const root = installedCopy({ build: 1, repo: 'me/app' });
+  const good = await fakeGitHub();
+  let launched = null;
+  try {
+    const updater = createUpdater({ root, apiBase: good.base, platform: 'linux', dataDir: root, launchInstaller: (a) => { launched = a; } });
+    assert.equal((await updater.install({ waitPid: 1234 })).build, 7);
+    assert.equal(fs.readFileSync(launched.script, 'utf8'), '# the unix installer\n');
+    assert.ok(!launched.script.startsWith(root));
+  } finally { good.close(); }
+});
+
+// The real script against a real folder, in a throwaway home. It needs unzip and a Unix shell.
+const unixInstall = path.join(__dirname, '..', 'installer', 'unix', 'install.sh');
+const canRunInstaller = process.platform !== 'win32' && spawnSync('unzip', ['-v'], { stdio: 'ignore' }).status === 0;
+
+function installerFixture(appBody = "require('fs').writeFileSync(process.argv[2] ?? 'started', 'started')") {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-inst-'));
+  const target = path.join(home, 'app');
+  fs.mkdirSync(path.join(target, 'bin'), { recursive: true });
+  fs.writeFileSync(path.join(target, 'bin', 'crew-app.cjs'), '// the old build\n');
+  fs.writeFileSync(path.join(target, 'old-only.txt'), 'old');
+  fs.writeFileSync(path.join(target, '.env'), 'PORT=9999\n');
+  const stage = path.join(home, 'stage');
+  fs.mkdirSync(path.join(stage, 'bin'), { recursive: true });
+  fs.writeFileSync(path.join(stage, 'bin', 'crew-app.cjs'), `${appBody}\n`);
+  fs.writeFileSync(path.join(stage, 'package.json'), '{"name":"fixture","version":"1.0.0"}');
+  const zip = path.join(home, 'new.zip');
+  assert.equal(spawnSync('zip', ['-qr', zip, '.'], { cwd: stage }).status, 0, 'zip builds the fixture');
+  return { home, target, zip };
+}
+
+function runInstaller({ home, target }, ...args) {
+  const env = { ...process.env, HOME: home, XDG_DATA_HOME: path.join(home, 'share') };
+  return spawnSync('/bin/sh', [unixInstall, ...args, '--target', target], { env, encoding: 'utf8', timeout: 60_000 });
+}
+
+const hasZip = canRunInstaller && spawnSync('zip', ['-v'], { stdio: 'ignore' }).status === 0;
+
+test('the Unix installer swaps in the new copy, keeps .env, and restarts the app', { skip: !hasZip }, async () => {
+  const fx = installerFixture();
+  const r = runInstaller(fx, fx.zip, '--relaunch', '--app-args', path.join(fx.home, 'relaunched'));
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.match(fs.readFileSync(path.join(fx.target, 'bin', 'crew-app.cjs'), 'utf8'), /started/);
+  assert.equal(fs.existsSync(path.join(fx.target, 'old-only.txt')), false, 'nothing of the old copy but its settings');
+  assert.equal(fs.readFileSync(path.join(fx.target, '.env'), 'utf8'), 'PORT=9999\n');
+  assert.equal(fs.existsSync(`${fx.target}.new`), false);
+  assert.equal(fs.existsSync(`${fx.target}.old`), false);
+  for (let i = 0; i < 50 && !fs.existsSync(path.join(fx.home, 'relaunched')); i++) await new Promise((res) => setTimeout(res, 100));
+  assert.ok(fs.existsSync(path.join(fx.home, 'relaunched')), 'the app was started again');
+});
+
+test('a bad package leaves the Unix install whole and still restarts the old app', { skip: !hasZip }, async () => {
+  const fx = installerFixture();
+  const marker = path.join(fx.home, 'old-relaunched');
+  fs.writeFileSync(path.join(fx.target, 'bin', 'crew-app.cjs'), `require('fs').writeFileSync(${JSON.stringify(marker)}, 'yes')\n`);
+  const garbage = path.join(fx.home, 'garbage.zip');
+  fs.writeFileSync(garbage, 'not a zip');
+  const r = runInstaller(fx, garbage, '--relaunch');
+  assert.notEqual(r.status, 0);
+  assert.match(r.stdout, /not updated/);
+  assert.equal(fs.readFileSync(path.join(fx.target, 'old-only.txt'), 'utf8'), 'old', 'the old copy is untouched');
+  assert.equal(fs.existsSync(`${fx.target}.new`), false);
+  for (let i = 0; i < 50 && !fs.existsSync(marker); i++) await new Promise((res) => setTimeout(res, 100));
+  assert.ok(fs.existsSync(marker), 'the old app came back');
+});
+
+test('the Unix installer changes nothing while the app it replaces is still running', { skip: !hasZip, timeout: 60_000 }, () => {
+  const fx = installerFixture();
+  // Replaces `sleep`, so the 30-second wait passes at once while the process stays alive.
+  const bin = path.join(fx.home, 'fakebin');
+  fs.mkdirSync(bin);
+  fs.writeFileSync(path.join(bin, 'sleep'), '#!/bin/sh\nexit 0\n', { mode: 0o755 });
+  const env = { ...process.env, HOME: fx.home, PATH: `${bin}${path.delimiter}${process.env.PATH}` };
+  const r = spawnSync('/bin/sh', [unixInstall, fx.zip, '--target', fx.target, '--wait-pid', String(process.pid)], { env, encoding: 'utf8', timeout: 30_000 });
+  assert.notEqual(r.status, 0);
+  assert.match(r.stdout, /did not stop/);
+  assert.equal(fs.readFileSync(path.join(fx.target, 'old-only.txt'), 'utf8'), 'old');
 });
