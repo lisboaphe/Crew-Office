@@ -187,7 +187,7 @@ function enter() {
     name, h('label', 'Colour'), colour, err,
     h('button.btn.primary', { onclick: go }, 'Enter'),
     h('p.hint', 'Your AI agents run on your own computer with your own sign-ins. The host never receives them.'),
-    h('p.hint', 'Based on The Roving Office (Apache-2.0).'));
+    h('p.hint', 'By lisboaphe, free for non-commercial use with credit. Based on The Roving Office (Apache-2.0).'));
 }
 
 let view = 'home';

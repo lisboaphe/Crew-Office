@@ -160,5 +160,5 @@ followed up.
 ## Licence
 
 Contributions are governed by the [Code of Conduct](CODE_OF_CONDUCT.md), and by
-the Apache 2.0 [LICENSE](LICENSE) the project ships under: what you contribute is
-licensed on those terms to everyone who receives it.
+the terms in [LICENSING.md](LICENSING.md): what you contribute is licensed on those terms to
+everyone who receives it, non-commercially, with credit.
