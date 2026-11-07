@@ -39,6 +39,7 @@ prop shelf 300x350+1205+5 17.5%
 prop lamp 130x300+985+705 17.5%
 prop sofa 420x270+285+735 17.5%
 prop cooler 170x300+1240+380 17.5%
+prop coffee 345x270+760+405 17.5%
 
 # The oak tile. The sheet cannot simply repeat: it has a groove on both its top and bottom edges and
 # its planks narrow towards the bottom. So the tile is its six most even planks, each one lined up

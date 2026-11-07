@@ -8,7 +8,7 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 
 | Sprite | What it is | Animation |
 |---|---|---|
-| `worker` | Two characters and four more heads of hair, six in all. Tops take the bot's colour when drawn | Breathing, quicker while working |
+| `worker` | Two characters and four more heads of hair, six in all, each with four poses. Tops take the bot's colour when drawn | Breathing, quicker while working, and two steps of a walk |
 | `desk-active-*` | A workstation in use, with one of six programs: `code`, `dashboard`, `chart`, `chat`, `terminal` or `landscape`. A bot keeps its own | Each program runs on the screen |
 | `desk-idle` | Its bot is resting, screen dimmed | None |
 | `desk-standby` | Free for the next bot, drawn faded | None |
@@ -16,11 +16,18 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 | `window` | Over each column, on the back wall | Clouds passing |
 | `plant` | Beside the lounge and between columns | Swaying |
 | `cooler` | Against the back wall | Bubbles rising |
-| `shelf`, `sofa`, `lamp` | The room's furniture | None |
+| `shelf`, `sofa`, `lamp` | The office's furniture | None |
+| `door` | In the back wall, between rooms one behind the other | None |
+| `counter`, `coffee` | The break area's coffee machine and mugs, on its counter | Steam |
+| `fridge`, `side-table`, `microwave` | Drawn in `finish-established-art.lua` to match the set | The microwave glows while somebody uses it |
+| `noticeboard` | On the break area's wall | None |
 
 ## How the room is put together
 
-From the bottom: tiled floor, walls and window, furniture, one workstation per bot, and one worker at each active workstation. Every room is one size and holds four bots. A room view takes the largest whole-number scale that fits, so pixels stay square. A floor view shows all its rooms, smaller if it must be, as an overview.
+From the bottom: tiled floor, walls and window, furniture, the player at the top middle of their first room, a workstation per bot, and one worker at each active workstation. Every room is one size and holds four bots, two down each side of an aisle. Rooms share walls and are joined by doors, on to a break area on each floor.
+
+Idle agents sometimes visit the break area, and two there may show a small bubble of dots. That is `src/office2d/ambient.js`, and it is only a picture: it reads whether an agent is idle and nothing more, it changes nothing about them, and real work brings them straight back.
+ A room view takes the largest whole-number scale that fits, so pixels stay square. A floor view shows all its rooms, smaller if it must be, as an overview.
 
 ## Changing them
 

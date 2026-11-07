@@ -96,9 +96,26 @@ local RAMPS = {
 local a, b = load('worker-a'), load('worker-b')
 local variants = { a, b, rehaired(a, RAMPS.blonde), rehaired(b, RAMPS.navy), rehaired(a, RAMPS.auburn), rehaired(a, RAMPS.silver) }
 local workerFrames = {}
+--- A step: one foot lifts while the other stays down, and the body rises a pixel with it.
+local function stepping(image, leftFoot)
+  local frame = Image(image.width, image.height, ColorMode.RGB)
+  local ankle = image.height - 9
+  local middle = image.width // 2
+  each(image, function(x, y, p)
+    if pc.rgbaA(p) == 0 then return end
+    local lift = 0
+    if y >= ankle and (leftFoot and x < middle or (not leftFoot and x >= middle)) then lift = 2 end
+    if y < ankle - 12 then lift = 1 end
+    if y - lift >= 0 then frame:drawPixel(x, y - lift, p) end
+  end)
+  return frame
+end
+
 for _, v in ipairs(variants) do
   workerFrames[#workerFrames + 1] = v
   workerFrames[#workerFrames + 1] = shifted(v, math.floor(v.height * 0.68), 0, 1)
+  workerFrames[#workerFrames + 1] = stepping(v, true)
+  workerFrames[#workerFrames + 1] = stepping(v, false)
 end
 -- Both cuts are padded to one size, feet on the bottom row, so frames line up.
 local WW, WH = 26, 44
@@ -293,6 +310,175 @@ local function windowFrame(step)
   return w
 end
 save('window', { windowFrame(0), windowFrame(1), windowFrame(2), windowFrame(3) }, 0.25)
+
+-- The break area's other furniture, drawn to match: dark outline, a lit edge and a shaded one, and
+-- clusters of tone rather than flat fills. -----------------------------------------------------
+
+local function canvas(w, h)
+  local image = Image(w, h, ColorMode.RGB)
+  local paint = {}
+  function paint.rect(x, y, cw, ch, p)
+    for j = y, y + ch - 1 do for i = x, x + cw - 1 do
+      if i >= 0 and j >= 0 and i < w and j < h then image:drawPixel(i, j, p) end
+    end end
+  end
+  function paint.outline(p)
+    local marks = {}
+    each(image, function(x, y, q)
+      if pc.rgbaA(q) == 0 then
+        for _, n in ipairs({ { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }) do
+          local i, j = x + n[1], y + n[2]
+          if i >= 0 and j >= 0 and i < w and j < h and pc.rgbaA(image:getPixel(i, j)) > 0 then marks[#marks + 1] = { x, y }; break end
+        end
+      end
+    end)
+    for _, m in ipairs(marks) do image:drawPixel(m[1], m[2], p) end
+  end
+  return image, paint
+end
+
+local INK = c(58, 34, 18)
+local OAK_HI, OAK_TOP, OAK_MID, OAK_LOW = c(238, 181, 101), c(213, 148, 72), c(178, 112, 48), c(128, 78, 34)
+local CREAM_HI, CREAM_TOP, CREAM_MID, CREAM_LOW = c(250, 243, 228), c(234, 222, 200), c(208, 192, 166), c(168, 150, 126)
+local STEEL_HI, STEEL, STEEL_LOW = c(112, 110, 114), c(78, 76, 82), c(48, 46, 52)
+
+--- A cream refrigerator with two doors, seen a little from the right, its handles in brass.
+local function fridgeSprite()
+  local image, p = canvas(40, 72)
+  p.rect(1, 6, 30, 64, CREAM_TOP)
+  -- The top, then the shaded side.
+  for r = 0, 5 do p.rect(1 + r, 5 - r, 30, 1, r > 3 and CREAM_HI or CREAM_TOP) end
+  for s = 0, 5 do p.rect(31 + s, 6 - s, 1, 64, s < 2 and CREAM_MID or CREAM_LOW) end
+  p.rect(1, 6, 30, 1, CREAM_HI); p.rect(1, 6, 1, 64, CREAM_HI)
+  -- Soft shading down the doors, broken up so it does not read as a flat panel.
+  for y = 8, 68 do
+    for x = 24, 30 do
+      if (x + y) % 3 ~= 0 or x > 27 then image:drawPixel(x, y, CREAM_MID) end
+    end
+  end
+  p.rect(1, 24, 30, 2, CREAM_LOW); p.rect(1, 26, 30, 1, CREAM_HI)
+  p.rect(5, 12, 2, 9, c(226, 176, 78)); p.rect(5, 12, 1, 9, c(246, 214, 136))
+  p.rect(5, 30, 2, 14, c(226, 176, 78)); p.rect(5, 30, 1, 14, c(246, 214, 136))
+  p.rect(1, 66, 30, 4, CREAM_LOW); p.rect(4, 67, 24, 2, STEEL_LOW)
+  -- Notes held on by magnets.
+  p.rect(13, 32, 8, 9, c(246, 220, 148)); p.rect(14, 34, 6, 1, OAK_MID); p.rect(14, 36, 4, 1, OAK_MID); p.rect(16, 31, 2, 2, c(192, 80, 60))
+  p.rect(23, 40, 5, 6, c(160, 208, 190)); p.rect(25, 39, 1, 2, c(60, 110, 150))
+  p.outline(INK)
+  return image
+end
+
+--- A microwave with a dark window and a little lit panel.
+local function microwaveSprite(frame)
+  local image, p = canvas(42, 28)
+  for r = 0, 4 do p.rect(1 + r, 5 - r, 33, 1, r > 2 and STEEL_HI or CREAM_MID) end
+  for s = 0, 4 do p.rect(34 + s, 6 - s, 1, 20, s < 2 and CREAM_LOW or c(138, 122, 102)) end
+  p.rect(1, 6, 33, 20, CREAM_TOP); p.rect(1, 6, 33, 1, CREAM_HI); p.rect(1, 6, 1, 20, CREAM_HI)
+  p.rect(3, 9, 21, 14, STEEL_LOW); p.rect(4, 10, 19, 12, c(36, 46, 52))
+  p.rect(5, 11, 6, 2, c(74, 96, 104)); p.rect(5, 11, 2, 5, c(74, 96, 104))
+  -- It glows while something is heating.
+  if frame > 0 then
+    p.rect(4, 10, 19, 12, c(226, 170, 78))
+    p.rect(6, 12, 15, 8, c(246, 206, 120))
+    local turn = (frame - 1) % 3
+    p.rect(9 + turn * 3, 15, 5, 3, c(190, 110, 60))
+  end
+  p.rect(26, 9, 6, 4, STEEL_LOW); p.rect(27, 10, 4, 2, c(143, 208, 127))
+  for row = 0, 2 do for col = 0, 1 do p.rect(26 + col * 3, 15 + row * 3, 2, 2, CREAM_LOW) end end
+  p.rect(1, 25, 33, 1, CREAM_LOW)
+  p.outline(INK)
+  return image
+end
+
+--- A low oak table, for the microwave to stand on.
+local function tableSprite()
+  local image, p = canvas(46, 34)
+  p.rect(5, 12, 4, 21, OAK_MID); p.rect(5, 12, 1, 21, OAK_TOP)
+  p.rect(33, 12, 4, 21, OAK_LOW)
+  p.rect(38, 6, 3, 21, OAK_LOW)
+  for r = 0, 5 do p.rect(1 + r, 7 - r, 36, 1, r > 3 and OAK_HI or OAK_TOP) end
+  p.rect(1, 8, 36, 4, OAK_MID); p.rect(1, 8, 36, 1, OAK_HI)
+  for s = 0, 5 do p.rect(37 + s, 8 - s, 1, 4, OAK_LOW) end
+  p.rect(9, 22, 24, 3, OAK_LOW); p.rect(9, 22, 24, 1, OAK_MID)
+  p.outline(INK)
+  return image
+end
+
+--- A long counter, for the coffee machine and mugs.
+local function counterSprite()
+  local image, p = canvas(92, 40)
+  for r = 0, 7 do p.rect(1 + r, 9 - r, 80, 1, r > 5 and OAK_HI or OAK_TOP) end
+  for s = 0, 7 do p.rect(81 + s, 10 - s, 1, 28, s < 3 and OAK_MID or OAK_LOW) end
+  p.rect(1, 10, 80, 28, OAK_MID); p.rect(1, 10, 80, 2, OAK_HI)
+  for _, x in ipairs({ 3, 29, 55 }) do
+    p.rect(x, 14, 23, 21, OAK_TOP); p.rect(x, 14, 23, 1, OAK_LOW); p.rect(x, 14, 1, 21, OAK_LOW)
+    p.rect(x + 22, 15, 1, 20, OAK_HI); p.rect(x + 1, 34, 22, 1, OAK_HI)
+    p.rect(x + 9, 19, 5, 2, c(226, 176, 78)); p.rect(x + 9, 19, 5, 1, c(246, 214, 136))
+  end
+  p.rect(1, 36, 80, 2, OAK_LOW)
+  p.outline(INK)
+  return image
+end
+
+--- A corkboard, with notes pinned to it.
+local function noticeboardSprite()
+  local image, p = canvas(58, 36)
+  p.rect(1, 1, 56, 34, OAK_MID); p.rect(1, 1, 56, 1, OAK_HI); p.rect(1, 1, 1, 34, OAK_HI); p.rect(56, 2, 1, 33, OAK_LOW); p.rect(2, 34, 55, 1, OAK_LOW)
+  for y = 4, 31 do for x = 4, 53 do
+    image:drawPixel(x, y, (x * 3 + y * 5) % 7 == 0 and c(170, 118, 66) or c(190, 136, 80))
+  end end
+  local notes = {
+    { 7, 7, 13, 10, c(246, 220, 148) }, { 24, 6, 11, 12, c(250, 243, 228) }, { 39, 8, 12, 9, c(160, 208, 190) },
+    { 9, 20, 10, 9, c(236, 168, 130) }, { 24, 21, 14, 8, c(246, 220, 148) }, { 42, 20, 9, 9, c(250, 243, 228) },
+  }
+  for n, note in ipairs(notes) do
+    p.rect(note[1] + 1, note[2] + 1, note[3], note[4], c(140, 94, 50))
+    p.rect(note[1], note[2], note[3], note[4], note[5])
+    p.rect(note[1] + 2, note[2] + 3, note[3] - 4, 1, c(128, 106, 84))
+    if note[4] > 8 then p.rect(note[1] + 2, note[2] + 5, note[3] - 6, 1, c(128, 106, 84)) end
+    p.rect(note[1] + note[3] // 2, note[2], 2, 2, n % 2 == 0 and c(60, 110, 150) or c(192, 80, 60))
+  end
+  p.outline(INK)
+  return image
+end
+
+--- A panelled oak door in a wall, with a brass handle.
+local function doorSprite()
+  local image, p = canvas(38, 56)
+  p.rect(1, 1, 36, 55, OAK_LOW)
+  p.rect(1, 1, 36, 1, OAK_HI); p.rect(1, 1, 1, 55, OAK_MID); p.rect(36, 1, 1, 55, c(98, 58, 24))
+  p.rect(4, 4, 30, 52, OAK_MID); p.rect(4, 4, 30, 1, OAK_TOP); p.rect(4, 4, 1, 52, OAK_TOP)
+  p.rect(8, 8, 22, 15, c(176, 220, 234)); p.rect(8, 8, 22, 1, OAK_LOW); p.rect(8, 8, 1, 15, OAK_LOW)
+  p.rect(18, 8, 2, 15, OAK_MID); p.rect(8, 15, 22, 1, OAK_MID)
+  p.rect(10, 10, 4, 2, c(226, 244, 248))
+  for _, y in ipairs({ 27, 41 }) do
+    p.rect(8, y, 22, 11, OAK_LOW); p.rect(9, y + 1, 20, 9, OAK_TOP); p.rect(9, y + 9, 20, 1, OAK_HI)
+  end
+  p.rect(30, 30, 3, 4, c(226, 176, 78)); p.rect(30, 30, 3, 1, c(246, 214, 136))
+  p.outline(INK)
+  return image
+end
+
+save('fridge', { fridgeSprite() }, 0)
+local waves = {}
+for i = 0, 3 do waves[#waves + 1] = microwaveSprite(i) end
+save('microwave', waves, 2)
+save('side-table', { tableSprite() }, 0)
+save('counter', { counterSprite() }, 0)
+save('noticeboard', { noticeboardSprite() }, 0)
+save('door', { doorSprite() }, 0)
+
+local coffee = load('coffee')
+local steam = {}
+for i = 0, 3 do
+  local f = Image(coffee)
+  for n = 0, 1 do
+    local y = 8 - (i * 2 + n * 4) % 8
+    local x = 21 + n * 2 + (i + n) % 2
+    if y >= 0 then f:drawPixel(x, y, c(236, 232, 224)) end
+  end
+  steam[#steam + 1] = f
+end
+save('coffee', steam, 3)
 
 local f = io.open(app.fs.joinPath(out, 'sprites.json'), 'w')
 f:write('{\n', table.concat(manifest, ',\n'), '\n}\n')
