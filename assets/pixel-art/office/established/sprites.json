@@ -1,0 +1,18 @@
+{
+  "worker": { "width": 26, "height": 44, "frames": 12, "fps": 0 },
+  "desk-active-code": { "width": 82, "height": 68, "frames": 8, "fps": 3 },
+  "desk-active-dashboard": { "width": 82, "height": 68, "frames": 8, "fps": 3 },
+  "desk-active-chart": { "width": 82, "height": 68, "frames": 8, "fps": 3 },
+  "desk-active-chat": { "width": 82, "height": 68, "frames": 8, "fps": 1.2 },
+  "desk-active-terminal": { "width": 82, "height": 68, "frames": 8, "fps": 3 },
+  "desk-active-landscape": { "width": 82, "height": 68, "frames": 8, "fps": 1 },
+  "desk-idle": { "width": 82, "height": 68, "frames": 1, "fps": 0 },
+  "desk-standby": { "width": 82, "height": 68, "frames": 1, "fps": 0 },
+  "floor": { "width": 132, "height": 90, "frames": 1, "fps": 0 },
+  "plant": { "width": 43, "height": 49, "frames": 4, "fps": 1 },
+  "shelf": { "width": 51, "height": 59, "frames": 1, "fps": 0 },
+  "sofa": { "width": 72, "height": 42, "frames": 1, "fps": 0 },
+  "cooler": { "width": 26, "height": 52, "frames": 4, "fps": 3 },
+  "lamp": { "width": 20, "height": 49, "frames": 1, "fps": 0 },
+  "window": { "width": 104, "height": 50, "frames": 4, "fps": 0.25 }
+}

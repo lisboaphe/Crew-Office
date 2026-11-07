@@ -1,5 +1,7 @@
 # Watching the office
 
+> **The office is now 2D, seen from one fixed angle.** Scroll, use the **+** and **−** buttons or keys, or click a room to zoom between a room and the whole floor, and drag to look around. The camera doesn't turn. First-person view, the scene panel, photos and furniture editing described here are not available in it.
+
 *For anyone looking at the room. Two minutes, no code.*
 
 ---

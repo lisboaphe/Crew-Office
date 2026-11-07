@@ -1,0 +1,299 @@
+-- Finishes the sprites cut by build-established-art.sh: makes variants and animation frames, and
+-- writes an editable .aseprite and a PNG strip for each, with established/sprites.json listing them.
+
+local root = app.params.root
+assert(root, 'Pass --script-param root=<folder>')
+local out = app.fs.joinPath(root, 'established')
+local sources = app.fs.joinPath(out, 'source')
+app.fs.makeAllDirectories(sources)
+
+local pc = app.pixelColor
+local CLEAR = pc.rgba(0, 0, 0, 0)
+
+local function load(name) return Image{ fromFile = app.fs.joinPath(out, 'cut', name .. '.png') } end
+
+local function each(image, fn)
+  for y = 0, image.height - 1 do
+    for x = 0, image.width - 1 do fn(x, y, image:getPixel(x, y)) end
+  end
+end
+
+local function hsl(p)
+  local r, g, b = pc.rgbaR(p) / 255, pc.rgbaG(p) / 255, pc.rgbaB(p) / 255
+  local hi, lo = math.max(r, g, b), math.min(r, g, b)
+  local l, d = (hi + lo) / 2, hi - lo
+  if d == 0 then return 0, 0, l end
+  local s = d / (1 - math.abs(2 * l - 1))
+  local h
+  if hi == r then h = ((g - b) / d) % 6 elseif hi == g then h = (b - r) / d + 2 else h = (r - g) / d + 4 end
+  return h * 60, s, l
+end
+
+local manifest = {}
+
+local function save(name, frames, fps)
+  local w, h = frames[1].width, frames[1].height
+  local sprite = Sprite(w, h, ColorMode.RGB)
+  sprite.layers[1].name = 'art'
+  local strip = Image(w * #frames, h, ColorMode.RGB)
+  for i, image in ipairs(frames) do
+    if i > 1 then sprite:newEmptyFrame(i) end
+    sprite:newCel(sprite.layers[1], i, image, Point(0, 0))
+    strip:drawImage(image, Point(w * (i - 1), 0))
+  end
+  if fps > 0 then for _, f in ipairs(sprite.frames) do f.duration = 1 / fps end end
+  sprite:saveAs(app.fs.joinPath(sources, name .. '.aseprite'))
+  sprite:close()
+  strip:saveAs(app.fs.joinPath(out, name .. '.png'))
+  manifest[#manifest + 1] = string.format('  "%s": { "width": %d, "height": %d, "frames": %d, "fps": %s }', name, w, h, #frames, fps)
+end
+
+--- The rows above `limit` moved by `dy`, so a body breathes or a plant leans without losing detail.
+local function shifted(image, limit, dx, dy)
+  local copy = Image(image.width, image.height, ColorMode.RGB)
+  each(image, function(x, y, p)
+    if y >= limit then copy:drawPixel(x, y, p)
+    else
+      local tx, ty = x + dx, y + dy
+      if tx >= 0 and ty >= 0 and tx < copy.width and ty < copy.height and pc.rgbaA(p) > 0 then copy:drawPixel(tx, ty, p) end
+    end
+  end)
+  -- Where the rows part, the row below shows through rather than leaving a gap.
+  if dy > 0 then
+    each(image, function(x, y, p)
+      if y == limit and pc.rgbaA(copy:getPixel(x, y)) == 0 then copy:drawPixel(x, y, p) end
+    end)
+  end
+  return copy
+end
+
+-- Workers: both of ours, with more heads of hair so a team is not a row of twins. ---------------
+
+local function rehaired(image, ramp)
+  local copy = Image(image)
+  local rows = math.floor(image.height * 0.42)
+  each(image, function(x, y, p)
+    if y < rows and pc.rgbaA(p) > 0 then
+      local h, s, l = hsl(p)
+      -- Hair is the dark or brown part of the head; skin is lighter, and outlines are darker still.
+      if l > 0.1 and l < 0.5 and not (h > 15 and h < 40 and l > 0.42) then
+        local i = math.max(1, math.min(#ramp, math.floor(l / 0.5 * #ramp) + 1))
+        local c = ramp[i]
+        copy:drawPixel(x, y, pc.rgba(c[1], c[2], c[3], 255))
+      end
+    end
+  end)
+  return copy
+end
+
+local RAMPS = {
+  blonde = { { 122, 82, 32 }, { 186, 136, 54 }, { 226, 184, 88 }, { 244, 218, 138 } },
+  navy = { { 18, 24, 58 }, { 32, 44, 96 }, { 54, 72, 136 }, { 88, 108, 170 } },
+  auburn = { { 88, 34, 20 }, { 140, 58, 30 }, { 180, 84, 44 }, { 214, 122, 70 } },
+  silver = { { 96, 100, 112 }, { 142, 146, 158 }, { 186, 190, 200 }, { 226, 228, 234 } },
+}
+
+local a, b = load('worker-a'), load('worker-b')
+local variants = { a, b, rehaired(a, RAMPS.blonde), rehaired(b, RAMPS.navy), rehaired(a, RAMPS.auburn), rehaired(a, RAMPS.silver) }
+local workerFrames = {}
+for _, v in ipairs(variants) do
+  workerFrames[#workerFrames + 1] = v
+  workerFrames[#workerFrames + 1] = shifted(v, math.floor(v.height * 0.68), 0, 1)
+end
+-- Both cuts are padded to one size, feet on the bottom row, so frames line up.
+local WW, WH = 26, 44
+for i, f in ipairs(workerFrames) do
+  local cell = Image(WW, WH, ColorMode.RGB)
+  cell:drawImage(f, Point(math.floor((WW - f.width) / 2), WH - f.height))
+  workerFrames[i] = cell
+end
+save('worker', workerFrames, 0)
+
+-- Workstations. The screen tilts: its top and bottom edges rise a little to the right. Measured on
+-- the sheet, where the active and standby desks differ only in the screen, then divided by eight.
+local on, off = load('desk-on'), load('desk-off')
+local SCREEN_LEFT, SCREEN_RIGHT = 29, 52
+local function screenTop(x) return math.ceil(6 - (x - 28.25) * 0.127) end
+local function screenBottom(x) return math.floor(20.2 - (x - 28.25) * 0.127) end
+
+local function c(r, g, bl) return pc.rgba(r, g, bl, 255) end
+local function dimmed(p) return c(pc.rgbaR(p) * 0.55 // 1, pc.rgbaG(p) * 0.6 // 1, pc.rgbaB(p) * 0.68 // 1) end
+
+-- A program is a function from a screen position and a frame to a colour. u runs left to right from
+-- 0 and v from 0 down each column, in whole pixels, so what it draws leans with the screen.
+local PROGRAMS = {}
+
+function PROGRAMS.code(u, v, t)
+  local rows = { { 1, 6, c(126, 214, 200) }, { 3, 9, c(236, 228, 208) }, { 3, 5, c(236, 164, 112) }, { 5, 7, c(160, 208, 130) }, { 3, 11, c(236, 228, 208) }, { 1, 4, c(126, 214, 200) }, { 3, 7, c(226, 190, 96) }, { 5, 8, c(236, 228, 208) } }
+  if v % 2 == 1 then
+    local r = rows[(v // 2 + t) % #rows + 1]
+    if u >= r[1] and u < r[1] + r[2] then return r[3] end
+  end
+  return c(18, 32, 42)
+end
+
+function PROGRAMS.dashboard(u, v, t)
+  -- Four busy bars down the left, and a stack of cards on the right that fill as they work.
+  local bg = c(22, 38, 46)
+  if u < 14 then
+    if v % 2 == 1 then
+      local row = v // 2
+      local length = 3 + (row * 3 + t * (row % 2 == 0 and 1 or 2)) % 10
+      if u == 1 then return row % 3 == 2 and c(236, 164, 112) or c(143, 208, 127) end
+      if u >= 3 and u < 3 + length then return c(86, 176, 164) end
+    end
+    return bg
+  end
+  local height = 2 + (u * 5 + t * 3) % 6
+  if v >= 12 - height and v < 12 and u % 2 == 0 then return u % 4 == 0 and c(226, 190, 96) or c(126, 214, 200) end
+  return bg
+end
+
+function PROGRAMS.chart(u, v, t)
+  -- A line chart scrolling past over a faint grid, its peak moving along with it.
+  local x = u + t * 2
+  local level = 7 + math.floor(math.sin(x * 0.7) * 2 + math.sin(x * 0.23) * 2 + 0.5)
+  if v == level then return c(246, 214, 120) end
+  if v > level then return c(40, 96, 102) end
+  if v % 4 == 3 or u % 6 == 5 then return c(26, 58, 68) end
+  return c(16, 42, 52)
+end
+
+function PROGRAMS.chat(u, v, t)
+  -- The team talking: messages from each side, with the newest arriving as the frames go by.
+  local shown = t // 2 + 1
+  local messages = { { 0, 1, 12, c(120, 196, 186) }, { 1, 4, 10, c(246, 214, 150) }, { 0, 7, 14, c(120, 196, 186) }, { 1, 10, 8, c(246, 214, 150) } }
+  for i = 1, math.min(shown, #messages) do
+    local m = messages[i]
+    if v >= m[2] and v < m[2] + 2 then
+      local left = m[1] == 0 and 1 or 23 - m[3]
+      if u >= left and u < left + m[3] then return m[4] end
+    end
+  end
+  return c(238, 243, 238)
+end
+
+function PROGRAMS.terminal(u, v, t)
+  -- Lines of output, a progress bar filling, and a cursor that blinks.
+  local bg = c(10, 20, 16)
+  local green = c(116, 222, 132)
+  if v == 1 or v == 3 or v == 9 or v == 11 then
+    if u >= 1 and u < ((v == 1 or v == 11) and 12 or 18) and (u + v) % 4 ~= 0 then return c(70, 150, 92) end
+  elseif v == 5 then
+    if u >= 1 and u <= 2 + t * 2 then return green end
+    if u >= 1 and u <= 22 then return c(30, 62, 44) end
+  elseif v == 7 then
+    if u >= 1 and u < 3 then return green end
+    if u == 4 and t % 2 == 0 then return c(226, 250, 226) end
+  end
+  return bg
+end
+
+function PROGRAMS.landscape(u, v, t)
+  -- Hills, and a cloud crossing above them.
+  local hill = 10 - math.floor(math.sin((u + 3) * 0.4) * 1.5 + 0.5)
+  local far = 7 - math.floor(math.sin((u + 11) * 0.25) * 1.5 + 0.5)
+  if v >= hill then return v > hill + 2 and c(42, 96, 96) or c(64, 122, 116) end
+  if v >= far then return c(118, 166, 158) end
+  local x = (u + 26 - t * 3) % 26
+  if (v == 2 and x >= 4 and x < 11) or (v == 1 and x >= 6 and x < 9) then return c(252, 250, 240) end
+  if v == 3 and x >= 5 and x < 10 then return c(214, 230, 228) end
+  return v < 2 and c(142, 204, 222) or c(176, 220, 228)
+end
+
+local function paint(program, frame, dim)
+  local image = Image(on)
+  for x = SCREEN_LEFT, SCREEN_RIGHT do
+    local top = screenTop(x)
+    for y = top, screenBottom(x) do
+      local p = program(x - SCREEN_LEFT, y - top, frame)
+      image:drawPixel(x, y, dim and dimmed(p) or p)
+    end
+  end
+  return image
+end
+
+for _, name in ipairs({ 'code', 'dashboard', 'chart', 'chat', 'terminal', 'landscape' }) do
+  local frames = {}
+  for t = 0, 7 do frames[#frames + 1] = paint(PROGRAMS[name], t) end
+  save('desk-active-' .. name, frames, name == 'chat' and 1.2 or name == 'landscape' and 1 or 3)
+end
+save('desk-idle', { paint(PROGRAMS.landscape, 0, true) }, 0)
+save('desk-standby', { off }, 0)
+
+-- The room. --------------------------------------------------------------------------------
+
+save('floor', { load('floor') }, 0)
+
+local plant = load('plant')
+save('plant', { plant, shifted(plant, plant.height - 12, 1, 0), plant, shifted(plant, plant.height - 12, -1, 0) }, 1)
+save('shelf', { load('shelf') }, 0)
+save('sofa', { load('sofa') }, 0)
+
+local cooler = load('cooler')
+local bubbles = {}
+for i = 0, 3 do
+  local f = Image(cooler)
+  for n = 0, 1 do
+    local y = 12 - (i * 2 + n * 5) % 10
+    local x = 10 + n * 6
+    if pc.rgbaA(f:getPixel(x, y)) > 0 then f:drawPixel(x, y, pc.rgba(232, 248, 252, 255)) end
+  end
+  bubbles[#bubbles + 1] = f
+end
+save('cooler', bubbles, 3)
+
+local lamp = load('lamp')
+save('lamp', { lamp }, 0)
+
+-- A window for the back wall: three panes in a honey oak frame, looking out over a city and trees.
+local function windowFrame(step)
+  local W, H = 104, 50
+  local w = Image(W, H, ColorMode.RGB)
+  local function fill(x, y, cw, ch, p)
+    for j = y, y + ch - 1 do for i = x, x + cw - 1 do
+      if i >= 0 and j >= 0 and i < W and j < H then w:drawPixel(i, j, p) end
+    end end
+  end
+  local skies = { c(136, 196, 224), c(158, 210, 232), c(182, 224, 238), c(208, 236, 240) }
+  for y = 3, 45 do
+    for x = 3, W - 4 do
+      local band = math.min(4, (y - 3) // 11 + 1)
+      local near = (y - 3) % 11 > 7 and (x + y) % 2 == 0
+      w:drawPixel(x, y, skies[near and math.min(4, band + 1) or band])
+    end
+  end
+  for _, cloud in ipairs({ { 6, 9, 16 }, { 44, 6, 13 }, { 28, 15, 11 } }) do
+    local x = 3 + (cloud[1] + step * 3) % 82
+    fill(x, cloud[2], cloud[3], 2, c(250, 250, 244))
+    fill(x + 3, cloud[2] - 2, cloud[3] - 6, 2, c(255, 255, 250))
+    fill(x + 1, cloud[2] + 2, cloud[3] - 2, 1, c(214, 232, 238))
+  end
+  local towers = { { 6, 28, 9 }, { 17, 22, 8 }, { 27, 31, 10 }, { 39, 24, 8 }, { 50, 30, 9 }, { 61, 20, 10 }, { 74, 29, 8 }, { 85, 24, 10 } }
+  for n, tower in ipairs(towers) do
+    local body = n % 2 == 0 and c(128, 154, 182) or c(146, 170, 194)
+    fill(tower[1], tower[2], tower[3], 46 - tower[2], body)
+    fill(tower[1] + tower[3] - 1, tower[2], 1, 46 - tower[2], c(100, 124, 154))
+    fill(tower[1], tower[2], tower[3], 1, c(178, 198, 214))
+    for j = tower[2] + 2, 42, 3 do
+      for i = tower[1] + 1, tower[1] + tower[3] - 2, 2 do w:drawPixel(i, j, c(222, 236, 238)) end
+    end
+  end
+  local greens = { c(58, 112, 44), c(84, 142, 56), c(118, 172, 72), c(72, 128, 52) }
+  for x = 3, W - 4 do
+    local top = 39 + (x * 5 // 7 + x // 3) % 4
+    for y = top, 45 do w:drawPixel(x, y, greens[(x * 7 + y * 3 + x // 4) % 4 + 1]) end
+  end
+  local hi, mid, lo = c(238, 181, 101), c(201, 138, 69), c(140, 84, 32)
+  fill(0, 0, W, 3, mid); fill(0, 0, W, 1, hi); fill(0, 2, W, 1, lo)
+  fill(0, 0, 3, 46, mid); fill(0, 0, 1, 46, hi); fill(2, 3, 1, 43, lo)
+  fill(W - 3, 0, 3, 46, mid); fill(W - 3, 0, 1, 46, hi); fill(W - 1, 0, 1, 46, lo)
+  for _, x in ipairs({ 34, 67 }) do fill(x, 3, 3, 43, mid); fill(x, 3, 1, 43, hi); fill(x + 2, 3, 1, 43, lo) end
+  fill(0, 46, W, 4, mid); fill(0, 46, W, 1, hi); fill(0, 49, W, 1, lo)
+  return w
+end
+save('window', { windowFrame(0), windowFrame(1), windowFrame(2), windowFrame(3) }, 0.25)
+
+local f = io.open(app.fs.joinPath(out, 'sprites.json'), 'w')
+f:write('{\n', table.concat(manifest, ',\n'), '\n}\n')
+f:close()

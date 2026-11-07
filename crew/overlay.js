@@ -877,6 +877,12 @@ let meetingLayer = null;
 const bubbles = [];
 const meetings = new Map();
 
+// Whose bot this is, for the office's columns. A player owns bots and has no desk of their own.
+window.crewOwnerOf = (charId) => {
+  const a = S.agents.find((x) => String(charId).endsWith(`#crew:${x.id}`));
+  return a?.ownerId ? { id: a.ownerId, name: a.ownerName ?? '' } : null;
+};
+
 function charFor(agentId) {
   const world = window.officeView?.world;
   if (!world?.manager?.agents) return null;
@@ -888,6 +894,7 @@ function screenOf(agentId, lift = 2.3) {
   const ch = charFor(agentId);
   const view = window.officeView;
   if (!ch || !view) return null;
+  if (view.office2d) return view.office2d.agentAt(ch.id);
   const cam = view.camera();
   const p = ch.root.getWorldPosition(new ch.root.position.constructor());
   p.y += lift;

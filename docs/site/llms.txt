@@ -34,12 +34,12 @@ which is the working agreement for an agent session in this codebase.
 You have the app and a browser.
 
 - [What this is](https://therovingoffice.com/docs/user/index.md): An office full of characters, and the characters are your AI agents.
-- [Watching the office](https://therovingoffice.com/docs/user/watching.md): For anyone looking at the room.
+- [Watching the office](https://therovingoffice.com/docs/user/watching.md): The office is now 2D, seen from one fixed angle.
 - [Install and run it](https://therovingoffice.com/docs/user/install.md): Five minutes, and the room fills itself with people.
-- [Keys and panels](https://therovingoffice.com/docs/user/keys.md): Everything the keyboard does.
+- [Keys and panels](https://therovingoffice.com/docs/user/keys.md): The office is now 2D, seen from one fixed angle.
 - [Offices, keycards and scenes](https://therovingoffice.com/docs/user/offices-and-keycards.md): How an office is named, shared, and — if you are careless — lost.
 - [Connect your agents](https://therovingoffice.com/docs/user/connect-your-agents.md): One command per harness, then your real sessions walk in through the door.
-- [Rearranging the furniture](https://therovingoffice.com/docs/user/rearranging-furniture.md): Press E, drag the desks about, and watch everybody's route bend round them.
+- [Rearranging the furniture](https://therovingoffice.com/docs/user/rearranging-furniture.md): Not available right now.
 - [Layouts](https://therovingoffice.com/docs/user/layouts.md): An arrangement of furniture is a thing in its own right: it is kept, it can be named, and it can be handed to somebody else as a file.
 - [Sharing an office](https://therovingoffice.com/docs/user/sharing-an-office.md): Put the sessions running on your laptop into a room somebody else can open.
 - [Multiplayer: host, join, bring your AI team](https://therovingoffice.com/docs/user/multiplayer.md): Crew Office turns the office into a shared, multiplayer workspace.
@@ -68,7 +68,7 @@ You have a checkout and something to change.
 - [Getting the code](https://therovingoffice.com/docs/developer/getting-the-code.md): Run a checkout, install public development tooling, and check your changes.
 - [Developing on it](https://therovingoffice.com/docs/developer/developing.md): There is no app build step or npm runtime install.
 - [Every npm script](https://therovingoffice.com/docs/developer/npm-scripts.md): What each command in package.json does, and which of them you actually need.
-- [Architecture](https://therovingoffice.com/docs/developer/architecture.md): How a keystroke in a terminal becomes somebody walking across a room, and where the seams are.
+- [Architecture](https://therovingoffice.com/docs/developer/architecture.md): The office is drawn by src/office2d/view.js, in 2D from one fixed angle, using the art in assets/pixel-art/office/established/, with no WebGL.
 - [The multiplayer layer](https://therovingoffice.com/docs/developer/multiplayer.md): How the shared office works: rooms, players, owner-side workers, the message bus, the task engine, and the bridge that makes the 3D office show what the agents are doing.
 - [Deploying the connectivity service](https://therovingoffice.com/docs/developer/connectivity-service.md): How to run the service that makes Host Office work over the internet, and how a build of the app finds it.
 - [Memory and knowledge](https://therovingoffice.com/docs/developer/memory-and-knowledge.md): How Crew Office keeps what its teams have learned and a map of their code, with the optional Mem0 and Graphify engines.
