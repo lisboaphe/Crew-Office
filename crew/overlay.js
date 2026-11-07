@@ -146,7 +146,7 @@ function buildChrome() {
   ui.editor = createAgentEditor(editorContext());
   ui.security = createSecurityCenter(editorContext());
   // The bookshelf in each room of the office opens this. It is the same Files page as the menu's.
-  window.crewOpenFiles = () => toggleDash('files');
+  window.crewOpenFiles = () => openDash('files');
   // Who the office should show as here, and how to change your own character.
   window.crewPlayers = () => S.members
     .filter((m) => m.online || m.userId === S.me?.id)
@@ -166,6 +166,12 @@ function buildChrome() {
     onGo: goTo,
   });
   document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.nav.el, ui.dash, ui.side, ui.editor.el);
+  window.addEventListener('resize', fitTopBars);
+  // The office's own bar fills in as its parts load, and changes as offices do.
+  const titleBar = document.getElementById('title-bar');
+  const refit = new ResizeObserver(() => requestAnimationFrame(fitTopBars));
+  if (titleBar) refit.observe(titleBar);
+  refit.observe(ui.bar); // as the update button arrives, for one
   render();
 }
 
@@ -196,12 +202,40 @@ function renderBar() {
     connectionPill(),
     players,
     updateNotice(),
-    h('button.btn.cr-icon-btn', { onclick: () => toggleDash('approvals'), title: 'Approvals', 'aria-label': pending ? `Approvals, ${pending} waiting` : 'Approvals' }, icon('check'), pending ? h('span.badge', pending) : null),
-    h('button.btn.cr-icon-btn', { onclick: () => toggleDash('notifications'), title: 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications' }, icon('bell'), unread ? h('span.badge', unread) : null),
-    h('button.btn', { class: ui.side.classList.contains('hidden') ? '' : 'on', onclick: toggleChat, 'aria-pressed': ui.side.classList.contains('hidden') ? 'false' : 'true' }, icon('chat'), 'Chat', unreadTotal() ? h('span.cr-count', unreadTotal()) : null),
+    h('button.btn.cr-icon-btn', { class: dashShows('approvals') ? 'on' : '', 'aria-pressed': String(dashShows('approvals')), onclick: () => toggleDash('approvals'), title: 'Approvals', 'aria-label': pending ? `Approvals, ${pending} waiting` : 'Approvals' }, icon('check'), pending ? h('span.badge', pending) : null),
+    h('button.btn.cr-icon-btn', { class: dashShows('notifications') ? 'on' : '', 'aria-pressed': String(dashShows('notifications')), onclick: () => toggleDash('notifications'), title: 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications' }, icon('bell'), unread ? h('span.badge', unread) : null),
+    h('button.btn', { class: ui.side.classList.contains('hidden') ? '' : 'on', onclick: toggleChat, 'aria-pressed': ui.side.classList.contains('hidden') ? 'false' : 'true' }, icon('chat'), h('span.cr-says-less', 'Chat'), unreadTotal() ? h('span.cr-count', unreadTotal()) : null),
     stopButton(),
     h('button.btn.cr-icon-btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'How it works: a short tour', 'aria-label': 'How it works' }, '?'),
   );
+  fitTopBars();
+}
+
+const TOP_GAP = 12;
+const FIT_LEVELS = 3;
+
+/**
+ * Keeps the office's bar and ours side by side at any window width: each level says less, until they
+ * share one row. If even the shortest will not fit, ours wraps onto more rows rather than overlapping.
+ * Below the phone layout, the two have rows of their own and nothing needs fitting.
+ */
+function fitTopBars() {
+  const title = document.getElementById('title-bar');
+  const root = document.documentElement;
+  if (!title || !ui.bar?.isConnected) return;
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    delete root.dataset.topFit;
+    ui.bar.style.maxWidth = '';
+    return;
+  }
+  for (let level = 0; level <= FIT_LEVELS; level++) {
+    root.dataset.topFit = level;
+    ui.bar.style.maxWidth = `${Math.max(0, window.innerWidth - title.getBoundingClientRect().right - TOP_GAP * 2)}px`;
+    // One row: nothing starts below where the first item ends, whatever their different heights.
+    const items = [...ui.bar.children].filter((item) => item.offsetWidth > 0);
+    const firstEnd = items[0]?.getBoundingClientRect().bottom ?? 0;
+    if (items.every((item) => item.getBoundingClientRect().top < firstEnd)) return;
+  }
 }
 
 // Where the launcher goes. Each destination is an existing tab of the dashboard, so nothing here
@@ -242,6 +276,8 @@ const navKeyFor = (tab) => (NAV_KEYS.has(tab) ? tab : NAV_PARENT[tab] ?? null);
 
 function goTo(key) {
   if (key === 'office3d') { ui.dash.classList.add('hidden'); ui.editor.close?.(); render(); return; }
+  // On a tab within this destination, as much as on the destination itself.
+  if (!ui.dash.classList.contains('hidden') && navKeyFor(ui.tab) === key) { ui.dash.classList.add('hidden'); render(); return; }
   toggleDash(key);
 }
 
@@ -260,10 +296,21 @@ function tourShowMe(tab) {
   render();
 }
 
+const dashShows = (tab) => !ui.dash.classList.contains('hidden') && ui.tab === tab;
+
+/** A second click on what is already open closes it, and a click on anything else goes there. */
 function toggleDash(tab) {
-  if (tab) ui.tab = tab;
-  if (!ui.dash.classList.contains('hidden') && !tab) ui.dash.classList.add('hidden');
-  else ui.dash.classList.remove('hidden');
+  if (dashShows(tab)) {
+    ui.dash.classList.add('hidden');
+    render();
+    return;
+  }
+  openDash(tab);
+}
+
+function openDash(tab) {
+  ui.tab = tab;
+  ui.dash.classList.remove('hidden');
   if (tab === 'notifications') api('POST', `/api/crew/rooms/${roomId}/notifications/read`).then(() => { S.notifications.forEach((n) => { n.read = true; }); render(); });
   render();
 }
@@ -302,7 +349,7 @@ function renderDash() {
   ui.dash.dataset.tab = ui.tab;
   ui.dash.replaceChildren(
     h('div.cr-dash-main',
-      h('header', h('h2', section.label), h('button.btn.small', { onclick: () => ui.dash.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
+      h('header', h('h2', section.label), h('button.btn.small', { onclick: () => { ui.dash.classList.add('hidden'); render(); }, 'aria-label': 'Close' }, '✕')),
       section.tabs.length > 1 ? h('nav.cr-tabs', { role: 'tablist' }, ...section.tabs.map(([k, label]) => h('button', { role: 'tab', 'aria-selected': ui.tab === k ? 'true' : 'false', class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; render(); } }, label))) : null,
       body));
   if (ui.drawnScrollTab === ui.tab) body.scrollTop = scroll;
@@ -565,7 +612,8 @@ function connectionPill() {
   const here = ['localhost', '127.0.0.1'].includes(location.hostname);
   if (!here && !/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)) return h('span.cr-link.ok', 'Relay connection');
   if (!here) return h('span.cr-link.ok', 'Direct connection');
-  return h('span.cr-link', { class: internet?.state === 'online' ? 'ok' : internet?.state === 'unavailable' ? 'bad' : '' }, internet?.label ?? 'Hosting locally');
+  const label = internet?.label ?? 'Hosting locally';
+  return h('span.cr-link', { class: internet?.state === 'online' ? 'ok' : internet?.state === 'unavailable' ? 'bad' : '', title: label }, h('span.cr-says-less', label));
 }
 
 /** On the HUD and in the Security Center. The host decides what the press may do. */
@@ -579,7 +627,7 @@ function stopButton() {
         if (staff) { await api('POST', `/api/crew/rooms/${roomId}/emergency-stop`, { reason: 'Pressed the stop button' }); toast('All AI activity stopped'); await refresh(); } else { await api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: true }); toast('Your agents are stopped'); }
       } catch (e) { toast(e.message, 6000); }
     },
-  }, staff ? 'STOP ALL AI ACTIVITY' : 'STOP MY AI');
+  }, h('span.cr-says-less', staff ? 'STOP ALL AI ACTIVITY' : 'STOP MY AI'), h('span.cr-says-more', 'STOP AI'));
 }
 
 function openAgent(id) { ui.editor.open(id).catch((e) => toast(e.message)); }

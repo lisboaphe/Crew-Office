@@ -8,19 +8,20 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 
 | Sprite | What it is | Animation |
 |---|---|---|
-| `worker` | Two characters and four more heads of hair, six in all, each with four poses. Tops take the bot's colour when drawn | Breathing, quicker while working, and two steps of a walk |
+| `worker` | Two characters and four more heads of hair, six in all, each with ten poses: standing, breathing and striding, and from behind for sitting, typing and walking away. Tops take the bot's colour when drawn | Breathing, quicker while working, and two steps of a walk |
 | `desk-active-*` | A workstation in use, with one of six programs: `code`, `dashboard`, `chart`, `chat`, `terminal` or `landscape`. A bot keeps its own | Each program runs on the screen |
 | `desk-idle` | Its bot is resting, screen dimmed | None |
 | `desk-standby` | Free for the next bot, drawn faded | None |
-| `floor` | The oak tile, repeated as far as the room needs | None |
+| `chair-back` | The back of the desk's chair alone, drawn over somebody sitting in it | None |
+| `floor` | The oak tile, repeated as far as the room needs and stained dark brown as the office draws it | None |
 | `window-day`, `-dawn`, `-dusk`, `-night` | One per room, on the back wall, picked by the host's time. Weather is painted over the glass as the office draws | Clouds, or stars and lit windows after dark |
 | `wall-clock` | A slim digital display in each room and the break area. Its digits are drawn from the host's time | Digits, and a colon ticking each second |
 | `plant` | Beside the lounge and between columns | Swaying |
 | `cooler` | Against the back wall | Bubbles rising |
 | `shelf`, `sofa`, `lamp` | The office's furniture | None |
 | `door` | In the back wall, between rooms one behind the other | None |
-| `counter`, `coffee` | The break area's coffee machine and mugs, on its counter | Steam |
-| `fridge`, `side-table`, `microwave` | Drawn in `finish-established-art.lua` to match the set | The microwave glows while somebody uses it |
+| `coffee` | The break area's cabinet, with the coffee machine and mugs on it | Steam |
+| `fridge`, `side-table`, `microwave` | Cut from the break nook and scene sheets | The microwave glows while somebody uses it |
 | `noticeboard` | On the break area's wall | None |
 | `fax`, `armchair`, `rug`, `cabinet`, `boxes`, `bin`, `picture-*` | Chosen per room from its name, so rooms differ but each stays the same | None |
 
