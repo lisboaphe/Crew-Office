@@ -60,7 +60,7 @@
     },
     {
       "path": ".dockerignore",
-      "sha256": "d9f26d01bd150cb65d8f53409088efcef1b5a4900be0b6dd5e6c944815fbd2fd"
+      "sha256": "a0437dc493ba87d916cf8bd53d1b9e03e4c6517de6de3f3e04ae49128386d75c"
     },
     {
       "path": "bin/aop-codex-install.cjs",
