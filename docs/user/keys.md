@@ -1,5 +1,7 @@
 # Keys and panels
 
+> **The office is now 2D, seen from one fixed angle.** Scroll, use the **+** and **−** buttons or keys, or click a room to zoom between a room and the whole floor, and drag to look around. The camera doesn't turn. First-person view, the scene panel, photos and furniture editing described here are not available in it.
+
 *Everything the keyboard does. Press `?` in the app for the same list — or tap the
 **?** button in the title bar, which is the way in on a phone or tablet where there is
 no key to press.*

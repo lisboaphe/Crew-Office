@@ -165,6 +165,9 @@
 
     <main id="doc" class="doc">
       <h1 id="architecture" tabindex="-1">Architecture</h1>
+<blockquote>
+<p><strong>The office is drawn by <code>src/office2d/view.js</code></strong>, in 2D from one fixed angle, using the art in <code>assets/pixel-art/office/established/</code>, with no WebGL. A camera in that file zooms between one room and a whole floor. <code>src/office2d/allocation.js</code> gives each bot a workstation: four bots a room, three players a floor, ten bots per player per floor, and one standby desk at most. Agents keep their logic, including their walking in the 3D scene objects under <code>src/scene/</code>, but none of that is rendered, so workers are shown at their desks. The editor and first-person ride are off. The sections below describe the older picture where they mention a camera.</p>
+</blockquote>
 <p>How a keystroke in a terminal becomes somebody walking across a room, and where the seams are.</p>
 <h2 id="the-pipeline" tabindex="-1">The pipeline</h2>
 <pre><code>your harness              a hook fires with a JSON payload on stdin

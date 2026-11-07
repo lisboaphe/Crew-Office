@@ -10,13 +10,13 @@ import {
   createCamera, updateCameraAspect, createControls, clampPan,
   createFirstPersonCamera, updateFirstPersonAspect,
 } from './scene/camera.js';
-import { createRenderer } from './scene/renderer.js';
 import { saveCameraView } from './scene/camera-view.js';
-import { applyTimeOfDay, dayLength, declinationFor, createReflectionEnvironment } from './scene/lighting.js';
+import { applyTimeOfDay, dayLength, declinationFor } from './scene/lighting.js';
 import { applyNightLights } from './scene/night-lights.js';
 import { buildWorld, changeAppearance, disposeWorld } from './world.js';
 import { applyLayout, resetLayout, stationsOfKind } from './layout.js';
 import { createFpvRide } from './fpv.js';
+import { createOffice2D } from './office2d/view.js';
 import { setTagLegibility, tagLegibilityFor } from './agents/Agent.js';
 import { CAMERA, ROOM } from './config.js';
 import { BUILDING_LIST, SEASON_LIST } from './projects.js';
@@ -41,7 +41,6 @@ import { createDevPanel } from './ui/dev-panel.js';
 import { createScenePanel, LIGHT_MODES } from './ui/scene-panel.js';
 import { createNorthCompass } from './ui/north-compass.js';
 import { hemisphereOf } from './ui/place-map.js';
-import { copySceneToClipboard } from './ui/photo.js';
 import { recallPanel, rememberPanel } from './ui/panel-state.js';
 import { officePath } from './office/keycard.js';
 import { createEditor } from './editor/editor.js';
@@ -54,7 +53,8 @@ const loading = document.getElementById('loading');
 // Only the world (room, props, agents, feed) is rebuilt when you switch project,
 // so your camera framing survives the swap.
 
-const renderer = createRenderer({ canvas });
+// No WebGL renderer: the office is drawn in 2D, so it runs on machines without 3D graphics too.
+// The 3D scene object remains only because agents and props still hang their logic on it.
 
 /**
  * How big the picture actually is, in CSS pixels.
@@ -85,14 +85,14 @@ function canvasSize() {
 // element to whatever the viewport was at that instant — so a later change to the visible
 // area left the scene in a fixed box with background below it. The drawing buffer still
 // follows the size given here; only the element's CSS is left to CSS.
-renderer.setSize(canvasSize().w, canvasSize().h, false);
 
 const scene = new THREE.Scene();
-const reflections = createReflectionEnvironment(renderer);
-scene.environment = reflections.texture;
 
 const camera = createCamera(canvasSize().aspect);
 const controls = createControls(camera, canvas);
+// The 3D camera stays still: the office is drawn in 2D, with a camera of its own.
+controls.enabled = false;
+const office2d = createOffice2D(document.getElementById('office-2d'), canvas);
 
 /**
  * The first-person lens, used while riding an agent. Built once and kept: it is
@@ -101,8 +101,6 @@ const controls = createControls(camera, canvas);
  */
 const fpvCamera = createFirstPersonCamera(canvasSize().aspect);
 
-const raycaster = new THREE.Raycaster();
-const pointer = new THREE.Vector2();
 let selectedId = null;
 
 /**
@@ -820,7 +818,7 @@ scenePanel.setState({ ...lookState(), lights: lightsMode });
 const devPanel = createDevPanel({
   camera,
   controls,
-  onPhoto: () => copySceneToClipboard({ renderer, scene, camera: activeCamera }),
+  onPhoto: () => {},
 });
 
 // After the strips, not before them, and that ordering is the whole point: the hint
@@ -836,46 +834,28 @@ function setLights(mode) {
   scenePanel.setState({ ...lookState(), lights: lightsMode });
 }
 
-register({
-  id: 'scene-panel',
-  keys: ['S'],
-  label: 'Show/hide {SCENE} panel',
-  group: 'Scene',
-  order: 2,
-  onPress: () => scenePanel.toggle(),
-});
 
-// Moving the camera about, which OrbitControls dispatches for itself — so these are
-// description-only rows, like the editor's drag.
-//
-// They were the one part of the app nothing had ever written down: discoverable by
-// flailing at the mouse, which most people do get to eventually, and which is exactly
-// the kind of thing a panel headed "Shortcuts" exists to save them from.
-registerGesture({
-  id: 'camera-zoom',
-  keys: ['Scroll wheel'],
-  label: 'Zoom scene in / out',
-  group: 'Scene',
-  order: 4,
-});
-registerGesture({
-  id: 'camera-rotate',
-  keys: ['Drag'],
-  label: 'Rotate scene',
-  group: 'Scene',
-  order: 5,
-});
-registerGesture({
-  id: 'camera-pan',
-  keys: ['Ctrl', 'Drag'],
-  label: 'Move scene',
-  group: 'Scene',
-  order: 6,
-});
 
 // Bound but not listed: the panel prints `?` beside its own title, which teaches the key
 // at the moment it is useful and without spending a row of the list saying how to open
 // the list you are already reading.
+register({
+  id: 'zoom-in',
+  keys: ['+'],
+  label: 'Zoom in on a room',
+  group: 'Scene',
+  order: 4,
+  onPress: () => office2d.zoomIn(),
+});
+register({
+  id: 'zoom-out',
+  keys: ['-'],
+  label: 'Zoom out to the floor',
+  group: 'Scene',
+  order: 5,
+  onPress: () => office2d.zoomOut(),
+});
+
 register({
   id: 'help',
   keys: ['?'],
@@ -929,14 +909,6 @@ register({
 // A bare `C`, not `⌘C`. The registry can express the command key — that is what made
 // `⌘C` bindable in the first place — but taking the browser's copy away and then handing
 // it back through a special case was a lot of machinery for a room with no text in it.
-register({
-  id: 'photo',
-  keys: ['C'],
-  label: 'Copy a photo of the scene to the clipboard',
-  group: 'Developer',
-  order: 2,
-  onPress: () => devPanel.takePhoto(),
-});
 
 // --- The furniture editor --------------------------------------------------
 // Built once and kept, like the panels: the layout it edits is a singleton in the
@@ -950,20 +922,6 @@ editor = createEditor({
   getWorld: () => world,
 });
 
-register({
-  id: 'edit',
-  keys: ['E'],
-  label: 'Turn on/off {EDIT} mode',
-  group: 'Edit Mode',
-  order: 0,
-  onPress: () => {
-    // Not available from inside somebody's head. Dragging furniture is done by pointing
-    // at the floor from above, and a perspective lens at eye level cannot see the floor
-    // it would need to point at — so entering edit mode steps out of the ride first.
-    if (!editor.isOpen && ride.id) ride.exit();
-    editor.toggle();
-  },
-});
 
 register({
   id: 'edit-paths',
@@ -1190,14 +1148,6 @@ registerGesture({
 // the render loop only asks the ride to aim.
 
 // Discoverable in Help before selection; Follow Along offers the same action in the inspector.
-register({
-  id: 'fpv',
-  keys: ['F'],
-  label: 'First person view of the selected agent',
-  group: 'Agents',
-  order: 1,
-  onPress: () => (ride.id ? ride.exit() : (selectedId != null && ride.enter(selectedId))),
-});
 
 /**
  * A new selection (or none), from the roster, a click in the scene, or Escape.
@@ -1243,23 +1193,8 @@ canvas.addEventListener('pointerup', (e) => {
   downXY = null;
   if (moved > 6) return;
 
-  // Relative to the canvas and offset by where it starts, not to the window. A canvas
-  // that does not fill the window — a phone whose visible area differs from the layout
-  // viewport, or an embed in a frame — made every tap land somewhere other than where the
-  // finger was, and the miss grew with the discrepancy.
-  const box = canvas.getBoundingClientRect();
-  pointer.x = ((e.clientX - box.left) / box.width) * 2 - 1;
-  pointer.y = -((e.clientY - box.top) / box.height) * 2 + 1;
-  // Cast from whichever lens drew the frame, so clicking an agent seen from inside
-  // another one's head selects who you actually pointed at.
-  raycaster.setFromCamera(pointer, activeCamera());
-  const roots = [...world.manager.agents.values()].map((r) => r.agent.root);
-  const hits = raycaster.intersectObjects(roots, true);
-  if (hits.length) {
-    overlay.setSelected(world.manager.agentIdFromObject(hits[0].object));
-  } else {
-    overlay.setSelected(null);
-  }
+  const picked = office2d.pick(e.clientX, e.clientY);
+  if (picked !== undefined) overlay.setSelected(picked);
 });
 
 // The clock is the LED panel on the beige wall above the coffee machine. Poll
@@ -1286,12 +1221,11 @@ setInterval(updateWallClock, 500);
 setInterval(() => world?.manager.tidy(), 15_000);
 
 function viewportChanged() {
-  const { w, h, aspect } = canvasSize();
+  const { aspect } = canvasSize();
   updateCameraAspect(camera, aspect);
   // Both lenses, always: resizing while riding must fix the view you are in, and
   // resizing while outside must not leave a stale aspect waiting for the next `f`.
   updateFirstPersonAspect(fpvCamera, aspect);
-  renderer.setSize(w, h, false);
 
   /* Re-frame if a host asked for a frame mode.
    *
@@ -1336,7 +1270,7 @@ if (window.visualViewport) {
 const timer = new THREE.Timer();
 window.__dbg = { get world(){return world} };
 // What the multiplayer overlay needs to pin speech bubbles over characters.
-window.officeView = { get world() { return world; }, camera: () => activeCamera(), canvas };
+window.officeView = { get world() { return world; }, camera: () => activeCamera(), canvas, office2d };
 
 function animate(timestamp) {
   requestAnimationFrame(animate);
@@ -1385,13 +1319,21 @@ function animate(timestamp) {
     controls.update();
     clampPan(camera, controls);
   }
-  renderer.render(scene, activeCamera());
+  office2d.draw(world, dt, { selectedId, timeText: clockText(), ownerOf: window.crewOwnerOf });
 }
 
 animate();
 
 // Hide loading overlay once the first frame is drawn.
 requestAnimationFrame(() => loading.classList.add('done'));
+
+/** The time for the clock on the wall. */
+function clockText() {
+  const hours = worldClock.hours();
+  const h = Math.floor(hours);
+  const m = Math.floor((hours - h) * 60);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
 
 /**
  * Point the camera at the room the way `frame` asked for.
@@ -1540,4 +1482,4 @@ startHostApi({
  * screenshot can ever show — see the note on checking the work in AGENTS.md. This is the
  * only way to photograph the gizmos and the panel.
  */
-if (new URLSearchParams(window.location.search).get('edit') === '1') editor.enter();
+

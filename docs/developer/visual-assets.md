@@ -132,6 +132,10 @@ Recorded so the question does not have to be re-asked.
 - **`vendor/three/`, `vendor/color-name-list/`** — code, not artwork. See
   `third-party/inventory.json`.
 
+## 7. Experiments, not cleared for release
+
+- **`assets/pixel-art/office/established/`** — the sprites the office shows, cut from the project's established-style reference sheets by `source/build-established-art.sh`. Those sheets' source is not recorded yet. `assets/` ships whole, so these reach every distribution once merged: record the source and add a row as described below first.
+
 ---
 
 ## Adding or changing a visual asset
