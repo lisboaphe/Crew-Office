@@ -22,6 +22,7 @@ const CHAT_MIN = 4;
 const CHAT_MAX = 7;
 const MAX_AWAY = 2;
 const THROUGH_A_DOOR = 0.35; // seconds out of sight, on the far side of a door
+const ARRIVAL_GAP = 1.5; // seconds between people coming in, so a whole team does not come in as one
 
 const between = (random, low, high) => low + random() * (high - low);
 
@@ -38,6 +39,9 @@ export function createAmbient({ random = Math.random } = {}) {
   const away = new Map();
   /** id -> what they are doing at their desk, and how their free time has gone so far. */
   const desks = new Map();
+  /** Who is still to come in, first to last. They are out of sight until then. */
+  const expected = [];
+  let nextArrival = 0;
 
   function leave(bot, plan) {
     const [start, ...rest] = plan.path;
@@ -47,6 +51,8 @@ export function createAmbient({ random = Math.random } = {}) {
       y: start.y,
       path: rest,
       trail: [start],
+      home: plan.home ?? null,
+      arriving: Boolean(plan.home),
       walked: 0,
       hidden: 0,
       waiting: 0,
@@ -112,7 +118,8 @@ export function createAmbient({ random = Math.random } = {}) {
     person.waiting = 0;
     // From wherever they have got to, the way home is what they have walked so far, reversed, and
     // never a straight line, which could go through whatever the way out went around.
-    person.path = retraced(person.trail);
+    // Somebody on their way in has never been to their desk, and has a way there of their own.
+    person.path = person.home ? [...person.home] : retraced(person.trail);
     person.trail = [];
   }
 
@@ -178,10 +185,24 @@ export function createAmbient({ random = Math.random } = {}) {
         }
       }
       for (const id of [...desks.keys()]) if (!here.has(id)) desks.delete(id);
+      for (let i = expected.length - 1; i >= 0; i--) if (!here.has(expected[i])) expected.splice(i, 1);
+
+      // The next one in, once the last is clear of the door. They come in first for the coffee.
+      nextArrival -= dt;
+      if (expected.length && nextArrival <= 0) {
+        nextArrival = ARRIVAL_GAP;
+        const id = expected.shift();
+        const plan = planFor(here.get(id), new Set(), 'arrive');
+        if (plan) {
+          leave(here.get(id), plan);
+          away.get(id).hidden = THROUGH_A_DOOR;
+        }
+      }
 
       for (const bot of bots) {
         const person = away.get(bot.id);
         const desk = deskOf(bot.id);
+        if (expected.includes(bot.id)) continue;
         if (!person) {
           // Time on real work is its own: it counts for nothing here, and changes nothing here.
           if (!bot.idle) continue;
@@ -196,16 +217,17 @@ export function createAmbient({ random = Math.random } = {}) {
         if (bot.idle) desk.total += dt;
 
         // Real work always wins.
-        if (!bot.idle && person.phase !== 'back') {
+        // Only somebody on their way in carries on to the coffee, in a hurry, as it is on their way.
+        if (!bot.idle && person.phase !== 'back' && !(person.arriving && person.phase === 'going')) {
           endChat(person, away);
           turnBack(person);
         }
 
         if (person.phase === 'going') {
-          if (walk(person, dt, SPEED)) {
+          if (walk(person, dt, bot.idle ? SPEED : SPEED * HURRY)) {
             person.phase = 'at';
-            if (person.action === 'wander') continue;
-            const other = [...away.entries()].find(([id, p]) => id !== bot.id && p.phase === 'at' && !p.partner && p.action !== 'wander');
+            if (person.action === 'wander' || person.arriving) continue;
+            const other = [...away.entries()].find(([id, p]) => id !== bot.id && p.phase === 'at' && !p.partner && p.action !== 'wander' && !p.arriving);
             if (other) {
               const [otherId, otherPerson] = other;
               const chat = between(random, CHAT_MIN, CHAT_MAX);
@@ -218,8 +240,8 @@ export function createAmbient({ random = Math.random } = {}) {
         } else if (person.phase === 'at') {
           person.pause -= dt;
           // Somebody on their way over is worth waiting for, for a chat.
-          const company = person.action !== 'wander'
-            && [...away.values()].some((p) => p !== person && p.phase === 'going' && p.action !== 'wander');
+          const company = person.action !== 'wander' && !person.arriving
+            && [...away.values()].some((p) => p !== person && p.phase === 'going' && p.action !== 'wander' && !p.arriving);
           if (person.pause <= 0 && !company) {
             person.holding = person.action === 'coffee' || person.action === 'water';
             endChat(person, away);
@@ -232,8 +254,16 @@ export function createAmbient({ random = Math.random } = {}) {
       }
     },
 
+    /** Somebody has joined: they come in when their turn comes, and are nowhere to be seen until then. */
+    arrive(bot) {
+      if (!away.has(bot.id) && !expected.includes(bot.id)) expected.push(bot.id);
+    },
+
     /** Where to draw somebody who has left their desk, or null if they are at it. */
     whereIs(id) {
+      if (expected.includes(id)) {
+        return { x: 0, y: 0, moving: false, direction: 1, facingAway: false, holding: false, talking: false, phase: 'expected', walked: 0, hidden: true };
+      }
       const person = away.get(id);
       if (!person) return null;
       return {

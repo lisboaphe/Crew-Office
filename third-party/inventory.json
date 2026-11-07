@@ -527,7 +527,7 @@
         "hosted-app",
         "docs-site"
       ],
-      "review": "Project assets are tracked here to avoid mistaking all assets for the two vendored MIT libraries. developing.md describes the original project illustration/logo direction and Atlassian-inspired theme. Ownership, project license and Brand verification are separate release gates, and assets/logo-256.png is the only tracked component inside the published plugin artifacts, so that gate applies to them too. Documentation screenshots and portraits under docs/images are rendered from the scene and can incorporate the third-party marks listed above; review and regenerate them with any asset replacement. The four that carry a mark are recorded against the components they belong to rather than here: docs/images/panels/source-picker.png (reproduces all five picker marks at once) is listed under project-artwork below, and docs/images/objects/{aceLogo,rovoLogo,kanbanBoard}.png under atlassian-ace, atlassian-rovo-standee and atlassian-jira-mark. Note these object portraits are also runtime app assets, not documentation only: src/editor/kit-menu.js fetches them live for the add-item menu.",
+      "review": "The logo and icon set were supplied by the project's owner, and their source is not yet recorded. Project assets are tracked here to avoid mistaking all assets for the two vendored MIT libraries. developing.md describes the original project illustration/logo direction and Atlassian-inspired theme. Ownership, project license and Brand verification are separate release gates, and assets/logo-256.png is the only tracked component inside the published plugin artifacts, so that gate applies to them too. Documentation screenshots and portraits under docs/images are rendered from the scene and can incorporate the third-party marks listed above; review and regenerate them with any asset replacement. The four that carry a mark are recorded against the components they belong to rather than here: docs/images/panels/source-picker.png (reproduces all five picker marks at once) is listed under project-artwork below, and docs/images/objects/{aceLogo,rovoLogo,kanbanBoard}.png under atlassian-ace, atlassian-rovo-standee and atlassian-jira-mark. Note these object portraits are also runtime app assets, not documentation only: src/editor/kit-menu.js fetches them live for the add-item menu.",
       "files": [
         {
           "path": "assets/airmail.svg",
@@ -535,7 +535,7 @@
         },
         {
           "path": "assets/apple-touch-icon.png",
-          "sha256": "ac246d019ce893ed1734047f3131b2beb3b3aa5557df022115419133844ec0cb"
+          "sha256": "c9a04471be779c2d78c08a771dc2b6ed86b3495e4a74369834ce9a18c777b164"
         },
         {
           "path": "assets/arrivals.svg",
@@ -551,23 +551,23 @@
         },
         {
           "path": "assets/icon-192.png",
-          "sha256": "73f56f28570d03c1e8b4f1753709b70685bc3130136b9f29fab9e50777fd9c63"
+          "sha256": "829fc64d187fc9ca9ea9dadc4d43c576a99a2eaf00daf6db574a20bbee8383fe"
         },
         {
           "path": "assets/icon-512.png",
-          "sha256": "320939dab97f1bd4009424bed90545f0436acda40c3f5dd7a8513751fad508bb"
+          "sha256": "2d1f496a7037b7e044d109df0f2069e3a34c588c6dec0026e5ccd7b6b496ee65"
         },
         {
           "path": "assets/logo-256.png",
-          "sha256": "a2bd446256e1bf1ff1cb70ce073f39fc3947f2f3e8d017cb4a16ac403686201a"
+          "sha256": "9b9e23706605ae60aca876a00bcb1cfb781f949ece2f0f20e063ffd23e6cbb63"
         },
         {
           "path": "assets/logo-64.png",
-          "sha256": "713c15c27a7bfbf8a881d75db67bfdd43e355fa4623c8e5d05e102a4a1831794"
+          "sha256": "ece81516565f9aae15bbd9c32997435125a88a7024189d59f3e71c7150b1ca9c"
         },
         {
           "path": "assets/logo.png",
-          "sha256": "5e7abaf7fbc36b367267c3994ea4f3aae9b3ac0497f111ce0647980bbcf7bf28"
+          "sha256": "804cf3d31e2fa62425fdddffbaea8a89081f9e2d6c6ba5d31bf2657967f61775"
         },
         {
           "path": "assets/ui-theme.css",
@@ -575,7 +575,7 @@
         },
         {
           "path": "favicon.ico",
-          "sha256": "7966b8ae8a93e014d51032f033f63454b445f8abab5f81b35de28527dd61c762"
+          "sha256": "487eccf93cb416a83e4a961c51f3fc7cab42a75b35f3cc503dc500c6178ef175"
         }
       ],
       "licenseEvidence": []

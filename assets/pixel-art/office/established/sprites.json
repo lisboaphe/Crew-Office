@@ -1,5 +1,5 @@
 {
-  "worker": { "width": 26, "height": 44, "frames": 60, "fps": 0 },
+  "worker": { "width": 26, "height": 44, "frames": 96, "fps": 0 },
   "desk-active-code": { "width": 82, "height": 68, "frames": 8, "fps": 3 },
   "desk-active-dashboard": { "width": 82, "height": 68, "frames": 8, "fps": 3 },
   "desk-active-chart": { "width": 82, "height": 68, "frames": 8, "fps": 3 },

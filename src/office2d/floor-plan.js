@@ -18,7 +18,8 @@ export const ROOM_H = INNER_H + BORDER * 2;
 // Neighbouring rooms share a wall, so one frame stands between them.
 export const STEP_X = ROOM_W - BORDER;
 export const STEP_Y = ROOM_H - BORDER;
-export const BREAK_W = 250;
+export const BREAK_W = 290;
+export const BREAK_DOOR_X = 264; // the middle of the door in its back wall, where people come in
 export const WORKER_W = 26;
 export const WORKER_H = 44;
 export const DESK_W = 82;
@@ -287,4 +288,22 @@ export function strollFrom(seat, sizes, random) {
     path: way.map((p) => ({ ...p, x: p.x - WORKER_W / 2, y: p.y - WORKER_H })),
     spot: { action: 'wander', pause: 0.8 + random() * 1.7 },
   };
+}
+
+/**
+ * How somebody first comes in: through the break room's door, over to the coffee machine, then to
+ * their desk with a cup. Null if there is no way.
+ *
+ * @param {{room: object, plan: object, index: number}} seat
+ * @param {Record<string, {width: number, height: number}>} sizes
+ */
+export function arrivalRoute(seat, sizes) {
+  const map = walkMapOf(seat.plan, sizes, seat);
+  const door = { x: seat.plan.breakRoom.x + BORDER + BREAK_DOOR_X, y: seat.plan.breakRoom.y + BORDER + WALL_H + 4 };
+  const coffee = BREAK_SPOTS.find((s) => s.action === 'coffee');
+  const toCoffee = findPath(door, spotFeet(seat.plan, coffee), map);
+  const toDesk = findPath(spotFeet(seat.plan, coffee), seatFeet(seat.room, seat.index), map);
+  if (!toCoffee || !toDesk) return null;
+  const drawn = (p) => ({ ...p, x: p.x - WORKER_W / 2, y: p.y - WORKER_H });
+  return { path: toCoffee.map(drawn), home: toDesk.map(drawn), spot: { action: 'coffee', pause: 2.5 } };
 }

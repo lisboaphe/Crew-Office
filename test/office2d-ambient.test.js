@@ -259,3 +259,59 @@ test('feet keep pace with the floor: a stride goes by distance walked', () => {
   const where = ambient.whereIs('a');
   assert.ok(Math.abs(where.walked - where.x) < 1e-6);
 });
+
+const arrival = {
+  path: [{ x: 300, y: 0 }, { x: 250, y: 0 }],
+  home: [{ x: 250, y: 0 }, { x: 0, y: 0 }],
+  spot: { action: 'coffee', pause: 2.5 },
+};
+
+test('somebody new comes in, gets a coffee, and goes to their desk with it', () => {
+  const ambient = createAmbient({ random: () => 0.9 });
+  const bot = { id: 'a', idle: true };
+  ambient.arrive(bot);
+  assert.equal(ambient.whereIs('a').hidden, true, 'nowhere to be seen yet');
+  const kinds = [];
+  ambient.update(0.1, [bot], (b, taken, kind) => { kinds.push(kind); return arrival; });
+  assert.deepEqual(kinds, ['arrive']);
+  run(ambient, [bot], 2);
+  assert.equal(ambient.actionOf('a'), 'coffee');
+  run(ambient, [bot], 2.6);
+  assert.equal(ambient.whereIs('a').phase, 'back');
+  assert.equal(ambient.whereIs('a').holding, true);
+  assert.equal(ambient.whereIs('a').x < 250, true, 'heading for the desk, not back out of the door');
+  run(ambient, [bot], 6);
+  assert.equal(ambient.whereIs('a'), null);
+  assert.equal(ambient.activityOf('a'), 'working');
+});
+
+test('a whole team comes in one after another', () => {
+  const ambient = createAmbient({ random: () => 0.9 });
+  const bots = ['a', 'b', 'c'].map((id) => ({ id, idle: true }));
+  bots.forEach((b) => ambient.arrive(b));
+  const plan = () => arrival;
+  ambient.update(0.1, bots, plan);
+  assert.equal(ambient.whereIs('a').phase, 'going');
+  assert.equal(ambient.whereIs('b').phase, 'expected');
+  run(ambient, bots, 1.6, plan);
+  assert.equal(ambient.whereIs('b').phase, 'going');
+  assert.equal(ambient.whereIs('c').phase, 'expected');
+});
+
+test('somebody with real work still comes in that way, only quicker', () => {
+  const ambient = createAmbient({ random: () => 0.9 });
+  const bot = { id: 'a', idle: false };
+  ambient.arrive(bot);
+  ambient.update(0.1, [bot], () => arrival);
+  run(ambient, [bot], 1);
+  assert.notEqual(ambient.whereIs('a').phase, 'going');
+  run(ambient, [bot], 3);
+  assert.equal(ambient.whereIs('a'), null);
+});
+
+test('nobody expected stays expected once they have left', () => {
+  const ambient = createAmbient({ random: () => 0.9 });
+  ambient.arrive({ id: 'a' });
+  ambient.update(0.1, [], () => null);
+  assert.equal(ambient.whereIs('a'), null);
+});

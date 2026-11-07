@@ -9,9 +9,10 @@
 import { createAllocator } from './allocation.js';
 import { createAmbient } from './ambient.js';
 import {
-  AISLE_X, BORDER, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
-  STEP_X, WALL_H, WORKER_H, WORKER_W, decorOf, hashOf, placeFloor, routeTo, seatFeet, sittingAt, stationAt, strollFrom,
+  AISLE_X, BORDER, BREAK_DOOR_X, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
+  STEP_X, WALL_H, WORKER_H, WORKER_W, decorOf, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
 } from './floor-plan.js';
+import { restingPose, workingPose } from './desk-poses.js';
 import { clockText, hostMinutes, phaseOf } from './sky.js';
 
 const ROOT = '/assets/pixel-art/office/established/';
@@ -37,14 +38,10 @@ const OAK_DARK = '#8c5420';
 const GREEN = '#3f6248';
 const CREAM = '#fbf3e4';
 
-// Each person's frames: standing, breathing, two strides; then from behind, for the chair and for
-// walking away: standing, two of typing, glancing aside, two strides.
-const POSES = 10;
+// Each person's frames: standing, breathing and two strides, then from behind for the chair and for
+// walking away. desk-poses.js has what the rest of them are for.
+const POSES = 16;
 const BEHIND = 4;
-const TYPING = [5, 6];
-const SITTING = [4, 4, 7, 4];
-const TYPING_FPS = 6;
-const SITTING_FPS = 0.8;
 const SEATED_ROWS = 36; // of the person's height, as the rest of them is out of sight behind the chair
 // A walk cycle by distance covered, so feet keep pace with the floor at any speed.
 const WALK_CYCLE = [2, 0, 3, 0];
@@ -354,6 +351,20 @@ export function createOffice2D(canvas, input) {
     context.restore();
   }
 
+  /** Who has been seen coming in, kept for this tab, so reloading does not send everyone out again. */
+  const WELCOMED_KEY = `crew-office:arrived:${location.pathname}`;
+  const welcomed = new Set();
+  let welcomedSaved = 0;
+  try { for (const key of JSON.parse(sessionStorage.getItem(WELCOMED_KEY)) ?? []) welcomed.add(key); } catch { /* it only means a second welcome */ }
+  welcomedSaved = welcomed.size;
+  // An agent waiting for its worker and the same agent running have different ids, but one arrival.
+  const arrivalKey = (id) => id.slice(id.indexOf('#crew:') + 1 || 0);
+  function rememberWelcomed() {
+    if (welcomed.size === welcomedSaved) return;
+    welcomedSaved = welcomed.size;
+    try { sessionStorage.setItem(WELCOMED_KEY, JSON.stringify([...welcomed])); } catch { /* as above */ }
+  }
+
   function drawPerson(image, frame, x, y, flip, rows = WORKER_H) {
     const px = Math.round(x);
     const py = Math.round(y);
@@ -461,9 +472,7 @@ export function createOffice2D(canvas, input) {
 
   /** The frame of somebody in their chair, either at the keyboard or sitting back. */
   function seatedPose(typing, hash) {
-    return typing
-      ? TYPING[Math.floor(clock * TYPING_FPS + hash % 5) % TYPING.length]
-      : SITTING[Math.floor(clock * SITTING_FPS + hash % 4) % SITTING.length];
+    return typing ? workingPose(clock, hash) : restingPose(clock, hash);
   }
 
   /** The player, at the top middle of their first room. They own the room and have no bot's seat. */
@@ -550,6 +559,7 @@ export function createOffice2D(canvas, input) {
     put('noticeboard', left + 141, top + 2);
     // The microwave only turns while somebody is heating something.
     for (const item of BREAK_FURNITURE) put(item.sprite, left + item.x, top + item.y, item.sprite === 'microwave' && !heating ? 0 : null);
+    put('door', left + BREAK_DOOR_X - sprites.door.width / 2, top + WALL_H - sprites.door.height);
   }
 
   /** The window for this time of day at the host, with the host's weather across the glass. */
@@ -697,6 +707,7 @@ export function createOffice2D(canvas, input) {
     const seat = seats.get(bot.id);
     if (!seat) return null;
     if (kind === 'wander') return strollFrom(seat, sprites, Math.random);
+    if (kind === 'arrive') return arrivalRoute(seat, sprites);
     const free = BREAK_SPOTS.filter((s) => !taken.has(s.action));
     if (!free.length) return null;
     const spot = free[Math.floor(Math.random() * free.length)];
@@ -921,6 +932,14 @@ export function createOffice2D(canvas, input) {
         });
       }
     });
+    // Anybody new to this viewer comes in through the break room's door, the first time only.
+    for (const bot of roster) {
+      const key = arrivalKey(bot.id);
+      if (!seats.has(bot.id) || welcomed.has(key)) continue;
+      welcomed.add(key);
+      ambient.arrive({ id: bot.id });
+    }
+    rememberWelcomed();
     ambient.update(dt, roster.map((b) => ({ id: b.id, idle: isFree(b) && !b.waiting })), planOuting);
 
     floorPlan = placeFloor(floors[floorIndex]);

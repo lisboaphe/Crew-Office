@@ -137,26 +137,68 @@ local function moved(image, rule)
   return frame
 end
 
---- The same person from behind: the face and ears become more of the hair above them.
+--- The same person from behind: the face and ears become hair, shaded from the hair's own colours
+--- with a soft light on the crown and a few strands falling down it.
 local function fromBehind(cell)
   local copy = Image(cell)
-  local FACE_TOP, FACE_BOTTOM = 5, 22
+  local FACE_TOP, FACE_BOTTOM = 3, 22
   local middle = cell.width // 2
-  -- Hair is what lies just under the top outline of the head, in the middle of it.
-  local tops = {}
-  for x = middle - 6, middle + 6 do
+  -- The hair's colours are what lies just under the top outline of the head, darkest to lightest.
+  local samples = {}
+  for x = middle - 5, middle + 5 do
     local y = 0
     while y < cell.height - 1 and pc.rgbaA(cell:getPixel(x, y)) == 0 do y = y + 1 end
-    tops[x] = y
+    for row = y + 1, y + 4 do
+      local p = cell:getPixel(x, row)
+      if pc.rgbaA(p) > 0 then
+        local _, _, l = hsl(p)
+        samples[#samples + 1] = { l = l, p = p }
+      end
+    end
   end
+  table.sort(samples, function(a, b) return a.l < b.l end)
+  local tone = function(share) return samples[math.max(1, math.floor(#samples * share))].p end
+  local dark, mid, light = tone(0.3), tone(0.55), tone(0.85)
   each(cell, function(x, y, p)
     if y < FACE_TOP or y > FACE_BOTTOM or pc.rgbaA(p) == 0 then return end
     -- The silhouette keeps its outline.
-    if x == 0 or x == cell.width - 1 or pc.rgbaA(cell:getPixel(x - 1, y)) == 0 or pc.rgbaA(cell:getPixel(x + 1, y)) == 0 then return end
-    local column = math.max(middle - 6, math.min(middle + 6, x))
-    local hair = cell:getPixel(column, tops[column] + 2 + (x + y) % 3)
-    if pc.rgbaA(hair) > 0 then copy:drawPixel(x, y, hair) end
+    if x == 0 or x == cell.width - 1 or y == 0 then return end
+    for _, n in ipairs({ { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } }) do
+      if pc.rgbaA(cell:getPixel(x + n[1], y + n[2])) == 0 then return end
+    end
+    local colour = mid
+    if y >= FACE_BOTTOM - 4 or x >= cell.width - 6 then colour = dark end
+    if y <= FACE_TOP + 7 and x >= middle - 6 and x <= middle + 1 then colour = light end
+    -- Strands, a few pixels long, so it is hair rather than a flat cap.
+    if (x + (y // 4) * 3) % 6 == 0 and y > FACE_TOP + 3 then colour = dark end
+    copy:drawPixel(x, y, colour)
   end)
+  return copy
+end
+
+--- Tidies a silhouette: fills notches a pixel wide, and takes off single pixels sticking out of it.
+local function tidied(frame)
+  local copy = Image(frame)
+  local opaque = function(x, y)
+    return x >= 0 and y >= 0 and x < frame.width and y < frame.height and pc.rgbaA(frame:getPixel(x, y)) > 0
+  end
+  local NEAR = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } }
+  for y = 0, frame.height - 1 do
+    for x = 0, frame.width - 1 do
+      local count, darkest, darkestL = 0, nil, 2
+      for _, n in ipairs(NEAR) do
+        if opaque(x + n[1], y + n[2]) then
+          count = count + 1
+          local p = frame:getPixel(x + n[1], y + n[2])
+          local _, _, l = hsl(p)
+          if l < darkestL then darkest, darkestL = p, l end
+        end
+      end
+      if not opaque(x, y) and count >= 3 then copy:drawPixel(x, y, darkest) end
+      -- The feet keep their shadow, which is meant to be soft at the edge.
+      if opaque(x, y) and count <= 1 and y < frame.height - 4 then copy:drawPixel(x, y, CLEAR) end
+    end
+  end
   return copy
 end
 
@@ -177,6 +219,37 @@ for _, v in ipairs(variants) do
   local cell = Image(WW, WH, ColorMode.RGB)
   cell:drawImage(v, Point(math.floor((WW - v.width) / 2), WH - v.height))
   local back = fromBehind(cell)
+  local middle = WW // 2
+  local HEAD, ARMS_TOP, ARMS_BOTTOM = 23, 24, 33
+  local armOf = function(x, y)
+    if y < ARMS_TOP or y > ARMS_BOTTOM then return nil end
+    if x < middle - 5 then return 'left' elseif x >= middle + 5 then return 'right' end
+    return nil
+  end
+  --- An arm lifted, and the head moved by as much as the pose wants.
+  local posed = function(hx, hy, rule)
+    local frame = moved(back, function(x, y)
+      if y < HEAD then return hx, hy end
+      local arm = armOf(x, y)
+      if arm then return 0, rule and rule(arm) or 0 end
+      return 0, 0
+    end)
+    -- A head lifted leaves its chin where it was, so it stays joined to the neck.
+    if hy < 0 then
+      each(back, function(x, y, p)
+        if y == HEAD - 1 and pc.rgbaA(p) > 0 then frame:drawPixel(x, y, p) end
+      end)
+    end
+    return frame
+  end
+  local sipping = posed(1, 0, function(arm) return arm == 'right' and -8 or 0 end)
+  -- The mug, in the raised hand.
+  for my = 19, 23 do
+    for mx = 19, 23 do
+      local edge = my == 19 or my == 23 or mx == 19 or mx == 23
+      sipping:drawPixel(mx, my, edge and pc.rgba(58, 34, 18, 255) or pc.rgba(244, 234, 214, 255))
+    end
+  end
   local list = {
     cell,
     shifted(cell, math.floor(WH * 0.68), 0, 1),
@@ -185,11 +258,17 @@ for _, v in ipairs(variants) do
     back,
     typing(back, true),
     typing(back, false),
-    moved(back, function(_, y) return y < 23 and 1 or 0, 0 end),
+    posed(1, 0), -- glancing to one side
     stepping(back, true),
     stepping(back, false),
+    posed(-1, 0), -- and to the other
+    posed(0, 2, function() return -1 end), -- leaning in to the screen
+    posed(0, -1), -- looking up, thinking
+    posed(0, 1, function() return -10 end), -- stretching, hands behind the head
+    sipping,
+    posed(-1, 1, function(arm) return arm == 'left' and -9 or 0 end), -- scratching their head
   }
-  for _, frame in ipairs(list) do workerFrames[#workerFrames + 1] = frame end
+  for _, frame in ipairs(list) do workerFrames[#workerFrames + 1] = tidied(tidied(frame)) end
 end
 save('worker', workerFrames, 0)
 

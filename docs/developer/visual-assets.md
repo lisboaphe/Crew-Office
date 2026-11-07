@@ -29,7 +29,6 @@ and published under Apache-2.0 like the rest of the tree.
 
 | Asset | Where | What it is |
 |---|---|---|
-| Project logo and icon set | `assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico` | An isometric cutaway office in a rounded-hex silhouette. Cut from the scene's own render — the method is in [Developing on it](developing.md) |
 | Spot illustrations | `assets/airmail.svg`, `assets/arrivals.svg`, `assets/breather.svg`, `assets/curiosity.svg` | Hand-authored flat illustrations: a paper plane, a reception scene, a mug, a telescope |
 | UI theme | `assets/ui-theme.css` | Hand-authored CSS custom properties, with the project's own colour values |
 | In-house source glyphs | `src/ui/marks.js` — `cursorMark`, `testDataMark`, `museMark`, `plusMark` | Original geometry: a cursor chevron, a die, a laptop wearing headphones, a plus. Not any vendor's logo. Cursor's tile is deliberately an original glyph rather than Cursor's mark. The Muse glyph survives for the 3D name-tag and the debug log; the 2D chrome shows the portrait below |
@@ -133,6 +132,7 @@ Recorded so the question does not have to be re-asked.
 
 ## 7. Experiments, not cleared for release
 
+- **`assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico`** — the project's icon, supplied by its owner. Where the picture came from is not recorded, so its release basis has to be settled before a release.
 - **`assets/pixel-art/office/established/`** — the sprites the office shows, cut from the project's established-style reference sheets by `source/build-established-art.sh`. Those sheets' source is not recorded yet. `assets/` ships whole, so these reach every distribution once merged: record the source and add a row as described below first.
 
 ---

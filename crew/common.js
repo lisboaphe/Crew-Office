@@ -57,7 +57,7 @@ const COLOURS = ['#e07a5f', '#f15bb5', '#9b5de5', '#3d85c6', '#00bbf9', '#2a9d8f
 
 /** A row of colour swatches. Read the choice from the element's `.value`. */
 const CHARACTER_SHEET = '/assets/pixel-art/office/established/worker.png';
-const CHARACTER_FRAMES = 10; // each person's frames on the sheet
+const CHARACTER_FRAMES = 16; // each person's frames on the sheet
 const CHARACTER_NAMES = ['Sam', 'Kai', 'Bea', 'Noor', 'Rue', 'Sage'];
 
 /** A row of characters to choose from, drawn from the office's own sprites. Read `.value`. */

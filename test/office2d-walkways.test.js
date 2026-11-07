@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { findPath, isClear, isLineClear } from '../src/office2d/walkways.js';
 import { createAllocator } from '../src/office2d/allocation.js';
 import {
-  BREAK_FURNITURE, BREAK_SPOTS, WALL_H, WORKER_H, WORKER_W, placeFloor, routeTo, seatFeet, spotFeet, strollFrom, walkMapOf,
+  BREAK_FURNITURE, BREAK_SPOTS, WALL_H, WORKER_H, WORKER_W, arrivalRoute, placeFloor, routeTo, seatFeet, spotFeet, strollFrom, walkMapOf,
 } from '../src/office2d/floor-plan.js';
 
 const sizes = JSON.parse(readFileSync(new URL('../assets/pixel-art/office/established/sprites.json', import.meta.url)));
@@ -163,5 +163,22 @@ test('no standing furniture overlaps the shelf or the player\'s desk', () => {
         top.forEach((a, i) => top.slice(i + 1).forEach((b) => assert.ok(!overlaps(a, b), `${room.key}: ${JSON.stringify([a, b])}`)));
       }
     }
+  }
+});
+
+test('everyone can come in by the break room door, get a coffee and reach their desk', () => {
+  for (const [players, each] of LAYOUTS) {
+    const { bots, present } = team(players, each);
+    everySeat(createAllocator().sync(bots, present).floors, (seat) => {
+      const route = arrivalRoute(seat, sizes);
+      const label = `${players}x${each} ${seat.room.key} seat ${seat.index}`;
+      assert.ok(route, label);
+      const map = walkMapOf(seat.plan, sizes, seat);
+      for (const way of [route.path, route.home]) {
+        const feet = way.map((p) => ({ x: p.x + WORKER_W / 2, y: p.y + WORKER_H, through: p.through }));
+        feet.forEach((p, n) => { if (n && !p.through) assert.ok(isLineClear(feet[n - 1], p, map), `${label} leg ${n}`); });
+      }
+      assert.deepEqual(route.path.at(-1), route.home[0], 'the way to the desk starts at the coffee');
+    });
   }
 });

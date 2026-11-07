@@ -151,9 +151,8 @@ The visual identity follows the same distinction as Atlassian Design's
 [app logos](https://atlassian.design/foundations/logos) and
 [illustrations](https://atlassian.design/foundations/illustrations): a simple mark
 for recognition, with more expressive artwork where there is room for a story.
-The logo is the multicolour isometric office in `assets/logo.png`: blue and purple
-walls, an orange doorway and a green garden edge. Its PNG variants and favicon are
-committed alongside it. Keep the wordmark as native text, and leave the transparent
+The logo is the pixel-art team around a desk in `assets/logo.png`, in a stepped, rounded
+frame. Its PNG variants and favicon are exported from it and committed alongside it. Keep the wordmark as native text, and leave the transparent
 mark free of an extra background tile or shadow.
 
 Interface colours are Crew Office's own palette of oak, teal, sage, terracotta and cream,

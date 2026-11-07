@@ -8,7 +8,7 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 
 | Sprite | What it is | Animation |
 |---|---|---|
-| `worker` | Two characters and four more heads of hair, six in all, each with ten poses: standing, breathing and striding, and from behind for sitting, typing and walking away. Tops take the bot's colour when drawn | Breathing, quicker while working, and two steps of a walk |
+| `worker` | Two characters and four more heads of hair, six in all, each with sixteen poses: standing, breathing and striding, and from behind for typing, walking away, glancing around, leaning in, thinking, stretching, sipping and scratching their head. Tops take the bot's colour when drawn | Breathing, quicker while working, and two steps of a walk |
 | `desk-active-*` | A workstation in use, with one of six programs: `code`, `dashboard`, `chart`, `chat`, `terminal` or `landscape`. A bot keeps its own | Each program runs on the screen |
 | `desk-idle` | Its bot is resting, screen dimmed | None |
 | `desk-standby` | Free for the next bot, drawn faded | None |
