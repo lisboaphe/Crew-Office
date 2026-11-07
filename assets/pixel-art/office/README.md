@@ -34,7 +34,7 @@ Idle agents sometimes visit the break area, and two there may show a small bubbl
 
 ## Changing them
 
-The art comes from the project's reference sheets: `office-modular-sprites-established-style.png`, `office-props-sheet.png` and `office-floor-oak.png`. To rebuild it, from this folder:
+The art comes from the reference sheets the project's owner made in Aseprite: `office-modular-sprites-established-style.png`, `office-props-sheet.png`, `office-floor-oak.png`, `office-break-nook-props.png` and `office-scene-refined.png`. To rebuild it, from this folder:
 
 ```bash
 sh source/build-established-art.sh <folder holding those sheets>

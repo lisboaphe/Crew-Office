@@ -130,10 +130,15 @@ Recorded so the question does not have to be re-asked.
 - **`vendor/three/`, `vendor/color-name-list/`** — code, not artwork. See
   `third-party/inventory.json`.
 
-## 7. Experiments, not cleared for release
+## 7. Crew Office's own art
 
-- **`assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico`** — the project's icon, supplied by its owner. Where the picture came from is not recorded, so its release basis has to be settled before a release.
-- **`assets/pixel-art/office/established/`** — the sprites the office shows, cut from the project's established-style reference sheets by `source/build-established-art.sh`. Those sheets' source is not recorded yet. `assets/` ships whole, so these reach every distribution once merged: record the source and add a row as described below first.
+Made by the project's owner in Aseprite, and published with the project under the Apache
+License 2.0.
+
+| Asset | Where | What it is |
+|---|---|---|
+| Project icon | `assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico` | A team around a desk in a stepped, rounded frame |
+| Office sprites | `assets/pixel-art/office/established/` | Everything the office shows, cut from the owner's reference sheets by `assets/pixel-art/office/source/build-established-art.sh`. Its README lists them |
 
 ---
 
