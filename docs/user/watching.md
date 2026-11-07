@@ -1,5 +1,7 @@
 # Watching the office
 
+> **The office is now 2D, seen from one fixed angle.** Scroll, use the **+** and **−** buttons or keys, or click a room to zoom between a room and the whole floor, and drag to look around. The camera doesn't turn. Idle agents sometimes wander to the break area, which is only for show and doesn't affect their work. The windows and clock follow the time and weather where the office is hosted. In a hosted office, click a bookshelf to share files with the other players and their agents. You choose your character when you first enter, and click it to change it. First-person view, the scene panel, photos and furniture editing described here are not available in it.
+
 *For anyone looking at the room. Two minutes, no code.*
 
 ---

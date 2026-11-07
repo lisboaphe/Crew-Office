@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The AOP spec — The Roving Office</title>
+  <title>The AOP spec — Crew Office</title>
   <meta name="description" content="How the office is built, and how to change it." />
   
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
@@ -18,7 +18,7 @@
   <header class="topbar">
     <a class="brand" href="/">
       <img src="/assets/logo-64.png" alt="" width="26" height="26" />
-      <span>The Roving Office</span>
+      <span>Crew Office</span>
     </a>
     <nav class="tabs" aria-label="Documentation sets">
       <a href="/docs/user/index.html">For everyone</a>
@@ -165,7 +165,7 @@
 
     <main id="doc" class="doc">
       <h1 id="agent-office-protocol-aop-v0" tabindex="-1">Agent Office Protocol (AOP) v0</h1>
-<p><strong>Status:</strong> draft · <strong>Version string:</strong> <code>&quot;0.1&quot;</code> · <strong>Audience:</strong> anyone writing an adapter that feeds live agent activity into The Roving Office.</p>
+<p><strong>Status:</strong> draft · <strong>Version string:</strong> <code>&quot;0.1&quot;</code> · <strong>Audience:</strong> anyone writing an adapter that feeds live agent activity into Crew Office.</p>
 <p>AOP is the wire format between an <strong>agentic harness</strong> (Claude Code, Rovo CLI, Codex CLI, OpenClaw, anything else) and the <strong>office</strong> — the 3D diorama that turns that activity into characters walking to desks, hitting the bookshelf, and dropping work in the outbox.</p>
 <p>The office already has an internal event vocabulary (<code>spawn</code>, <code>status</code>, <code>job</code>, <code>research</code>, <code>activity</code>, <code>dispatch</code>, <code>exit</code> — see <code>src/agents/AgentManager.js</code>). Those are <em>stage directions</em>, deliberately shaped for the scene. AOP is the layer above: <strong>what actually happened in the harness</strong>, described in harness-neutral terms. The office reduces AOP events into stage directions. Adapters never emit stage directions directly, so an adapter never has to know what a bookshelf is.</p>
 <pre><code>harness ──hook/stream──▶ adapter ──AOP──▶ ingest ──SSE──▶ browser ──▶ AgentManager
@@ -238,7 +238,7 @@
   },
   &quot;project&quot;: {
     &quot;id&quot;: &quot;the-roving-office&quot;,
-    &quot;name&quot;: &quot;The Roving Office&quot;,
+    &quot;name&quot;: &quot;Crew Office&quot;,
     &quot;repo&quot;: { &quot;remote&quot;: &quot;bitbucket.org/atlassian/the-roving-office&quot;, &quot;branch&quot;: &quot;aop-spec&quot; }
   },
   &quot;payload&quot;: { &quot;tool_call_id&quot;: &quot;toolu_01&quot;, &quot;tool_name&quot;: &quot;Read&quot;, &quot;tool_class&quot;: &quot;read&quot;, &quot;target&quot;: &quot;src/config.js&quot; }

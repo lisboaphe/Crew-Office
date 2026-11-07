@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Visual assets and their rights — The Roving Office</title>
+  <title>Visual assets and their rights — Crew Office</title>
   <meta name="description" content="How the office is built, and how to change it." />
   
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
@@ -18,7 +18,7 @@
   <header class="topbar">
     <a class="brand" href="/">
       <img src="/assets/logo-64.png" alt="" width="26" height="26" />
-      <span>The Roving Office</span>
+      <span>Crew Office</span>
     </a>
     <nav class="tabs" aria-label="Documentation sets">
       <a href="/docs/user/index.html">For everyone</a>
@@ -165,7 +165,7 @@
 
     <main id="doc" class="doc">
       <h1 id="visual-assets-source-and-release-basis" tabindex="-1">Visual assets: source and release basis</h1>
-<p>Every visual asset that ships with The Roving Office, where it came from, and on what
+<p>Every visual asset that ships with Crew Office, where it came from, and on what
 basis it is published. Some of them are other companies' brand assets that this project's
 code licence does not and cannot cover; those are named again in
 <a href="https://github.com/atlassian-labs/roving-office/blob/main/NOTICE"><code>NOTICE</code></a>, which is the short, legally operative version. This page is the
@@ -196,11 +196,6 @@ and published under Apache-2.0 like the rest of the tree.</p>
 </thead>
 <tbody>
 <tr>
-<td>Project logo and icon set</td>
-<td><code>assets/logo.png</code>, <code>assets/logo-256.png</code>, <code>assets/logo-64.png</code>, <code>assets/icon-512.png</code>, <code>assets/icon-192.png</code>, <code>assets/apple-touch-icon.png</code>, <code>favicon.ico</code></td>
-<td>An isometric cutaway office in a rounded-hex silhouette. Cut from the scene's own render — the method is in <a href="developing.html">Developing on it</a></td>
-</tr>
-<tr>
 <td>Spot illustrations</td>
 <td><code>assets/airmail.svg</code>, <code>assets/arrivals.svg</code>, <code>assets/breather.svg</code>, <code>assets/curiosity.svg</code></td>
 <td>Hand-authored flat illustrations: a paper plane, a reception scene, a mug, a telescope</td>
@@ -208,7 +203,7 @@ and published under Apache-2.0 like the rest of the tree.</p>
 <tr>
 <td>UI theme</td>
 <td><code>assets/ui-theme.css</code></td>
-<td>Hand-authored CSS custom properties. Its colour values come from <code>@atlaskit/tokens</code> — see §4</td>
+<td>Hand-authored CSS custom properties, with the project's own colour values</td>
 </tr>
 <tr>
 <td>In-house source glyphs</td>
@@ -355,12 +350,6 @@ UI and the documentation to say which agent an office can listen to, and nothing
 <td>JetBrains Mono 2.304</td>
 <td><strong>OFL-1.1</strong>. <a href="https://github.com/atlassian-labs/roving-office/blob/main/vendor/jetbrains-mono/"><code>vendor/jetbrains-mono/</code></a></td>
 </tr>
-<tr>
-<td>Atlassian Design System tokens</td>
-<td>colour values in <code>assets/ui-theme.css</code></td>
-<td><code>@atlaskit/tokens</code> 16.11.3</td>
-<td><strong>Apache-2.0</strong>. Nothing from the package is bundled — only its colour values were transcribed. <a href="https://github.com/atlassian-labs/roving-office/blob/main/vendor/atlaskit-tokens/"><code>vendor/atlaskit-tokens/</code></a></td>
-</tr>
 </tbody>
 </table>
 <h2 id="5-images-that-reproduce-a-mark" tabindex="-1">5. Images that reproduce a mark</h2>
@@ -411,6 +400,11 @@ own office. Not a project asset; covered by the hosted service's own terms.</li>
 <li><strong><code>vendor/three/</code>, <code>vendor/color-name-list/</code></strong> — code, not artwork. See
 <code>third-party/inventory.json</code>.</li>
 </ul>
+<h2 id="7-experiments-not-cleared-for-release" tabindex="-1">7. Experiments, not cleared for release</h2>
+<ul>
+<li><strong><code>assets/logo.png</code>, <code>assets/logo-256.png</code>, <code>assets/logo-64.png</code>, <code>assets/icon-512.png</code>, <code>assets/icon-192.png</code>, <code>assets/apple-touch-icon.png</code>, <code>favicon.ico</code></strong> — the project's icon, supplied by its owner. Where the picture came from is not recorded, so its release basis has to be settled before a release.</li>
+<li><strong><code>assets/pixel-art/office/established/</code></strong> — the sprites the office shows, cut from the project's established-style reference sheets by <code>source/build-established-art.sh</code>. Those sheets' source is not recorded yet. <code>assets/</code> ships whole, so these reach every distribution once merged: record the source and add a row as described below first.</li>
+</ul>
 <hr>
 <h2 id="adding-or-changing-a-visual-asset" tabindex="-1">Adding or changing a visual asset</h2>
 <ol>
@@ -445,6 +439,7 @@ for a new one.</li>
 <li><a href="#4-third-party-non-artwork-with-a-notice-obligation">4. Third-party non-artwork with a notice obligation</a></li>
 <li><a href="#5-images-that-reproduce-a-mark">5. Images that reproduce a mark</a></li>
 <li><a href="#6-not-shipped">6. Not shipped</a></li>
+<li><a href="#7-experiments-not-cleared-for-release">7. Experiments, not cleared for release</a></li>
 <li><a href="#adding-or-changing-a-visual-asset">Adding or changing a visual asset</a></li></ul></nav>
     </aside>
   </div>

@@ -157,21 +157,7 @@ One thing about review, so it is not a surprise: a pull request that changes beh
 without changing the documentation will be sent back for the doc rather than merged and
 followed up.
 
-## Sign it
-
-Atlassian requires contributors to sign a Contributor License Agreement, known as
-a CLA. It records that you are entitled to contribute the code, documentation or
-translation you are offering, and that you are willing to have it used in
-distributions and derivative works (or willing to transfer ownership). It is a
-one-off: sign once and every later contribution is covered.
-
-**A pull request cannot be accepted before the CLA is signed**, so it is worth
-doing before you open one rather than after. Follow whichever link applies —
-the corporate CLA if you are contributing as a member of an organisation, the
-individual CLA if you are contributing as yourself:
-
-- [CLA for corporate contributors](https://opensource.atlassian.com/corporate)
-- [CLA for individuals](https://opensource.atlassian.com/individual)
+## Licence
 
 Contributions are governed by the [Code of Conduct](CODE_OF_CONDUCT.md), and by
 the Apache 2.0 [LICENSE](LICENSE) the project ships under: what you contribute is

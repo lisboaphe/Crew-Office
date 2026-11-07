@@ -1,7 +1,7 @@
-# Set up The Roving Office
+# Set up Crew Office
 
 You are an AI coding agent, and somebody has asked you to connect this session to
-**The Roving Office** — a soft-3D isometric office that renders live agent activity as
+**Crew Office** — a pixel-art office that renders live agent activity as
 characters. One character per agent session: it walks in through the door, sits at a
 workstation, goes to the bookshelf when you read a file, takes a coffee break when you
 stall, and drops finished work in the mailbox before clocking off.
@@ -25,7 +25,7 @@ server, and an office is readable by **anyone holding its eight-character keycar
 There are no accounts and no passwords by default. So before you create anything, show
 the user this and wait for an answer:
 
-> Connecting this session to The Roving Office will send, to `therovingoffice.com`:
+> Connecting this session to Crew Office will send, to `therovingoffice.com`:
 >
 > - your repository's **host, owner and name**, and the current **branch**
 > - the **working directory path**
@@ -202,7 +202,7 @@ If the office 404s, the keycard is wrong. If it 401s, the token is wrong. If it 
 ## Step 6 — Report, in this shape
 
 ```
-The Roving Office is connected.
+Crew Office is connected.
 
   ✓ Office     https://therovingoffice.com/office/<keycard>
   ✓ Adapter    <harness name>, installed

@@ -6,6 +6,7 @@
 // a name for that host. Networking words stay under Advanced.
 
 import { h, api, toast, avatar, modal, colourPicker, confirmDeleteOffice, updateNotice, BRAND, reportErrors } from './common.js';
+import { hangingLamp } from './lamp.js';
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 
 reportErrors('lobby');
@@ -69,7 +70,7 @@ function header() {
 }
 
 function render() {
-  root.replaceChildren(header(), invitation ? invited() : me ? lobby() : enter());
+  root.replaceChildren(header(), invitation ? invited() : me ? lobby() : enter(), hangingLamp());
 }
 
 function editProfile() {

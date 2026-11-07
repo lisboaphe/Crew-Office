@@ -1,4 +1,4 @@
-// Tiny zero-dependency static file server for The Roving Office, plus the office
+// Tiny zero-dependency static file server for Crew Office, plus the office
 // registry and the Agent Office Protocol receiver (docs/developer/protocol/aop-spec.md).
 //
 // Usage: node server.cjs [port] [--office <keycard>]
@@ -2208,7 +2208,7 @@ async function main() {
 
   publishEndpoint();
   crew.start();
-  console.log(`The Roving Office running at http://localhost:${PORT}`);
+  console.log(`Crew Office running at http://localhost:${PORT}`);
   console.log(`Multiplayer lobby (Host Office / Join Office) at http://localhost:${PORT}/crew`);
   if (HOST !== '127.0.0.1') for (const a of require('./lib/crew/lan.cjs').lanAddresses()) console.log(`  friends on your network join at http://${a}:${PORT}/crew`);
   console.log(`  crew data and crash logs in ${crew.dataDir}`);

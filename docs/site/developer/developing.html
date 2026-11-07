@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Developing on it — The Roving Office</title>
+  <title>Developing on it — Crew Office</title>
   <meta name="description" content="How the office is built, and how to change it." />
   
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
@@ -18,7 +18,7 @@
   <header class="topbar">
     <a class="brand" href="/">
       <img src="/assets/logo-64.png" alt="" width="26" height="26" />
-      <span>The Roving Office</span>
+      <span>Crew Office</span>
     </a>
     <nav class="tabs" aria-label="Documentation sets">
       <a href="/docs/user/index.html">For everyone</a>
@@ -244,8 +244,8 @@ npm run map -- --theme=tower    # just one, while you're working on it
 </code></pre>
 <p>The frame is fitted to whatever the theme actually built (the same reasoning as <code>prop-portrait.html</code>'s subject-fitted framing, applied to a whole exterior), rather than to the room: a skyscraper's neighbouring towers run to roughly 150 units across, a street to roughly 80, and hand-carrying both numbers — and a third the day a fifth theme wants something else — is exactly the kind of thing worth deriving instead. The one thing excluded by hand is the 220x220 backdrop ground plane <code>buildExterior()</code> always lays down so there's never a visible void under the scene: real content tops out at a few dozen units in any one mesh, so anything wider <em>and</em> deeper than 100 units is that plane, not something to frame. The settings are captioned in <a href="../user/buildings.html#the-cities-from-above">buildings and themes → user docs</a>.</p>
 <h2 id="where-to-make-a-change" tabindex="-1">Where to make a change</h2>
-<p>Reception, the app and the documentation share <code>assets/ui-theme.css</code>: warm white
-surfaces, dark ink, blue actions and semantic status colours. Eleventy copies that
+<p>Reception, the app and the documentation share <code>assets/ui-theme.css</code>: warm cream
+surfaces, dark brown ink, teal actions and semantic status colours. Eleventy copies that
 stylesheet and the bundled fonts into the documentation site. Prefer its tokens to
 hard-coded panel colours so dialogs and documentation stay consistent. Interactive
 accents use blue; body text and metadata use ink and muted tokens. Paper and furniture
@@ -278,13 +278,11 @@ reverts.</p>
 <a href="https://atlassian.design/foundations/logos">app logos</a> and
 <a href="https://atlassian.design/foundations/illustrations">illustrations</a>: a simple mark
 for recognition, with more expressive artwork where there is room for a story.
-The logo is the multicolour isometric office in <code>assets/logo.png</code>: blue and purple
-walls, an orange doorway and a green garden edge. Its PNG variants and favicon are
-committed alongside it. Keep the wordmark as native text, and leave the transparent
+The logo is the pixel-art team around a desk in <code>assets/logo.png</code>, in a stepped, rounded
+frame. Its PNG variants and favicon are exported from it and committed alongside it. Keep the wordmark as native text, and leave the transparent
 mark free of an extra background tile or shadow.</p>
-<p>Interface colours use the brand-refresh palette published in <code>@atlaskit/tokens</code>
-16.11.3: neutral white/grey surfaces, Blue700 actions, and Green200/Green800 for
-layout import feedback. The office's material palettes remain expressive and separate
+<p>Interface colours are Crew Office's own palette of oak, teal, sage, terracotta and cream,
+with pixel-art panels: square corners, hard bevels and no blur. Keep body text at 4.5:1 contrast or better in both themes. The office's material palettes remain expressive and separate
 from the UI. Inter is the main face; JetBrains Mono is for numeric readouts and code.
 Shared definitions live in <code>assets/ui-theme.css</code>.
 Reception uses the real animated vignette with flat sunshine and leaf shapes.

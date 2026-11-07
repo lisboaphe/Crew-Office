@@ -279,29 +279,6 @@
       "review": "Declared by assets/ui-theme.css; Eleventy copies the font and the licence into docs/site/assets. Vendored as the upstream variable font subset to latin and converted to WOFF2, which changes neither the outlines nor the family name; vendor/jetbrains-mono/README.md records the exact command. Replaces the Atlassian Mono entry that stood here as NOASSERTION."
     },
     {
-      "id": "atlaskit-tokens",
-      "name": "Atlassian Design System tokens",
-      "version": "16.11.3",
-      "license": "Apache-2.0",
-      "source": "https://registry.npmjs.org/@atlaskit/tokens/-/tokens-16.11.3.tgz (package/LICENSE)",
-      "modification": "nothing from the package is installed or bundled; only the palette-brand-refresh colour values were transcribed into the hand-authored assets/ui-theme.css. See vendor/atlaskit-tokens/README.md.",
-      "paths": [
-        "assets/ui-theme.css",
-        "docs/site/assets/ui-theme.css"
-      ],
-      "licenseFiles": [
-        "vendor/atlaskit-tokens/LICENSE"
-      ],
-      "distributions": [
-        "source",
-        "claude-marketplace",
-        "hosted-app",
-        "docs-site"
-      ],
-      "runtimeNotice": true,
-      "review": "Recorded when the visual-asset provenance was written up: assets/ui-theme.css has always named this package in a source comment as the origin of its ~50 colour values, but the licence was not carried. The registry declares Apache-2.0 for this version. Covers the tokens package only, and is not a licence to any Atlassian brand asset."
-    },
-    {
       "id": "project-artwork",
       "name": "Project logo, illustrations, UI theme and documentation images",
       "version": null,
@@ -329,7 +306,7 @@
         "hosted-app",
         "docs-site"
       ],
-      "review": "Project assets are tracked here to avoid mistaking all assets for the two vendored MIT libraries. developing.md describes the original project illustration/logo direction and Atlassian-inspired theme. Ownership, project license and Brand verification are separate release gates, and assets/logo-256.png is the only tracked component inside the published plugin artifacts, so that gate applies to them too. Documentation screenshots and portraits under docs/images are rendered from the scene and can incorporate the third-party marks listed above; review and regenerate them with any asset replacement. The four that carry a mark are recorded against the components they belong to rather than here: docs/images/panels/source-picker.png (reproduces all five picker marks at once) is listed under project-artwork below, and docs/images/objects/{aceLogo,rovoLogo,kanbanBoard}.png under atlassian-ace, atlassian-rovo-standee and atlassian-jira-mark. Note these object portraits are also runtime app assets, not documentation only: src/editor/kit-menu.js fetches them live for the add-item menu."
+      "review": "The logo and icon set were supplied by the project's owner, and their source is not yet recorded. Project assets are tracked here to avoid mistaking all assets for the two vendored MIT libraries. developing.md describes the original project illustration/logo direction and Atlassian-inspired theme. Ownership, project license and Brand verification are separate release gates, and assets/logo-256.png is the only tracked component inside the published plugin artifacts, so that gate applies to them too. Documentation screenshots and portraits under docs/images are rendered from the scene and can incorporate the third-party marks listed above; review and regenerate them with any asset replacement. The four that carry a mark are recorded against the components they belong to rather than here: docs/images/panels/source-picker.png (reproduces all five picker marks at once) is listed under project-artwork below, and docs/images/objects/{aceLogo,rovoLogo,kanbanBoard}.png under atlassian-ace, atlassian-rovo-standee and atlassian-jira-mark. Note these object portraits are also runtime app assets, not documentation only: src/editor/kit-menu.js fetches them live for the add-item menu."
     },
     {
       "id": "node-container-runtime",

@@ -1,13 +1,15 @@
-// The way around the office: a slim glass dock on the left edge that opens into a sidebar.
+// The way around the office: a slim dock on the left edge, where each button opens its own menu.
 //
-// Hovering opens it, after a short pause so that passing the mouse over it on the way to the office
-// does nothing. Once open it stays open until something says otherwise: a click outside, Esc, or
-// choosing a destination. Moving the mouse away is not one of those, on purpose. On a touch screen,
-// or from the keyboard, the same buttons open it by pressing them.
+// Hovering shows it, after a short pause so that passing the mouse over it on the way to the office
+// does nothing, and moving the mouse away puts it back. Pressing a button works like the bell: press
+// to open, press again to close, and opened that way it stays until then, or a click outside, or Esc,
+// or choosing a destination. A menu whose destination is already open on screen closes that too, so
+// nothing here needs a close button. On a touch screen, or from the keyboard, pressing is the only way.
 
 import { h, icon } from './common.js';
 
 const HOVER_MS = 110;
+const LEAVE_MS = 350; // long enough to cross the gap to the menu, or to slip off it and back
 
 /**
  * @param groups  [{ key, label, icon, items: [{ key, label, icon, hint? }] }]
@@ -19,45 +21,69 @@ export function createNav({ groups, onGo, current, badgeOf = () => 0 }) {
   let isOpen = false;
   let openGroup = groups[0].key;
   let hoverTimer = null;
+  let leaveTimer = null;
+  let pressed = false; // opened by pressing rather than by hovering, so it stays open
   let trigger = null;
 
   const panel = h('div.cr-nav-panel', { id: 'cr-nav-panel', role: 'menu', 'aria-label': 'Go to', inert: true });
   const dockButtons = groups.map((g) => {
     const b = h('button.cr-nav-dock-btn', {
       type: 'button', 'aria-label': g.label, 'aria-haspopup': 'menu', 'aria-expanded': 'false', 'aria-controls': 'cr-nav-panel', 'data-tip': g.label, 'data-group': g.key,
-      onclick: () => { trigger = b; if (isOpen && openGroup === g.key) close(true); else open(g.key, true); },
-      onkeydown: (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); trigger = b; open(g.key, true); } },
+      onclick: () => {
+        trigger = b;
+        const here = current();
+        // What this menu leads to is what is open, so pressing it again puts that away as well.
+        if (here !== 'office3d' && g.items.some((it) => it.key === here)) {
+          close(true);
+          onGo(here);
+        } else if (isOpen && openGroup === g.key) {
+          close(true);
+        } else {
+          pressed = true;
+          open(g.key, true);
+        }
+      },
+      onkeydown: (e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); trigger = b; pressed = true; open(g.key, true); } },
     }, icon(g.icon));
     // Touch has no hover: a tap is a click, and must not arrive at an already-open group and shut it.
     b.addEventListener('pointerenter', (e) => {
       if (e.pointerType === 'touch') return;
       clearTimeout(hoverTimer);
-      hoverTimer = setTimeout(() => { trigger = b; open(g.key); }, HOVER_MS);
+      hoverTimer = setTimeout(() => {
+        trigger = b;
+        if (openGroup !== g.key) pressed = false;
+        open(g.key);
+      }, HOVER_MS);
     });
     b.addEventListener('pointerleave', () => clearTimeout(hoverTimer));
     return b;
   });
   const dock = h('div.cr-nav-dock', ...dockButtons);
   const el = h('nav.cr.cr-nav', { 'aria-label': 'Main navigation' }, dock, panel);
+  el.addEventListener('pointerenter', () => clearTimeout(leaveTimer));
+  el.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'touch') return;
+    clearTimeout(leaveTimer);
+    leaveTimer = setTimeout(() => { if (!pressed) close(false); }, LEAVE_MS);
+  });
 
   function draw() {
     const here = current();
+    const group = groups.find((g) => g.key === openGroup) ?? groups[0];
+    // Only the section being pointed at, beside the button that opened it.
+    const button = dockButtons.find((b) => b.dataset.group === group.key);
+    panel.style.marginTop = `${button.offsetTop - 6}px`;
     panel.replaceChildren(
-      h('div.cr-nav-head', h('b', 'Go to'), h('button.btn.small', { type: 'button', 'aria-label': 'Close navigation', onclick: () => close(true) }, '✕')),
-      ...groups.map((g) => {
-        const on = g.key === openGroup;
-        return h('section.cr-nav-group', { class: on ? 'on' : '' },
-          h('button.cr-nav-group-head', { type: 'button', 'aria-expanded': on ? 'true' : 'false', onclick: () => { openGroup = on ? null : g.key; draw(); syncDock(); } },
-            icon(g.icon), h('span.grow', g.label), h('span.cr-nav-caret', { 'aria-hidden': 'true' }, '›')),
-          h('div.cr-nav-items', { inert: on ? null : true },
-            h('div', ...g.items.map((it) => {
-              const n = badgeOf(it.key);
-              return h('button.cr-nav-item', {
-                type: 'button', role: 'menuitem', class: here === it.key ? 'on' : '', 'aria-current': here === it.key ? 'page' : null, title: it.hint ?? null,
-                onclick: () => { close(false); onGo(it.key); },
-              }, icon(it.icon), h('span.grow', it.label), n ? h('span.cr-nav-badge', n) : null);
-            }))));
-      }));
+      h('div.cr-nav-head', h('b', group.label)),
+      h('section.cr-nav-group.on',
+        h('div.cr-nav-items',
+          h('div', ...group.items.map((it) => {
+            const n = badgeOf(it.key);
+            return h('button.cr-nav-item', {
+              type: 'button', role: 'menuitem', class: here === it.key ? 'on' : '', 'aria-current': here === it.key ? 'page' : null, title: it.hint ?? null,
+              onclick: () => { close(false); onGo(it.key); },
+            }, icon(it.icon), h('span.grow', it.label), n ? h('span.cr-nav-badge', n) : null);
+          })))));
   }
 
   const syncDock = () => {
@@ -84,8 +110,10 @@ export function createNav({ groups, onGo, current, badgeOf = () => 0 }) {
 
   function close(returnFocus) {
     clearTimeout(hoverTimer);
+    clearTimeout(leaveTimer);
     if (!isOpen) return;
     isOpen = false;
+    pressed = false;
     el.classList.remove('open');
     panel.inert = true;
     syncDock();

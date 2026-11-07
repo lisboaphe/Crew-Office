@@ -1,5 +1,7 @@
 # Rearranging the furniture
 
+> **Not available right now.** The office is now 2D, drawn from one fixed angle, and furniture can't be dragged in it yet. Saved layouts still apply.
+
 *Press `E`, drag the desks about, and watch everybody's route bend round them.*
 
 The office keeps running while you do it. Nothing is paused — agents go on walking,

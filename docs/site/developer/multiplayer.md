@@ -301,6 +301,10 @@ to every installed copy.** So protect the branch, and keep the tests in the work
 Set `CREW_UPDATE_API` to point the updater at a stand-in for GitHub. `deploy.yml` is off unless
 the repository variable `DEPLOY_TO_FLY` is `true`.
 
+## The host's time and weather
+
+`GET /api/crew/host-conditions` gives the host's time and the weather, so the office's clock and windows match the host's computer for everyone looking at it. `lib/crew/host-conditions.cjs` asks Open-Meteo, at most every half hour, with a location rounded to one decimal place and nothing else. The location is `CREW_WEATHER_LAT` and `CREW_WEATHER_LON`, or a guess from the time zone on systems with a zone table. Without one, with `CREW_WEATHER=off`, or if the service is down, the window shows a clear sky.
+
 ## Known limits
 
 - Updating inside the app is Windows only; macOS and Linux get a link to the release.

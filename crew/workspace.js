@@ -126,7 +126,25 @@ function linkContract(p, ctx) {
 export function filesTab(body, ctx) {
   const { S, roomId, ui, render } = ctx;
   const p = S.projects.find((x) => x.id === ui.projectId) ?? S.projects[0];
-  if (!p) { body.append(h('p.hint', 'No projects yet.')); return; }
+  if (!p) {
+    // Files live in a project, and a project needs one of your agents to manage it. So the first
+    // share either makes that project or says plainly what it is waiting for.
+    const manager = S.agents.find((a) => a.ownerId === S.me.id);
+    if (!manager) {
+      body.append(h('p.hint', 'Files are shared through a project, and a project is run by one of your agents. Add an agent first, then come back to this bookshelf.'),
+        h('div.row', h('button.btn.primary', { onclick: () => { ui.tab = 'agents'; render(); } }, 'Add an agent')));
+      return;
+    }
+    const start = async () => {
+      try {
+        const { project } = await api('POST', `/api/crew/rooms/${roomId}/projects`, { name: 'Shared files', goal: 'A place to share files with the other players and their agents.', managerAgentId: manager.id });
+        if (!S.projects.some((x) => x.id === project.id)) S.projects.push(project);
+        render();
+      } catch (e) { toast(e.message); }
+    };
+    body.append(h('p.hint', `Files are shared through a project, and this office has none yet. ${manager.name} can run one for you.`), h('div.row', h('button.btn.primary', { onclick: start }, 'Create a shared space')));
+    return;
+  }
   ui.projectId = p.id;
   const U = `/api/crew/rooms/${roomId}/projects/${p.id}`;
   const load = () => api('GET', `${U}/blobs`).then((d) => { ui.blobs = { projectId: p.id, ...d }; render(); }).catch((e) => toast(e.message));

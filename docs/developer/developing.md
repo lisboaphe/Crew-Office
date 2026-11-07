@@ -114,8 +114,8 @@ The frame is fitted to whatever the theme actually built (the same reasoning as 
 
 ## Where to make a change
 
-Reception, the app and the documentation share `assets/ui-theme.css`: warm white
-surfaces, dark ink, blue actions and semantic status colours. Eleventy copies that
+Reception, the app and the documentation share `assets/ui-theme.css`: warm cream
+surfaces, dark brown ink, teal actions and semantic status colours. Eleventy copies that
 stylesheet and the bundled fonts into the documentation site. Prefer its tokens to
 hard-coded panel colours so dialogs and documentation stay consistent. Interactive
 accents use blue; body text and metadata use ink and muted tokens. Paper and furniture
@@ -151,14 +151,12 @@ The visual identity follows the same distinction as Atlassian Design's
 [app logos](https://atlassian.design/foundations/logos) and
 [illustrations](https://atlassian.design/foundations/illustrations): a simple mark
 for recognition, with more expressive artwork where there is room for a story.
-The logo is the multicolour isometric office in `assets/logo.png`: blue and purple
-walls, an orange doorway and a green garden edge. Its PNG variants and favicon are
-committed alongside it. Keep the wordmark as native text, and leave the transparent
+The logo is the pixel-art team around a desk in `assets/logo.png`, in a stepped, rounded
+frame. Its PNG variants and favicon are exported from it and committed alongside it. Keep the wordmark as native text, and leave the transparent
 mark free of an extra background tile or shadow.
 
-Interface colours use the brand-refresh palette published in `@atlaskit/tokens`
-16.11.3: neutral white/grey surfaces, Blue700 actions, and Green200/Green800 for
-layout import feedback. The office's material palettes remain expressive and separate
+Interface colours are Crew Office's own palette of oak, teal, sage, terracotta and cream,
+with pixel-art panels: square corners, hard bevels and no blur. Keep body text at 4.5:1 contrast or better in both themes. The office's material palettes remain expressive and separate
 from the UI. Inter is the main face; JetBrains Mono is for numeric readouts and code.
 Shared definitions live in `assets/ui-theme.css`.
 Reception uses the real animated vignette with flat sunshine and leaf shapes.

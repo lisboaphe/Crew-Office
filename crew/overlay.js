@@ -5,7 +5,7 @@
 // State comes from one snapshot plus a stream of events; a reconnect that missed too much
 // is told to resync and fetches the snapshot again, so no state lives only in the page.
 
-import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteOffice, updateNotice, BRAND, reportErrors } from './common.js';
+import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteOffice, updateNotice, BRAND, reportErrors, characterPicker } from './common.js';
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 import { gitTab, filesTab, rulesTab } from './workspace.js';
 import { createAgentEditor } from './agent-editor.js';
@@ -50,7 +50,9 @@ async function boot() {
   ui.ownerOfComputer = (await api('GET', '/api/crew/this-computer').catch(() => ({}))).owner === true;
   buildChrome();
   connect();
-  tutorialOnFirstVisit({ showMe: tourShowMe });
+  // Choosing who you are comes first, then the tour.
+  const chosen = S.me && S.me.character == null ? chooseCharacter({ first: true }) : Promise.resolve();
+  chosen.then(() => tutorialOnFirstVisit({ showMe: tourShowMe }));
   window.addEventListener('office:select', (e) => {
     const id = String(e.detail?.id ?? '');
     const m = id.match(/#crew:(agt_[A-Za-z0-9_-]+)$/);
@@ -143,6 +145,19 @@ function buildChrome() {
   ui.orchestrator = createOrchestrator(editorContext());
   ui.editor = createAgentEditor(editorContext());
   ui.security = createSecurityCenter(editorContext());
+  // The bookshelf in each room of the office opens this. It is the same Files page as the menu's.
+  window.crewOpenFiles = () => openDash('files');
+  // Who the office should show as here, and how to change your own character.
+  window.crewPlayers = () => S.members
+    .filter((m) => m.online || m.userId === S.me?.id)
+    .map((m) => ({ id: m.userId, name: m.displayName, character: m.userId === S.me?.id ? S.me.character ?? m.character : m.character }));
+  // Every agent in the office, including those whose worker is not running yet: they have a desk too.
+  window.crewAgents = () => S.agents.map((a) => ({ id: a.id, name: a.name, color: a.color, ownerId: a.ownerId, ownerName: a.ownerName }));
+  window.crewChooseCharacter = (userId) => {
+    if (userId !== S.me?.id) return false;
+    chooseCharacter();
+    return true;
+  };
   ui.knowledge = createKnowledge({ ...editorContext(), setTab: (tab) => { ui.tab = tab; render(); } });
   ui.nav = createNav({
     groups: NAV,
@@ -151,6 +166,12 @@ function buildChrome() {
     onGo: goTo,
   });
   document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.nav.el, ui.dash, ui.side, ui.editor.el);
+  window.addEventListener('resize', fitTopBars);
+  // The office's own bar fills in as its parts load, and changes as offices do.
+  const titleBar = document.getElementById('title-bar');
+  const refit = new ResizeObserver(() => requestAnimationFrame(fitTopBars));
+  if (titleBar) refit.observe(titleBar);
+  refit.observe(ui.bar); // as the update button arrives, for one
   render();
 }
 
@@ -181,19 +202,47 @@ function renderBar() {
     connectionPill(),
     players,
     updateNotice(),
-    h('button.btn.cr-icon-btn', { onclick: () => toggleDash('approvals'), title: 'Approvals', 'aria-label': pending ? `Approvals, ${pending} waiting` : 'Approvals' }, icon('check'), pending ? h('span.badge', pending) : null),
-    h('button.btn.cr-icon-btn', { onclick: () => toggleDash('notifications'), title: 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications' }, icon('bell'), unread ? h('span.badge', unread) : null),
-    h('button.btn', { class: ui.side.classList.contains('hidden') ? '' : 'on', onclick: toggleChat, 'aria-pressed': ui.side.classList.contains('hidden') ? 'false' : 'true' }, icon('chat'), 'Chat', unreadTotal() ? h('span.cr-count', unreadTotal()) : null),
+    h('button.btn.cr-icon-btn', { class: dashShows('approvals') ? 'on' : '', 'aria-pressed': String(dashShows('approvals')), onclick: () => toggleDash('approvals'), title: 'Approvals', 'aria-label': pending ? `Approvals, ${pending} waiting` : 'Approvals' }, icon('check'), pending ? h('span.badge', pending) : null),
+    h('button.btn.cr-icon-btn', { class: dashShows('notifications') ? 'on' : '', 'aria-pressed': String(dashShows('notifications')), onclick: () => toggleDash('notifications'), title: 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications' }, icon('bell'), unread ? h('span.badge', unread) : null),
+    h('button.btn', { class: ui.side.classList.contains('hidden') ? '' : 'on', onclick: toggleChat, 'aria-pressed': ui.side.classList.contains('hidden') ? 'false' : 'true' }, icon('chat'), h('span.cr-says-less', 'Chat'), unreadTotal() ? h('span.cr-count', unreadTotal()) : null),
     stopButton(),
     h('button.btn.cr-icon-btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'How it works: a short tour', 'aria-label': 'How it works' }, '?'),
   );
+  fitTopBars();
+}
+
+const TOP_GAP = 12;
+const FIT_LEVELS = 3;
+
+/**
+ * Keeps the office's bar and ours side by side at any window width: each level says less, until they
+ * share one row. If even the shortest will not fit, ours wraps onto more rows rather than overlapping.
+ * Below the phone layout, the two have rows of their own and nothing needs fitting.
+ */
+function fitTopBars() {
+  const title = document.getElementById('title-bar');
+  const root = document.documentElement;
+  if (!title || !ui.bar?.isConnected) return;
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    delete root.dataset.topFit;
+    ui.bar.style.maxWidth = '';
+    return;
+  }
+  for (let level = 0; level <= FIT_LEVELS; level++) {
+    root.dataset.topFit = level;
+    ui.bar.style.maxWidth = `${Math.max(0, window.innerWidth - title.getBoundingClientRect().right - TOP_GAP * 2)}px`;
+    // One row: nothing starts below where the first item ends, whatever their different heights.
+    const items = [...ui.bar.children].filter((item) => item.offsetWidth > 0);
+    const firstEnd = items[0]?.getBoundingClientRect().bottom ?? 0;
+    if (items.every((item) => item.getBoundingClientRect().top < firstEnd)) return;
+  }
 }
 
 // Where the launcher goes. Each destination is an existing tab of the dashboard, so nothing here
 // is a second way of doing anything; `office3d` is the office itself, with everything put away.
 const NAV = [
   { key: 'workspace', label: 'Workspace', icon: 'workspace', items: [
-    { key: 'office3d', label: '3D Office', icon: 'building', hint: 'Close the panels and watch the floor' },
+    { key: 'office3d', label: 'Office', icon: 'building', hint: 'Close the panels and watch the floor' },
     { key: 'projects', label: 'Projects', icon: 'folder' },
     { key: 'board', label: 'Task Board', icon: 'board' },
     { key: 'files', label: 'Files', icon: 'file' },
@@ -227,6 +276,8 @@ const navKeyFor = (tab) => (NAV_KEYS.has(tab) ? tab : NAV_PARENT[tab] ?? null);
 
 function goTo(key) {
   if (key === 'office3d') { ui.dash.classList.add('hidden'); ui.editor.close?.(); render(); return; }
+  // On a tab within this destination, as much as on the destination itself.
+  if (!ui.dash.classList.contains('hidden') && navKeyFor(ui.tab) === key) { ui.dash.classList.add('hidden'); render(); return; }
   toggleDash(key);
 }
 
@@ -245,10 +296,21 @@ function tourShowMe(tab) {
   render();
 }
 
+const dashShows = (tab) => !ui.dash.classList.contains('hidden') && ui.tab === tab;
+
+/** A second click on what is already open closes it, and a click on anything else goes there. */
 function toggleDash(tab) {
-  if (tab) ui.tab = tab;
-  if (!ui.dash.classList.contains('hidden') && !tab) ui.dash.classList.add('hidden');
-  else ui.dash.classList.remove('hidden');
+  if (dashShows(tab)) {
+    ui.dash.classList.add('hidden');
+    render();
+    return;
+  }
+  openDash(tab);
+}
+
+function openDash(tab) {
+  ui.tab = tab;
+  ui.dash.classList.remove('hidden');
   if (tab === 'notifications') api('POST', `/api/crew/rooms/${roomId}/notifications/read`).then(() => { S.notifications.forEach((n) => { n.read = true; }); render(); });
   render();
 }
@@ -287,7 +349,7 @@ function renderDash() {
   ui.dash.dataset.tab = ui.tab;
   ui.dash.replaceChildren(
     h('div.cr-dash-main',
-      h('header', h('h2', section.label), h('button.btn.small', { onclick: () => ui.dash.classList.add('hidden'), 'aria-label': 'Close' }, '✕')),
+      h('header', h('h2', section.label), h('button.btn.small', { onclick: () => { ui.dash.classList.add('hidden'); render(); }, 'aria-label': 'Close' }, '✕')),
       section.tabs.length > 1 ? h('nav.cr-tabs', { role: 'tablist' }, ...section.tabs.map(([k, label]) => h('button', { role: 'tab', 'aria-selected': ui.tab === k ? 'true' : 'false', class: ui.tab === k ? 'on' : '', onclick: () => { ui.tab = k; render(); } }, label))) : null,
       body));
   if (ui.drawnScrollTab === ui.tab) body.scrollTop = scroll;
@@ -512,7 +574,7 @@ function dashPrefs(body) {
   body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: stored('crew.motion') === 'off', onchange: (e) => { keep('crew.motion', e.target.checked ? 'off' : ''); applyAppearance(); } }), ' Turn off interface animation (your system’s reduced motion setting always applies)'));
   body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: quietMode(), onchange: (e) => keep('crew.quiet', e.target.checked ? '1' : '0') }), ' Quiet mode: only pop up what needs me (approvals, blockers, failures)'));
   body.append(h('h3', 'Tours'), h('div.row', h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }) }, 'How the office works'), h('button.btn', { onclick: () => { goTo('playbooks'); setTimeout(() => ui.orchestrator.tour(), 250); } }, 'How the Orchestrator works')));
-  body.append(h('h3', 'Profile'), h('div.row', h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
+  body.append(h('h3', 'Profile'), h('div.row', h('button.btn', { onclick: () => chooseCharacter() }, 'Change character'), h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
 }
 
 function dashRoom(body) {
@@ -550,7 +612,8 @@ function connectionPill() {
   const here = ['localhost', '127.0.0.1'].includes(location.hostname);
   if (!here && !/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)) return h('span.cr-link.ok', 'Relay connection');
   if (!here) return h('span.cr-link.ok', 'Direct connection');
-  return h('span.cr-link', { class: internet?.state === 'online' ? 'ok' : internet?.state === 'unavailable' ? 'bad' : '' }, internet?.label ?? 'Hosting locally');
+  const label = internet?.label ?? 'Hosting locally';
+  return h('span.cr-link', { class: internet?.state === 'online' ? 'ok' : internet?.state === 'unavailable' ? 'bad' : '', title: label }, h('span.cr-says-less', label));
 }
 
 /** On the HUD and in the Security Center. The host decides what the press may do. */
@@ -564,7 +627,7 @@ function stopButton() {
         if (staff) { await api('POST', `/api/crew/rooms/${roomId}/emergency-stop`, { reason: 'Pressed the stop button' }); toast('All AI activity stopped'); await refresh(); } else { await api('POST', `/api/crew/rooms/${roomId}/agents-pause-all`, { paused: true }); toast('Your agents are stopped'); }
       } catch (e) { toast(e.message, 6000); }
     },
-  }, staff ? 'STOP ALL AI ACTIVITY' : 'STOP MY AI');
+  }, h('span.cr-says-less', staff ? 'STOP ALL AI ACTIVITY' : 'STOP MY AI'), h('span.cr-says-more', 'STOP AI'));
 }
 
 function openAgent(id) { ui.editor.open(id).catch((e) => toast(e.message)); }
@@ -825,6 +888,25 @@ function roomSettings() {
   });
 }
 
+/** The selection screen. Everyone in the office sees who you choose. */
+function chooseCharacter({ first = false } = {}) {
+  return modal('Choose your character', (close) => {
+    const picker = characterPicker(S.me?.character ?? 0);
+    const save = async () => {
+      try {
+        const { user } = await api('PATCH', '/api/crew/me', { character: picker.value });
+        S.me = user;
+        close();
+        render();
+      } catch (e) { toast(e.message); }
+    };
+    return h('div',
+      h('p.hint', first ? 'This is you in the office. You can change it any time by clicking your character.' : 'This is you in the office, and everyone here sees it.'),
+      picker,
+      h('div.actions', first ? null : h('button.btn', { onclick: () => close() }, 'Cancel'), h('button.btn.primary', { onclick: save }, first ? 'Start' : 'Save')));
+  });
+}
+
 function profile() {
   return modal('Your profile', (close) => {
     const name = h('input', { value: S.me.displayName });
@@ -877,6 +959,12 @@ let meetingLayer = null;
 const bubbles = [];
 const meetings = new Map();
 
+// Whose bot this is, for the office's columns. A player owns bots and has no desk of their own.
+window.crewOwnerOf = (charId) => {
+  const a = S.agents.find((x) => String(charId).endsWith(`#crew:${x.id}`));
+  return a?.ownerId ? { id: a.ownerId, name: a.ownerName ?? '' } : null;
+};
+
 function charFor(agentId) {
   const world = window.officeView?.world;
   if (!world?.manager?.agents) return null;
@@ -888,6 +976,7 @@ function screenOf(agentId, lift = 2.3) {
   const ch = charFor(agentId);
   const view = window.officeView;
   if (!ch || !view) return null;
+  if (view.office2d) return view.office2d.agentAt(ch.id);
   const cam = view.camera();
   const p = ch.root.getWorldPosition(new ch.root.position.constructor());
   p.y += lift;

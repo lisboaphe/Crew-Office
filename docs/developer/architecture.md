@@ -1,5 +1,7 @@
 # Architecture
 
+> **The office is drawn by `src/office2d/view.js`**, in 2D from one fixed angle, using the art in `assets/pixel-art/office/established/`, with no WebGL. A camera in that file zooms between one room and a whole floor, and `src/office2d/ambient.js` sends idle agents to a shared break area, which is only a picture and changes nothing about them. `src/office2d/allocation.js` gives each bot a workstation: four bots a room, three players a floor, ten bots per player per floor, and one standby desk at most. Agents keep their logic, including their walking in the 3D scene objects under `src/scene/`, but none of that is rendered, so workers are shown at their desks. The editor and first-person ride are off. The sections below describe the older picture where they mention a camera.
+
 How a keystroke in a terminal becomes somebody walking across a room, and where the seams are.
 
 ## The pipeline

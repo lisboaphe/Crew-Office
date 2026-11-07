@@ -17,7 +17,7 @@ Before a line of code is written:
 1. **An issue.** No change without one. If none exists, open one. Say there that you are
    picking it up — that is how somebody else finds out you are already doing the thing
    they were about to start.
-2. **A branch.** Never commit to `main`; it is protected and will refuse you anyway.
+2. **A branch.** Never commit to `main`.
 3. **A worktree**, cut from `main`. Not the primary checkout.
 
 The third used to be a preference, hedged with *prefer* and *if*, and the hedge cost an
@@ -186,9 +186,9 @@ the checkout and says what is live, so run it rather than guessing.
 
 ## Landing it
 
-A branch lands by **pull request**, and `main` is protected: both CI jobs must be green
-and up to date with `main`, one approval is required, and force-pushes and deletions are
-refused. CI is `.github/workflows/ci.yml` and it runs the six commands below — the same
+A branch lands by **pull request**, with both CI jobs green and up to date with `main`, and a
+merge is what publishes a release. GitHub does not enforce any of that on `main` at present, so
+it is on whoever merges. CI is `.github/workflows/ci.yml` and it runs the six commands below — the same
 ones you run from a checkout, so there is no class of red build you cannot reproduce
 locally. A pull request from a fork waits for a maintainer to approve the workflow run
 before it starts; that is a repository setting rather than a comment on the change.

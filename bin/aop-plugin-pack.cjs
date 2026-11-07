@@ -235,8 +235,8 @@ function filesJson(host, version, entries) {
  */
 function notice(host, version, hasLicence) {
   const manifest = readJson(HOSTS[host].manifest);
-  const author = manifest.author?.name ?? 'The Roving Office';
-  return Buffer.from(`The Roving Office — ${HOSTS[host].label} plugin
+  const author = manifest.author?.name ?? 'Crew Office';
+  return Buffer.from(`Crew Office — ${HOSTS[host].label} plugin
 Version ${version}
 
 Copyright ${author}.
@@ -269,7 +269,7 @@ third-party/inventory.json (component "project-artwork").`}
 
 /** The install story, in the artifact, for whoever unpacks it without the site. */
 function readme(host, version, baseUrl) {
-  const common = `# The Roving Office — ${HOSTS[host].label} plugin
+  const common = `# Crew Office — ${HOSTS[host].label} plugin
 
 Version ${version}. A zero-context observer: it turns your agent's lifecycle, tool,
 plan, permission and subagent events into characters walking around a live isometric

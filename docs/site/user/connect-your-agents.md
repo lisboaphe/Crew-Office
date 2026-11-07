@@ -17,7 +17,7 @@ live feed while you are still getting the adapter working.
 works out which harness it is, mints you an office, installs the adapter and hands back
 the URL:
 
-> Fetch and execute the appropriate instructions to set me up for The Roving Office from
+> Fetch and execute the appropriate instructions to set me up for Crew Office from
 > <https://therovingoffice.com/agent-setup/prompt.md>
 
 It asks you one question first, because connecting transmits what your agent is doing to
