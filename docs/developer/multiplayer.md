@@ -287,8 +287,9 @@ whatever `origin` points at, so any release is newer than it.
 
 `lib/crew/update.cjs` asks `GET /repos/<repo>/releases/latest`, at most every ten minutes and
 only when the host's own app opens a page. The routes refuse anyone but `ownerOfComputer()`.
-Installing downloads the zip, checks the checksum, copies `install.ps1` out of the folder it is
-about to replace, starts it detached and stops the server. The installer waits for the server
+Installing downloads the zip, checks the checksum, copies the installer (`install.ps1`, or
+`install.sh` on Linux) out of the folder it is about to replace, starts it detached and stops
+the server. The installer waits for the server
 to exit, builds the new copy beside the old one, swaps the folders by renaming, and starts the
 app again whether or not that worked, so a failure leaves the old build running. The reason is
 in `update.log` in the crew data folder. The page polls `host-info` and reloads when the build
@@ -303,7 +304,9 @@ the repository variable `DEPLOY_TO_FLY` is `true`.
 
 ## Known limits
 
-- Updating inside the app is Windows only; macOS and Linux get a link to the release.
+- Updating inside the app is Windows and Linux only; macOS gets a link to the release.
+- Linux allows renaming a folder in use, so an open worker window does not block an update there.
+  It keeps running from deleted files until it is restarted.
 - A worker also runs from the app folder, so an open worker window blocks an update, which then
   stops and says so. Workers are not updated or restarted for you.
 - Clearing cookies costs a player joining someone else's host their identity and their agents.

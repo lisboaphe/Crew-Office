@@ -31,9 +31,10 @@ turns into **Update available** when a new build is out. Nothing installs until 
 published build's checksum, replaces itself, and comes back within about a minute; your
 offices, projects and sign-ins are kept. Everyone in the office is disconnected until then.
 
-Close any worker window first. A worker runs from the same folder, so while it is open the
-update stops and tells you, leaving the app as it was. Updating inside the app is Windows
-only for now; on macOS and Linux the button takes you to the download page.
+Close any worker window first. A worker runs from the same folder. On Windows, while it is open
+the update stops and tells you, leaving the app as it was. On Linux the update goes ahead, so
+restart the worker afterwards. Updating inside the app works on Windows and Linux; on macOS the
+button takes you to the download page.
 
 If the app's repository is private, GitHub has to know it is you: press **Sign in to GitHub** and
 finish in the window that opens, with an account that can see it. That needs the GitHub CLI

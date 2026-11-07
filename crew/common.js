@@ -175,7 +175,7 @@ function updateDialog(first) {
       if (u.error) { body.replaceChildren(h('p', 'Could not check for updates.'), h('p.hint', u.error), h('div.actions', cancel('Close'), again())); return; }
       if (!u.available) { body.replaceChildren(h('p', u.latest ? 'You are up to date.' : 'No version has been published yet.'), h('p.hint', `${have}${u.latest ? ` The newest published is build ${u.latest.build}.` : ''}`), h('div.actions', cancel('Close'), again())); return; }
       body.replaceChildren(h('p', `Build ${u.latest.build} is ready. ${have}`), ...(u.canInstall
-        ? [h('p.hint', 'It downloads from GitHub, is checked against its published checksum, and installs over this one. The office stops for a moment and everyone in it is disconnected until it is back. Your offices, projects and sign-ins are kept. Close any worker window first: it runs from the same folder and would block the update.'),
+        ? [h('p.hint', 'It downloads from GitHub, is checked against its published checksum, and installs over this one. The office stops for a moment and everyone in it is disconnected until it is back. Your offices, projects and sign-ins are kept. Close any worker window first: it runs from the same folder as the app.'),
           err, h('div.actions', cancel('Not now'), h('button.btn.primary', { onclick: () => install(u) }, 'Update now'))]
         : [h('p.hint', u.reason), h('div.actions', cancel('Close'), h('a.btn.primary', { href: u.latest.url, target: '_blank', rel: 'noopener' }, 'Open the download page'))]));
     };

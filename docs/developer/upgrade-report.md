@@ -37,7 +37,7 @@ Recovery point: the Git tag `checkpoint/pre-upgrade-2026-11-03`, on the branch `
 | Name-only entry, invite link on hosting, host computer remembered | Works | `auth.enter`, `machine.key`, `test/crew-entry-update.test.cjs` | Clearing cookies loses a joining player's identity |
 | Delete office, holiday, fire | Works | `rooms.remove`, same test file | Holiday and fire are the existing pause and remove, renamed |
 | App window without a console | Partial | `bin/crew-app.cjs`, run by hand on Windows 11 | It is Edge or Chrome in app mode, not a native shell. Worker still needs a terminal |
-| In-app updates from GitHub | Partial | `update.cjs`, tested against a stand-in for GitHub | Windows only; see the matrix note in `multiplayer.md` |
+| In-app updates from GitHub | Partial | `update.cjs`, tested against a stand-in for GitHub | Windows and Linux; see the matrix note in `multiplayer.md` |
 | Global redesign, grouped navigation, animations, reduced motion | Works | `crew/crew.css`, `overlay.js`; checked on screen at 1440x900 | Light mode not checked on screen in this pass |
 | AI Connections cards | Works | `connections.js`, `setup.cjs`; worker-security test | Sign-in for Codex and Claude Code has not run against the real tools. Install buttons have not run for real |
 | Add Worker wizard, no terminal on the host | Works | `wizard.js`, `local-worker.cjs`; run on screen up to the sign-in step | Not walked through with a real sign-in. Avatar is a colour and initials; there is no image picker |
