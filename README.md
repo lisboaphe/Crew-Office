@@ -3,12 +3,11 @@
 **A multiplayer office where every player brings their own team of AI employees.** Host an
 office on your computer, invite friends, give the office a project, and the agents plan it,
 message each other across teams, write the files, run the tests, review the work and
-summarise it — on an isometric office floor where every movement is a real backend event.
+summarise it — in a 2D pixel-art office where every movement is a real backend event.
 
-Crew Office is a fork of [The Roving Office](https://github.com/atlassian-labs/roving-office)
-(Apache-2.0). The 3D office, its characters and its Agent Office Protocol are upstream's;
-the multiplayer host, AI teams, message bus, task engine, workers and dashboard are added
-here. Upstream's documentation follows below the line.
+The multiplayer host, AI teams, message bus, task engine, workers, dashboard and 2D office are
+Crew Office's own. [The credits](#credits) say what it is built on. The original project's
+documentation, not all of it rewritten yet, follows below the line.
 
 ## Install
 
@@ -53,6 +52,13 @@ connectivity service to be deployed, which is one small program you can run your
 [its deployment guide](docs/developer/connectivity-service.md)). Not built: network
 isolation in the default process sandbox (use `CREW_SANDBOX=docker`), and horizontal
 scaling. Docker deployment is written but was not run in the environment it was built in.
+
+## Credits
+
+Crew Office began as a fork of **[The Roving Office](https://github.com/atlassian-labs/roving-office)**,
+by Atlassian, and would not exist without it. The office's server, its Agent Office Protocol
+and the plugins that watch your agents all come from that project, under the
+[Apache License 2.0](LICENSE). [NOTICE](NOTICE) has the full attribution and says what this fork changes.
 
 ---
 
