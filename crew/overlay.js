@@ -593,7 +593,7 @@ function dashRoom(body) {
     admin && m.role !== 'owner' && m.userId !== S.me.id ? h('select', { onchange: (e) => act(() => api('POST', `/api/crew/rooms/${roomId}/members/${m.userId}/role`, { role: e.target.value }), 'Role changed') }, ...['guest', 'member', 'admin'].map((x) => h('option', { value: x, selected: m.role === x }, x))) : h('span.pill', m.role),
     admin && m.role !== 'owner' && m.userId !== S.me.id ? h('button.btn.small.danger', { onclick: () => confirm(`Remove ${m.displayName} and take their agents off the floor?`) && act(() => api('DELETE', `/api/crew/rooms/${roomId}/members/${m.userId}`), 'Player removed') }, 'Remove') : null))));
   body.append(h('h3', 'Your profile'), h('div.row', h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
-  body.append(h('p.hint', { style: { marginTop: '16px' } }, `${BRAND} is based on The Roving Office (Apache-2.0, © Atlassian). See NOTICE.`));
+  body.append(h('p.hint', { style: { marginTop: '16px' } }, `${BRAND} is by lisboaphe, free for non-commercial use with credit, and based on The Roving Office (Apache-2.0, © Atlassian). See LICENSING.md and NOTICE.`));
 }
 
 // --- side panel: chat and agents ----------------------------------------------

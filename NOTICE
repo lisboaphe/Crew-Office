@@ -3,9 +3,10 @@ Copyright (c) 2026 Atlassian US., Inc.
 
 This product includes software developed at Atlassian (https://www.atlassian.com/).
 
-Crew Office is a modified version of The Roving Office. The multiplayer layer (lib/crew,
-lib/crew-worker, crew/, bin/crew-*) and the changes to upstream files are additions to
-the original work, under the same Apache License 2.0.
+Crew Office is a modified version of The Roving Office, by lisboaphe
+(https://github.com/lisboaphe/Crew-Office). The original work stays under the Apache
+License 2.0. Crew Office's own code and changes, and its art, are under non-commercial
+licences: LICENSING.md says which terms cover what.
 
 THIS FORK DOES NOT CARRY THE BRAND ASSETS LISTED BELOW. As section A requires of a
 redistributor, the Atlassian, Rovo and Jira marks (A1-A4) have been replaced with

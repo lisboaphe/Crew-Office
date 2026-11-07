@@ -60,6 +60,9 @@ by Atlassian, and would not exist without it. The office's server, its Agent Off
 and the plugins that watch your agents all come from that project, under the
 [Apache License 2.0](LICENSE). [NOTICE](NOTICE) has the full attribution and says what this fork changes.
 
+Crew Office itself, its code and its art, is by lisboaphe. You are welcome to use it for anything
+non-commercial, as long as you credit it. [LICENSING.md](LICENSING.md) has the terms.
+
 ---
 
 # Crew Office
@@ -171,8 +174,11 @@ Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) for humans,
 
 ## License
 
-Copyright (c) 2026 Atlassian US., Inc.
-Apache 2.0 licensed, see [LICENSE](LICENSE) file.
+Crew Office's own code and art are non-commercial, with credit: [LICENSING.md](LICENSING.md) says
+which terms cover what.
+
+The Roving Office's original work is Copyright (c) 2026 Atlassian US., Inc., and Apache 2.0
+licensed: see the [LICENSE](LICENSE) file.
 
 **That covers the code, and not the brand marks in it.** A handful of the logos in
 the scene and the source picker are other companies' trademarks, reproduced to say

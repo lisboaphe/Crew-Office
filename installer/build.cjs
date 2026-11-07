@@ -24,7 +24,7 @@ const version = require('../package.json').version;
 // Runtime paths, relative to the repository. Directories are taken whole.
 const INCLUDE = [
   'server.cjs', 'index.html', 'home.html', 'styles.css', 'favicon.ico', 'package.json', 'package-lock.json',
-  'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.txt', 'README.md', '.env.example',
+  'LICENSE', 'LICENSING.md', 'LICENSES', 'NOTICE', 'THIRD_PARTY_NOTICES.txt', 'README.md', '.env.example',
   'assets', 'crew', 'lib', 'src', 'vendor', 'admin', 'agent-setup', 'docs/images', 'docs/site', 'docs/examples',
   'bin/crew-app.cjs', 'bin/crew-host.cjs', 'bin/crew-worker.cjs', 'bin/crew-relay.cjs', 'bin/crew-demo.cjs', 'bin/crew-demo-bot.cjs', 'bin/lib/cli-flags.cjs',
   'installer/windows/install.ps1', 'installer/windows/uninstall.ps1', 'installer/windows/register-protocol.ps1', 'installer/windows/open-invitation.vbs', 'installer/unix/install.sh',

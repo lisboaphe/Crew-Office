@@ -132,8 +132,10 @@ Recorded so the question does not have to be re-asked.
 
 ## 7. Crew Office's own art
 
-Made by the project's owner in Aseprite, and published with the project under the Apache
-License 2.0.
+Made by the project's owner, lisboaphe, in Aseprite, and published under
+[CC BY-NC 4.0](https://github.com/atlassian-labs/roving-office/blob/main/LICENSES/CC-BY-NC-4.0.txt): free for non-commercial use with credit. This
+art is outside the Apache-2.0 grant, and [`LICENSING.md`](https://github.com/atlassian-labs/roving-office/blob/main/LICENSING.md) says which terms
+cover what across the project.
 
 | Asset | Where | What it is |
 |---|---|---|
