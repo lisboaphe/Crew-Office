@@ -69,6 +69,26 @@ test('an empty office still has a floor to draw', () => {
   assert.deepEqual(floors, [{ columns: [] }]);
 });
 
+test('a player in the office has a room and a standby desk, before they have any bots', () => {
+  const { floors } = createAllocator().sync([], [{ id: 'me', name: 'Me' }]);
+  assert.equal(floors[0].columns[0].ownerName, 'Me');
+  assert.equal(floors[0].columns[0].rooms[0].number, 1);
+  assert.deepEqual(rowsOf(floors[0].columns[0]), ['standby']);
+});
+
+test('only one of several new players gets the standby desk, and each has a room', () => {
+  const { floors } = createAllocator().sync([], [{ id: 'a' }, { id: 'b' }]);
+  assert.deepEqual(floors[0].columns.map((c) => c.rooms.length), [1, 1]);
+  assert.deepEqual(floors[0].columns.map((c) => c.rows.length), [1, 0]);
+});
+
+test('a player who leaves with no bots gives up their room', () => {
+  const office = createAllocator();
+  office.sync([], [{ id: 'a' }, { id: 'b' }]);
+  const { floors } = office.sync([], [{ id: 'a' }]);
+  assert.deepEqual(floors[0].columns.map((c) => c.ownerId), ['a']);
+});
+
 const roomSizes = (column) => column.rooms.map((r) => r.rows.length);
 
 test('a room holds four bots, and a fifth opens the next', () => {

@@ -2883,8 +2883,8 @@ body.debuglog #title-bar { max-width: none; border-radius: 0; }
 #inspector h2 .insp-name { white-space: normal; overflow-wrap: anywhere; }
 #inspector h2 .insp-title { overflow-wrap: anywhere; }
 #inspector-body { font-size: var(--text-body); line-height: 20px; }
-.insp-follow { margin-top: 16px; min-height: 36px; width: 100%; background: var(--selected); color: var(--brand); border: 1px solid #b8d2f6; border-radius: 6px; font: 600 14px var(--font-sans); font-feature-settings: var(--font-variants-sans); cursor: pointer; }
-.insp-follow:hover { background: #d8e9ff; }
+.insp-follow { margin-top: 16px; min-height: 36px; width: 100%; background: var(--selected); color: var(--brand); border: 1px solid #a9d3c8; border-radius: 6px; font: 600 14px var(--font-sans); font-feature-settings: var(--font-variants-sans); cursor: pointer; }
+.insp-follow:hover { background: #cbe6df; }
 .insp-job-title { font-size: 14px; margin: 24px 0 8px; color: var(--text); }
 #inspector-body .job { font-size: var(--text-body); font-weight: 500; line-height: 20px; margin: 0; padding: var(--space-4); background: var(--sky-soft); border: 0; border-radius: var(--radius-surface); overflow-wrap: anywhere; }
 #inspector-body .job-idle { display: flex; align-items: center; gap: var(--space-3); padding: 12px 0; background: transparent; color: var(--muted); font-weight: 400; }
@@ -3093,3 +3093,62 @@ body.debuglog #title-bar { max-width: none; border-radius: 0; }
 @media (prefers-reduced-motion: reduce) {
   .welcome-hint { transition: none; }
 }
+
+
+/* --- Pixel art --------------------------------------------------------------------------------
+   The HUD in the same style as the office: square corners, hard bevels and no blur. */
+:root {
+  --radius-control: 0px;
+  --radius-surface: 0px;
+  --radius-dialog: 0px;
+  --panel: #fbf3e4;
+  --panel-solid: #fbf3e4;
+  --pixel-ink: #3a2212;
+  --pixel-frame: 2px solid var(--pixel-ink);
+  --pixel-bevel: inset 2px 2px 0 #fffaf1, inset -2px -2px 0 #dcc9a8, 3px 3px 0 rgba(58, 34, 18, 0.32);
+  --pixel-pressed: inset 2px 2px 0 #dcc9a8, inset -2px -2px 0 #fffaf1;
+}
+#ui *, #office-camera, #office-camera * { border-radius: 0 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+#ui h2, #ui h3, #ui button, #ui .kc-button, #ui label, #office-camera { font-family: var(--font-mono); font-feature-settings: var(--font-variants-mono); }
+#ui img { image-rendering: pixelated; }
+#agent-panel, #inspector, #dev-panel, #scene-panel, .kc-button, .help-button, .switcher > button, #title-bar .switcher > button,
+#office-camera, #welcome-hint, .welcome-hint, .kc-popover, .switcher-menu {
+  background: var(--panel-solid) !important;
+  border: var(--pixel-frame) !important;
+  box-shadow: var(--pixel-bevel) !important;
+}
+#ui .brand h1 { color: var(--pixel-ink); text-shadow: 1px 1px 0 #fffaf1; font-family: var(--font-mono); }
+#agent-panel h2, #inspector h2 { border-bottom: 2px solid #dcc9a8; padding-bottom: 6px; }
+#ui button:active, #office-camera button:active:not(:disabled) { box-shadow: var(--pixel-pressed) !important; transform: translate(1px, 1px); }
+#office-camera button { border: 2px solid var(--pixel-ink); box-shadow: inset 1px 1px 0 #fffaf1, inset -1px -1px 0 #dcc9a8; }
+
+/* Rounded, in pixels: stepped corners drawn as a frame, around a gradient in visible bands. */
+:root {
+  --pixel-corner-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'7'%20height%3D'7'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'0'%20width%3D'3'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'5'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'0'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'6'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'5'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'5'%20y%3D'5'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'6'%20width%3D'3'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'3'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'2'%20y%3D'5'%20width%3D'3'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'5'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'3'%20height%3D'3'%20fill%3D'%23fbf3e4'%2F%3E%3C%2Fsvg%3E");
+  --pixel-corner-fill: linear-gradient(170deg, color-mix(in srgb, #e6efe2 0%, #fbf3e4) 0.0% 14.3%, color-mix(in srgb, #e6efe2 17%, #fbf3e4) 14.3% 28.6%, color-mix(in srgb, #e6efe2 33%, #fbf3e4) 28.6% 42.9%, color-mix(in srgb, #e6efe2 50%, #fbf3e4) 42.9% 57.1%, color-mix(in srgb, #e6efe2 67%, #fbf3e4) 57.1% 71.4%, color-mix(in srgb, #e6efe2 83%, #fbf3e4) 71.4% 85.7%, color-mix(in srgb, #e6efe2 100%, #fbf3e4) 85.7% 100.0%);
+  --pixel-corner-step: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
+}
+#agent-panel, #inspector, #dev-panel, #scene-panel, #office-camera, .welcome-hint, #welcome-hint, .kc-popover, .switcher-menu {
+  border: 6px solid transparent !important;
+  border-image: var(--pixel-corner-frame) 3 / 6px !important;
+  background: var(--pixel-corner-fill) padding-box !important;
+  box-shadow: none !important;
+  filter: drop-shadow(3px 3px 0 rgba(58, 34, 18, 0.3));
+}
+.kc-button, .help-button, .switcher > button, #title-bar .switcher > button, #office-camera button {
+  clip-path: var(--pixel-corner-step);
+  border: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--pixel-ink), inset 4px 4px 0 -2px #fffaf1 !important;
+  background: linear-gradient(170deg, #fffaf1 0 50%, #f3e4c8 50%) !important;
+}
+
+/* Rounder: bigger stepped corners, with the gradient clipped to them so its bands reach the frame. */
+:root { --pixel-corner-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'11'%20height%3D'11'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'3'%20y%3D'0'%20width%3D'5'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'8'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'9'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'0'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'10'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'9'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'8'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'3'%20y%3D'10'%20width%3D'5'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'3'%20y%3D'1'%20width%3D'5'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'1'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'8'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'2'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'3'%20y%3D'9'%20width%3D'5'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'8'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'9'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23d8c6a4'%2F%3E%3C%2Fsvg%3E"); --pixel-round: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)); }
+#agent-panel, #inspector, #dev-panel, #scene-panel, #office-camera, .welcome-hint, #welcome-hint, .kc-popover, .switcher-menu {
+  border: 10px solid transparent !important;
+  border-image: var(--pixel-corner-frame) 5 / 10px !important;
+  background: var(--pixel-corner-fill) border-box !important;
+  clip-path: var(--pixel-round);
+  filter: none;
+}
+.kc-button, .help-button, .switcher > button, #title-bar .switcher > button, #office-camera button { clip-path: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)); }

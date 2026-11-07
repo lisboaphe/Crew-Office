@@ -1,48 +1,48 @@
 /* The multiplayer layer: lobby, dashboard, chat, agent panel, bubbles.
-   Dark glass over the office: translucent navy panels that blur what is behind them, a soft
-   blue-violet sheen, a thin lit edge. The tokens carry almost all of it, so the office stays
+   Dark glass over the office: translucent walnut panels that blur what is behind them, a soft
+   teal and sage sheen, a thin lit edge. The tokens carry almost all of it, so the office stays
    the main thing on screen and these float over it. */
 
 :root {
-  --cr-bg: #0a0e1a;
-  --cr-panel: rgba(16, 21, 37, 0.78);
-  --cr-solid: #151b2e;
+  --cr-bg: #1c130d;
+  --cr-panel: rgba(40, 27, 18, 0.82);
+  --cr-solid: #2b1e15;
   --cr-control: rgba(255, 255, 255, 0.075);
   --cr-control-hover: rgba(255, 255, 255, 0.15);
-  --cr-well: rgba(6, 10, 22, 0.38);
-  --cr-ink: #eef1f9;
-  --cr-ink-2: #c7cde0;
-  --cr-ink-3: #9aa4bc;
-  --cr-line: rgba(170, 185, 230, 0.17);
-  --cr-accent: #6a8dff;
-  --cr-accent-2: #a07bff;
-  --cr-accent-ink: #ffffff;
-  --cr-ok: #4fd08a;
-  --cr-warn: #f0b44a;
-  --cr-bad: #ff7a70;
-  --cr-ai: #b9a2ff;
-  --cr-human: #52d6bb;
+  --cr-well: rgba(18, 10, 5, 0.38);
+  --cr-ink: #f6ecdc;
+  --cr-ink-2: #dccbb2;
+  --cr-ink-3: #b8a58c;
+  --cr-line: rgba(235, 205, 165, 0.18);
+  --cr-accent: #6fbdaf;
+  --cr-accent-2: #93bd7f;
+  --cr-accent-ink: #14211d;
+  --cr-ok: #93c47d;
+  --cr-warn: #e8b65a;
+  --cr-bad: #ee8570;
+  --cr-ai: #dba98f;
+  --cr-human: #6fbdaf;
   --cr-radius: 20px;
   --cr-radius-inner: 14px;
   --cr-glass: blur(22px) saturate(165%);
   --cr-ease: cubic-bezier(0.22, 0.8, 0.3, 1);
   --cr-fast: 160ms;
   --cr-med: 220ms;
-  --cr-edge: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 0 0.5px rgba(190, 205, 255, 0.15);
-  --cr-shadow: 0 24px 60px rgba(3, 6, 18, 0.55), 0 2px 8px rgba(3, 6, 18, 0.35);
+  --cr-edge: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 0 0 0.5px rgba(240, 215, 180, 0.15);
+  --cr-shadow: 0 24px 60px rgba(15, 8, 3, 0.55), 0 2px 8px rgba(15, 8, 3, 0.35);
   --cr-glow: 0 0 0 1px color-mix(in srgb, var(--cr-accent) 45%, transparent), 0 6px 22px color-mix(in srgb, var(--cr-accent) 28%, transparent);
-  --cr-sheen: linear-gradient(155deg, rgba(106, 141, 255, 0.14) 0%, rgba(160, 123, 255, 0.075) 36%, rgba(12, 16, 30, 0) 72%);
+  --cr-sheen: linear-gradient(155deg, rgba(111, 189, 175, 0.12) 0%, rgba(147, 189, 127, 0.06) 36%, rgba(30, 20, 12, 0) 72%);
   --cr-active: linear-gradient(135deg, var(--cr-accent), var(--cr-accent-2));
   --cr-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI', 'Inter', system-ui, sans-serif;
   color-scheme: dark;
 }
 :root[data-theme="light"] {
-  --cr-bg: #eef0f8; --cr-panel: rgba(250, 251, 254, 0.86); --cr-solid: #f7f8fb; --cr-control: rgba(255, 255, 255, 0.55); --cr-control-hover: rgba(255, 255, 255, 0.85); --cr-well: rgba(120, 130, 155, 0.13);
-  --cr-ink: #161b26; --cr-ink-2: #3f4757; --cr-ink-3: #626b7c; --cr-line: rgba(60, 70, 95, 0.14);
-  --cr-accent: #2f6be8; --cr-accent-2: #7a5cf0; --cr-ok: #1f8a43; --cr-warn: #b06f08; --cr-bad: #c8352a; --cr-ai: #6c4fd1; --cr-human: #1f8a70;
+  --cr-bg: #f3e8d6; --cr-panel: rgba(253, 247, 236, 0.88); --cr-solid: #fbf5ea; --cr-control: rgba(255, 255, 255, 0.55); --cr-control-hover: rgba(255, 255, 255, 0.85); --cr-well: rgba(140, 105, 70, 0.13);
+  --cr-ink: #2a1d13; --cr-ink-2: #54412f; --cr-ink-3: #705c47; --cr-line: rgba(90, 60, 30, 0.17);
+  --cr-accent: #2f7468; --cr-accent-2: #466f45; --cr-accent-ink: #ffffff; --cr-ok: #44703c; --cr-warn: #8f5c0a; --cr-bad: #b23a2c; --cr-ai: #a84f2b; --cr-human: #2f7468;
   --cr-edge: inset 0 1px 0 rgba(255, 255, 255, 0.75), inset 0 0 0 0.5px rgba(255, 255, 255, 0.35);
-  --cr-shadow: 0 18px 50px rgba(20, 28, 45, 0.18), 0 2px 6px rgba(20, 28, 45, 0.07);
-  --cr-sheen: linear-gradient(155deg, rgba(47, 107, 232, 0.09) 0%, rgba(122, 92, 240, 0.05) 36%, rgba(255, 255, 255, 0) 72%);
+  --cr-shadow: 0 18px 50px rgba(60, 35, 15, 0.18), 0 2px 6px rgba(60, 35, 15, 0.07);
+  --cr-sheen: linear-gradient(155deg, rgba(47, 116, 104, 0.08) 0%, rgba(70, 111, 69, 0.05) 36%, rgba(255, 255, 255, 0) 72%);
   color-scheme: light;
 }
 /* Windows' and macOS's "reduce transparency" setting means it. */
@@ -106,7 +106,7 @@
 #crew-bar { position: fixed; top: 16px; min-height: 46px; align-content: center; right: 12px; z-index: 40; display: flex; flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 500px); gap: 6px; align-items: center; pointer-events: auto; }
 #crew-bar .btn { background: var(--cr-panel); box-shadow: var(--cr-edge), var(--cr-shadow); position: relative; }
 #crew-bar .btn.primary { background: var(--cr-accent); }
-#crew-bar .badge { position: absolute; top: -6px; right: -6px; background: var(--cr-bad); color: #fff; border-radius: 99px; font-size: 11px; padding: 0 5px; min-width: 18px; text-align: center; }
+#crew-bar .badge { position: absolute; top: -6px; right: -6px; background: var(--cr-bad); color: var(--cr-accent-ink); border-radius: 99px; font-size: 11px; padding: 0 5px; min-width: 18px; text-align: center; }
 #crew-bar .players { display: flex; gap: -4px; background: var(--cr-panel); padding: 4px 8px 4px 12px; border-radius: 99px; box-shadow: var(--cr-edge), var(--cr-shadow); }
 #crew-bar .players .avatar { margin-left: -4px; border: 2px solid var(--cr-solid); }
 .cr-drawer { position: fixed; top: 64px; bottom: 12px; z-index: 39; background: var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: var(--cr-radius); box-shadow: var(--cr-edge), var(--cr-shadow); display: flex; flex-direction: column; overflow: hidden; }
@@ -140,7 +140,7 @@ body.cr-chat-open .cr-drawer.left { width: min(1040px, max(520px, calc(100vw - 8
 .cr-msg .meta b { color: var(--cr-ink); }
 .cr-msg .text { white-space: pre-wrap; word-break: break-word; }
 .cr-msg.system .text { color: var(--cr-ink-3); font-style: italic; }
-.cr-modal-back { position: fixed; inset: 0; background: rgba(15, 20, 30, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.cr-modal-back { position: fixed; inset: 0; background: rgba(15, 8, 3, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
 /* Over a blurred page it needs more body than a drawer does, or its text swims. */
 .cr-modal { background: color-mix(in srgb, var(--cr-solid) 82%, transparent); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); border-radius: 24px; box-shadow: var(--cr-edge), var(--cr-shadow); width: min(560px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 22px 24px; }
 .cr-modal .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
@@ -209,8 +209,8 @@ body.cr-chat-open .cr-drawer.left { width: min(1040px, max(520px, calc(100vw - 8
 
 /* lobby */
 /* Glass needs something to be glass over. */
-body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; background-color: var(--cr-bg); background-image: radial-gradient(1000px 680px at 10% -10%, #1d3a86 0, transparent 62%), radial-gradient(820px 600px at 96% 4%, #43297f 0, transparent 60%), radial-gradient(900px 640px at 58% 110%, #17255e 0, transparent 62%); }
-:root[data-theme="light"] body.cr-lobby { background-image: radial-gradient(900px 620px at 12% -8%, #bcd2ff 0, transparent 62%), radial-gradient(760px 560px at 96% 6%, #dccbff 0, transparent 60%), radial-gradient(860px 620px at 62% 108%, #c9d6ff 0, transparent 60%); }
+body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; background-color: var(--cr-bg); background-image: radial-gradient(1000px 680px at 10% -10%, #4a2f1c 0, transparent 62%), radial-gradient(820px 600px at 96% 4%, #1f4a42 0, transparent 60%), radial-gradient(900px 640px at 58% 110%, #5a3518 0, transparent 62%); }
+:root[data-theme="light"] body.cr-lobby { background-image: radial-gradient(900px 620px at 12% -8%, #ecc994 0, transparent 62%), radial-gradient(760px 560px at 96% 6%, #c4dfd3 0, transparent 60%), radial-gradient(860px 620px at 62% 108%, #e6c8a0 0, transparent 60%); }
 .cr-lobby main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 60px; }
 .cr-lobby .top { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
 .cr-lobby .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; display: flex; gap: 10px; align-items: center; }
@@ -260,7 +260,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-editor-tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 0 10px 8px; border-bottom: 0.5px solid var(--cr-line); }
 .cr-editor-tabs button { border: 0; background: none; padding: 5px 10px; border-radius: 99px; cursor: pointer; color: var(--cr-ink-2); font-size: 12.5px; font-weight: 500; transition: background 0.15s; }
 .cr-editor-tabs button:hover { background: var(--cr-well); }
-.cr-editor-tabs button.on { background: var(--cr-active); color: #fff; font-weight: 600; }
+.cr-editor-tabs button.on { background: var(--cr-active); color: var(--cr-accent-ink); font-weight: 600; }
 .cr-editor-body { flex: 1; overflow: auto; padding: 14px; }
 .cr-kv.tight { margin: 6px 0; }
 
@@ -292,8 +292,8 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-stepper { list-style: none; display: flex; gap: 6px; padding: 0; margin: 0; flex-wrap: wrap; }
 .cr-stepper li { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--cr-ink-3); padding: 3px 9px 3px 4px; border-radius: 99px; }
 .cr-stepper li span { display: inline-flex; align-items: center; justify-content: center; width: 19px; height: 19px; border-radius: 50%; background: var(--cr-well); font-size: 11px; font-weight: 700; }
-.cr-stepper li.on { color: var(--cr-ink); font-weight: 650; } .cr-stepper li.on span { background: linear-gradient(135deg, var(--cr-accent), var(--cr-accent-2)); color: #fff; }
-.cr-stepper li.done span { background: var(--cr-ok); color: #fff; }
+.cr-stepper li.on { color: var(--cr-ink); font-weight: 650; } .cr-stepper li.on span { background: linear-gradient(135deg, var(--cr-accent), var(--cr-accent-2)); color: var(--cr-accent-ink); }
+.cr-stepper li.done span { background: var(--cr-ok); color: var(--cr-accent-ink); }
 .cr-preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 8px 0; }
 .cr-preset { display: flex; flex-direction: column; gap: 3px; text-align: left; border: 0; background: var(--cr-well); border-radius: var(--cr-radius-inner); padding: 12px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
 .cr-preset:hover { transform: translateY(-1px); box-shadow: inset 0 0 0 1.5px var(--cr-accent); }
@@ -306,7 +306,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-checklist li.ok .cr-mark { color: var(--cr-ok); } .cr-checklist li.bad .cr-mark { color: var(--cr-bad); }
 .cr-modal .actions.center { justify-content: center; }
 .cr-wizard-done { text-align: center; padding: 28px 8px; }
-.cr-done-mark { width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; background: linear-gradient(135deg, var(--cr-ok), #2fbf8f); animation: cr-pop 0.28s var(--cr-ease); }
+.cr-done-mark { width: 54px; height: 54px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--cr-accent-ink); background: linear-gradient(135deg, var(--cr-ok), var(--cr-accent-2)); animation: cr-pop 0.28s var(--cr-ease); }
 .cr-modal:has(.cr-wizard) { width: min(720px, 100%); }
 
 /* --- orchestrator --- */
@@ -392,7 +392,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 /* AI connections: what each costs, and every model as its service reported it. */
 .cr-usage-class { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; background: rgba(148, 163, 184, .18); }
 .cr-usage-class.free, .cr-usage-class.promo, .cr-usage-class.local { background: rgba(52, 211, 153, .18); color: #6ee7b7; }
-.cr-usage-class.subscription { background: rgba(96, 165, 250, .18); color: #93c5fd; }
+.cr-usage-class.subscription { background: rgba(111, 189, 175, .18); color: #9fd8cc; }
 .cr-usage-class.trial, .cr-usage-class.unknown { background: rgba(251, 191, 36, .18); color: #fcd34d; }
 .cr-usage-class.paid { background: rgba(248, 113, 113, .18); color: #fca5a5; }
 .cr-models-wrap { max-height: 46vh; overflow: auto; border: 1px solid rgba(148, 163, 184, .18); border-radius: 10px; margin: 8px 0; }
@@ -410,7 +410,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 /* --- glass surfaces: the sheen sits over each panel's translucent colour --- */
 .cr-drawer, .cr-editor, .cr-lobby .big, .cr-bigaction, .cr-nav-panel { background: var(--cr-sheen), var(--cr-panel); }
 .cr-modal { background: var(--cr-sheen), color-mix(in srgb, var(--cr-solid) 86%, transparent); }
-.cr-modal-back { background: rgba(5, 8, 20, 0.42); }
+.cr-modal-back { background: rgba(15, 8, 3, 0.42); }
 .cr-bigaction { -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); }
 .cr-bigaction:hover { box-shadow: var(--cr-glow), var(--cr-shadow); }
 .cr .btn { transition: background var(--cr-fast), transform var(--cr-fast), box-shadow var(--cr-fast), filter var(--cr-fast); }
@@ -429,7 +429,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 #crew-bar .btn { padding: 6px 13px; }
 #crew-bar .btn.cr-icon-btn { padding: 6px 9px; }
 #crew-bar .btn.cr-stop { padding: 6px 13px; font-size: 12.5px; }
-#crew-bar .btn.on { background: var(--cr-active); color: #fff; }
+#crew-bar .btn.on { background: var(--cr-active); color: var(--cr-accent-ink); }
 #crew-bar .cr-link { background: var(--cr-panel); }
 
 /* --- navigation --- */
@@ -437,7 +437,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-nav-dock { pointer-events: auto; display: flex; flex-direction: column; gap: 4px; padding: 6px; border-radius: 18px; background: var(--cr-sheen), var(--cr-panel); -webkit-backdrop-filter: var(--cr-glass); backdrop-filter: var(--cr-glass); box-shadow: var(--cr-edge), var(--cr-shadow); }
 .cr-nav-dock-btn { position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 12px; background: none; color: var(--cr-ink-2); cursor: pointer; transition: background var(--cr-fast), color var(--cr-fast), transform var(--cr-fast); }
 .cr-nav-dock-btn:hover { background: var(--cr-control); color: var(--cr-ink); }
-.cr-nav-dock-btn.on { background: var(--cr-active); color: #fff; box-shadow: 0 4px 14px color-mix(in srgb, var(--cr-accent) 35%, transparent); }
+.cr-nav-dock-btn.on { background: var(--cr-active); color: var(--cr-accent-ink); box-shadow: 0 4px 14px color-mix(in srgb, var(--cr-accent) 35%, transparent); }
 .cr-nav-dock-btn:focus-visible, .cr-nav-item:focus-visible, .cr-nav-group-head:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 1px; }
 /* The tooltip only says something while the dock is all there is. */
 .cr-nav:not(.open) .cr-nav-dock-btn::after { content: attr(data-tip); position: absolute; left: calc(100% + 12px); top: 50%; transform: translate(-4px, -50%); padding: 4px 10px; border-radius: 9px; white-space: nowrap; font-size: 12px; font-weight: 550; color: var(--cr-ink); background: var(--cr-solid); box-shadow: var(--cr-edge), var(--cr-shadow); opacity: 0; pointer-events: none; transition: opacity var(--cr-fast), transform var(--cr-fast); }
@@ -458,7 +458,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-nav-item .cr-icon svg { width: 17px; height: 17px; }
 .cr-nav-item:hover { background: var(--cr-control); color: var(--cr-ink); }
 .cr-nav-item.on { color: var(--cr-ink); background: linear-gradient(135deg, color-mix(in srgb, var(--cr-accent) 30%, transparent), color-mix(in srgb, var(--cr-accent-2) 26%, transparent)); box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--cr-accent) 50%, transparent); font-weight: 600; }
-.cr-nav-badge { min-width: 19px; padding: 0 6px; border-radius: 99px; text-align: center; font-size: 11px; font-weight: 700; color: #fff; background: var(--cr-bad); }
+.cr-nav-badge { min-width: 19px; padding: 0 6px; border-radius: 99px; text-align: center; font-size: 11px; font-weight: 700; color: var(--cr-accent-ink); background: var(--cr-bad); }
 
 /* --- chat: on the right, always --- */
 .cr-chat-head { padding: 12px 12px 8px 16px !important; }
@@ -470,9 +470,9 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-channels button { flex: none; display: inline-flex; align-items: center; max-width: 100%; position: relative; border: 0; background: var(--cr-control); color: var(--cr-ink-2); border-radius: 99px; padding: 4px 12px; cursor: pointer; font-size: 12.5px; font-weight: 520; box-shadow: inset 0 0 0 0.5px var(--cr-line); transition: background var(--cr-fast), color var(--cr-fast), box-shadow var(--cr-fast); }
 .cr-channels button:hover { background: var(--cr-control-hover); color: var(--cr-ink); }
 .cr-channels button:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 1px; }
-.cr-channels button.on { background: var(--cr-active); color: #fff; font-weight: 620; box-shadow: 0 3px 12px color-mix(in srgb, var(--cr-accent) 32%, transparent); }
+.cr-channels button.on { background: var(--cr-active); color: var(--cr-accent-ink); font-weight: 620; box-shadow: 0 3px 12px color-mix(in srgb, var(--cr-accent) 32%, transparent); }
 .cr-channel-name { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cr-channels .cr-unread { display: inline-block; flex: none; min-width: 16px; margin-left: 5px; padding: 0 4px; border-radius: 99px; font-size: 10.5px; line-height: 16px; font-weight: 700; text-align: center; color: #fff; background: var(--cr-accent); }
+.cr-channels .cr-unread { display: inline-block; flex: none; min-width: 16px; margin-left: 5px; padding: 0 4px; border-radius: 99px; font-size: 10.5px; line-height: 16px; font-weight: 700; text-align: center; color: var(--cr-accent-ink); background: var(--cr-accent); }
 .cr-channels button.on .cr-unread { background: rgba(255, 255, 255, 0.28); }
 .cr-msgs { padding: 12px 14px; gap: 12px; }
 .cr-msg .text { background: var(--cr-control); margin-top: 3px; padding: 7px 11px; border-radius: 4px 13px 13px 13px; box-shadow: inset 0 0 0 0.5px var(--cr-line); width: fit-content; max-width: 100%; }
@@ -487,7 +487,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr .cr-composer input:focus-visible { box-shadow: none; }
 .cr-composer .btn.primary { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 50%; flex: none; }
 .cr-composer .btn.primary .cr-icon svg { width: 16px; height: 16px; }
-#crew-bar .cr-count { min-width: 17px; margin-left: 2px; padding: 0 5px; border-radius: 99px; font-size: 11px; line-height: 17px; font-weight: 700; text-align: center; color: #fff; background: var(--cr-accent); }
+#crew-bar .cr-count { min-width: 17px; margin-left: 2px; padding: 0 5px; border-radius: 99px; font-size: 11px; line-height: 17px; font-weight: 700; text-align: center; color: var(--cr-accent-ink); background: var(--cr-accent); }
 
 /* Narrow enough that the top-right controls take two rows: panels start below them. */
 @media (max-width: 1320px) {
@@ -546,3 +546,176 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-graph-links button { border: 0; background: none; color: var(--cr-ink); text-align: left; padding: 3px 6px; border-radius: 8px; cursor: pointer; font-size: 12.5px; overflow-wrap: anywhere; }
 .cr-graph-links button:hover { background: var(--cr-control); }
 @media (max-width: 760px) { .cr-graph-main { flex-direction: column; } .cr-graph-details { width: auto; max-height: 40%; } .cr-graph-wrap { min-height: 300px; } }
+
+
+/* --- Pixel art --------------------------------------------------------------------------------
+   Panels and the chat in the same style as the office: square corners, hard bevels and no blur or
+   gradients. Both themes share it; only the colours above differ. */
+:root {
+  --cr-radius: 0px;
+  --cr-radius-inner: 0px;
+  --cr-glass: none;
+  --cr-panel: var(--cr-solid);
+  --cr-sheen: none;
+  --cr-active: var(--cr-accent);
+  --cr-font: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+  --cr-frame: #120a05;
+  --cr-bevel: inset 2px 2px 0 rgba(255, 236, 200, 0.22), inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+  --cr-edge: var(--cr-bevel);
+  --cr-shadow: 4px 4px 0 rgba(15, 8, 3, 0.4);
+  --cr-glow: 0 0 0 2px var(--cr-accent);
+}
+:root[data-theme="light"] {
+  --cr-panel: var(--cr-solid);
+  --cr-sheen: none;
+  --cr-frame: #3a2212;
+  --cr-bevel: inset 2px 2px 0 #fffaf1, inset -2px -2px 0 #dcc9a8;
+  --cr-edge: var(--cr-bevel);
+  --cr-shadow: 4px 4px 0 rgba(58, 34, 18, 0.28);
+}
+.cr, .cr *, #crew-bar, #crew-bar *, .cr-nav, .cr-nav *, .cr-drawer, .cr-drawer *, .cr-modal, .cr-modal *, .cr-editor, .cr-editor *, .cr-bubble {
+  border-radius: 0 !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.cr img, .cr-nav img, .cr-drawer img { image-rendering: pixelated; }
+.cr-drawer, .cr-editor, .cr-modal, .cr-nav-dock, .cr-nav-panel, .cr-bigaction, .cr-lobby .big {
+  background: var(--cr-solid) !important;
+  border: 2px solid var(--cr-frame) !important;
+  box-shadow: var(--cr-bevel), var(--cr-shadow) !important;
+}
+.cr .btn, #crew-bar .btn, .cr-nav-dock-btn {
+  border: 2px solid var(--cr-frame) !important;
+  box-shadow: var(--cr-bevel) !important;
+  transition: none;
+}
+.cr .btn.primary, #crew-bar .btn.primary, #crew-bar .btn.on, .cr-nav-dock-btn.on, .cr-channels button.on, .cr-editor-tabs button.on {
+  background: var(--cr-accent) !important;
+  color: var(--cr-accent-ink) !important;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.35), inset -2px -2px 0 rgba(0, 0, 0, 0.3) !important;
+}
+.cr .btn:active, #crew-bar .btn:active { transform: translate(1px, 1px); box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.3) !important; }
+.cr input, .cr select, .cr textarea { border: 2px solid var(--cr-frame) !important; box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.22) !important; outline-offset: 1px; }
+.cr .avatar { outline: 2px solid var(--cr-frame); }
+
+/* The chat, as speech bubbles on a plain wall. */
+.cr-msgs { background-color: var(--cr-well); background-image: linear-gradient(rgba(255, 236, 200, 0.03) 2px, transparent 2px); background-size: 100% 8px; }
+.cr-msg .text {
+  display: inline-block;
+  max-width: 100%;
+  padding: 5px 8px;
+  background: var(--cr-control);
+  border: 2px solid var(--cr-frame);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.22);
+}
+.cr-msg.system .text { background: none; border: 0; box-shadow: none; padding: 0; }
+.cr-channels button { border: 2px solid transparent; }
+.cr-bubble {
+  background: #fbf3e4;
+  color: #2e1c12;
+  border: 2px solid #3a2212;
+  box-shadow: 2px 2px 0 rgba(58, 34, 18, 0.35);
+  font-family: var(--cr-font);
+}
+.cr-bubble::after { border-width: 5px; bottom: -11px; }
+
+/* The character selection screen. */
+.cr-characters { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.cr-characters button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px 6px; background: var(--cr-control); border: 2px solid var(--cr-frame); box-shadow: var(--cr-bevel); color: var(--cr-ink); cursor: pointer; }
+.cr-characters button:hover { background: var(--cr-control-hover); }
+.cr-characters button.on { background: var(--cr-accent); color: var(--cr-accent-ink); box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.35), inset -2px -2px 0 rgba(0, 0, 0, 0.3); }
+.cr-characters canvas { width: 78px; height: 132px; image-rendering: pixelated; }
+.cr-characters span { font-size: 12px; font-weight: 700; }
+
+/* Rounded, in pixels: stepped corners drawn as a frame, around a gradient in visible bands. */
+:root {
+  --cr-pixel-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'7'%20height%3D'7'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'0'%20width%3D'3'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'1'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'5'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'0'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'6'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'1'%20y%3D'5'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'5'%20y%3D'5'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'2'%20y%3D'6'%20width%3D'3'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'3'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'2'%20y%3D'5'%20width%3D'3'%20height%3D'1'%20fill%3D'%232a1a0f'%2F%3E%3Crect%20x%3D'5'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%232a1a0f'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'3'%20height%3D'3'%20fill%3D'%233a2617'%2F%3E%3C%2Fsvg%3E");
+  --cr-pixel-fill: linear-gradient(170deg, color-mix(in srgb, #20302c 0%, #3a2617) 0.0% 14.3%, color-mix(in srgb, #20302c 17%, #3a2617) 14.3% 28.6%, color-mix(in srgb, #20302c 33%, #3a2617) 28.6% 42.9%, color-mix(in srgb, #20302c 50%, #3a2617) 42.9% 57.1%, color-mix(in srgb, #20302c 67%, #3a2617) 57.1% 71.4%, color-mix(in srgb, #20302c 83%, #3a2617) 71.4% 85.7%, color-mix(in srgb, #20302c 100%, #3a2617) 85.7% 100.0%);
+  --cr-pixel-action: linear-gradient(135deg, color-mix(in srgb, #93bd7f 0%, #7fcbbd) 0.0% 16.7%, color-mix(in srgb, #93bd7f 20%, #7fcbbd) 16.7% 33.3%, color-mix(in srgb, #93bd7f 40%, #7fcbbd) 33.3% 50.0%, color-mix(in srgb, #93bd7f 60%, #7fcbbd) 50.0% 66.7%, color-mix(in srgb, #93bd7f 80%, #7fcbbd) 66.7% 83.3%, color-mix(in srgb, #93bd7f 100%, #7fcbbd) 83.3% 100.0%);
+  --cr-pixel-step: polygon(0 4px, 2px 4px, 2px 2px, 4px 2px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 2px, calc(100% - 2px) 2px, calc(100% - 2px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 2px) calc(100% - 4px), calc(100% - 2px) calc(100% - 2px), calc(100% - 4px) calc(100% - 2px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 2px), 2px calc(100% - 2px), 2px calc(100% - 4px), 0 calc(100% - 4px));
+}
+:root[data-theme="light"] {
+  --cr-pixel-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'7'%20height%3D'7'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'2'%20y%3D'0'%20width%3D'3'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'5'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'0'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'6'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'5'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'5'%20y%3D'5'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'6'%20width%3D'3'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'3'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'2'%20y%3D'5'%20width%3D'3'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'5'%20y%3D'2'%20width%3D'1'%20height%3D'3'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'3'%20height%3D'3'%20fill%3D'%23fbf3e4'%2F%3E%3C%2Fsvg%3E");
+  --cr-pixel-fill: linear-gradient(170deg, color-mix(in srgb, #dfeadf 0%, #fbf3e4) 0.0% 14.3%, color-mix(in srgb, #dfeadf 17%, #fbf3e4) 14.3% 28.6%, color-mix(in srgb, #dfeadf 33%, #fbf3e4) 28.6% 42.9%, color-mix(in srgb, #dfeadf 50%, #fbf3e4) 42.9% 57.1%, color-mix(in srgb, #dfeadf 67%, #fbf3e4) 57.1% 71.4%, color-mix(in srgb, #dfeadf 83%, #fbf3e4) 71.4% 85.7%, color-mix(in srgb, #dfeadf 100%, #fbf3e4) 85.7% 100.0%);
+  --cr-pixel-action: linear-gradient(135deg, color-mix(in srgb, #466f45 0%, #2f7468) 0.0% 16.7%, color-mix(in srgb, #466f45 20%, #2f7468) 16.7% 33.3%, color-mix(in srgb, #466f45 40%, #2f7468) 33.3% 50.0%, color-mix(in srgb, #466f45 60%, #2f7468) 50.0% 66.7%, color-mix(in srgb, #466f45 80%, #2f7468) 66.7% 83.3%, color-mix(in srgb, #466f45 100%, #2f7468) 83.3% 100.0%);
+}
+.cr-drawer, .cr-editor, .cr-modal, .cr-nav-dock, .cr-nav-panel, .cr-bigaction, .cr-lobby .big {
+  border: 6px solid transparent !important;
+  border-image: var(--cr-pixel-frame) 3 / 6px !important;
+  background: var(--cr-pixel-fill) padding-box !important;
+  box-shadow: none !important;
+  filter: drop-shadow(3px 3px 0 rgba(15, 8, 3, 0.35));
+}
+.cr .btn, #crew-bar .btn, .cr-nav-dock-btn, .cr-channels button, .cr-characters button, .cr-nav-item, .cr-editor-tabs button {
+  clip-path: var(--cr-pixel-step);
+  border: 0 !important;
+  box-shadow: inset 0 0 0 2px var(--cr-frame), var(--cr-bevel) !important;
+}
+.cr-nav-item { box-shadow: none !important; }
+.cr-nav-item:hover, .cr-nav-item.on { box-shadow: inset 0 0 0 2px var(--cr-frame) !important; }
+.cr-nav-item:hover { background: var(--cr-control-hover); }
+.cr .btn.primary, #crew-bar .btn.primary, #crew-bar .btn.on, .cr-nav-dock-btn.on, .cr-channels button.on, .cr-editor-tabs button.on, .cr-characters button.on, .cr-nav-item.on {
+  background: var(--cr-pixel-action) !important;
+  color: var(--cr-accent-ink) !important;
+}
+.cr-nav-panel { width: 240px; }
+.cr-nav-head b { color: var(--cr-ink); }
+.cr-nav-item { padding-left: 10px; }
+
+/* The lobby's hanging light. */
+.cr-lamp { position: relative; height: 210px; margin-top: 18px; pointer-events: none; }
+.cr-lamp-beam {
+  height: 14px;
+  background: linear-gradient(#eeb565 0 2px, #c98a45 2px 10px, #8c5420 10px 14px);
+  box-shadow: 0 0 0 2px #2e1c12;
+}
+.cr-lamp-swing { position: absolute; top: 14px; left: 50%; width: 60px; margin-left: -30px; transform-origin: top center; animation: cr-lamp-sway 6s steps(8) infinite alternate; }
+@keyframes cr-lamp-sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
+.cr-lamp-cord { width: 4px; height: 62px; margin: 0 auto; background: repeating-linear-gradient(#2e1c12 0 4px, #4a2c12 4px 8px); }
+.cr-lamp-bulb {
+  width: 60px;
+  height: 96px;
+  margin-top: -4px;
+  background: url('/assets/pixel-art/office/established/bulb.png') 0 0 / 200% 100% no-repeat;
+  image-rendering: pixelated;
+  position: relative;
+  z-index: 1;
+}
+.cr-lamp.on .cr-lamp-bulb { background-position: 100% 0; }
+.cr-lamp-glow {
+  position: absolute;
+  left: 50%;
+  top: -37px; /* centred on the glass of the bulb */
+  width: 320px;
+  height: 320px;
+  margin-left: -160px;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(255, 224, 138, 0.42) 0 12%, rgba(255, 214, 120, 0.26) 12% 24%, rgba(255, 204, 100, 0.15) 24% 38%, rgba(255, 196, 90, 0.07) 38% 54%, transparent 54%);
+  opacity: 0;
+}
+.cr-lamp.on .cr-lamp-glow { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .cr-lamp-swing { animation: none; } }
+
+/* Rounder: bigger stepped corners, with the gradient clipped to them so its bands reach the frame. */
+:root { --cr-pixel-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'11'%20height%3D'11'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'3'%20y%3D'0'%20width%3D'5'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'8'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'9'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'0'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'10'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'1'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'9'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'2'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'8'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'3'%20y%3D'10'%20width%3D'5'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'3'%20y%3D'1'%20width%3D'5'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'1'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'8'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'2'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%231c110a'%2F%3E%3Crect%20x%3D'3'%20y%3D'9'%20width%3D'5'%20height%3D'1'%20fill%3D'%231c110a'%2F%3E%3Crect%20x%3D'8'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%231c110a'%2F%3E%3Crect%20x%3D'9'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%231c110a'%2F%3E%3C%2Fsvg%3E"); --cr-pixel-round: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)); }
+:root[data-theme="light"] { --cr-pixel-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'11'%20height%3D'11'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'3'%20y%3D'0'%20width%3D'5'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'8'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'9'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'0'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'10'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'1'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'9'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'2'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'8'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'3'%20y%3D'10'%20width%3D'5'%20height%3D'1'%20fill%3D'%233a2212'%2F%3E%3Crect%20x%3D'3'%20y%3D'1'%20width%3D'5'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'1'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'8'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23fffaf1'%2F%3E%3Crect%20x%3D'2'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'3'%20y%3D'9'%20width%3D'5'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'8'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23d8c6a4'%2F%3E%3Crect%20x%3D'9'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23d8c6a4'%2F%3E%3C%2Fsvg%3E"); }
+.cr-drawer, .cr-editor, .cr-modal, .cr-nav-dock, .cr-nav-panel, .cr-bigaction, .cr-lobby .big,
+#agent-panel, #inspector, #dev-panel, #scene-panel {
+  border: 10px solid transparent !important;
+  border-image: var(--cr-pixel-frame) 5 / 10px !important;
+  background: var(--cr-pixel-fill) border-box !important;
+  clip-path: var(--cr-pixel-round);
+  filter: none;
+  color: var(--cr-ink);
+}
+.cr .btn, #crew-bar .btn, .cr-nav-dock-btn, .cr-channels button, .cr-characters button, .cr-nav-item, .cr-editor-tabs button { clip-path: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)); }
+/* The top bar and panels in a hosted office take the room's colours, so their text stays readable. */
+.kc-button, .help-button, .switcher > button, #title-bar .switcher > button {
+  clip-path: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px));
+  background: var(--cr-pixel-fill) !important;
+  color: var(--cr-ink) !important;
+  box-shadow: inset 0 0 0 2px var(--cr-frame), var(--cr-bevel) !important;
+}
+#office-camera { clip-path: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)); border-image: var(--cr-pixel-frame) 5 / 10px !important; border: 10px solid transparent !important; background: var(--cr-pixel-fill) border-box !important; filter: none; }
+#office-camera span { color: var(--cr-ink); }
+#office-camera button { background: var(--cr-control) !important; color: var(--cr-ink) !important; }

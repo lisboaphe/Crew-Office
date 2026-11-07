@@ -1,5 +1,5 @@
 /* Shared by reception, the office and the generated documentation.
- * Colours: @atlaskit/tokens 16.11.3, palette-brand-refresh.
+ * Colours: Crew Office's own warm palette of oak, teal, sage, terracotta and cream.
  * Fonts: Inter 4.1 and JetBrains Mono 2.304, both SIL Open Font License 1.1, subset to
  * latin and bundled locally. Licences in vendor/inter/ and vendor/jetbrains-mono/, which
  * also record the versions and the subsetting command; see docs/developer/developing.md. */
@@ -49,47 +49,47 @@
   --text-heading-small: 1rem;
   --text-heading-medium: 1.25rem;
   --text-heading-large: 1.5rem;
-  --bg: #f8f8f8;
-  --panel: rgba(255, 255, 255, 0.97);
-  --panel-solid: #fff;
-  --surface-soft: #f0f1f2;
-  --surface-hovered: #dddee1;
-  --border: #dddee1;
-  --border-strong: #8c8f97;
-  --text: #292a2e;
-  --muted: #505258;
-  --brand: #1868db;
-  --brand-hovered: #1558bc;
-  --selected: #e9f2fe;
+  --bg: #f6eee0;
+  --panel: rgba(255, 250, 241, 0.97);
+  --panel-solid: #fffaf1;
+  --surface-soft: #efe4d2;
+  --surface-hovered: #e3d5bf;
+  --border: #e0d2bc;
+  --border-strong: #8f7c66;
+  --text: #2e2117;
+  --muted: #5c4a38;
+  --brand: #2f7468;
+  --brand-hovered: #255c52;
+  --selected: #dcefe9;
   --on-bold: #fff;
-  --green-soft: #baf3db;
-  --green-hovered: #7ee2b8;
-  --green-bold: #1f845a;
-  --sage: #216e4e;
-  --sky-soft: #e9f2fe;
-  --leaf-soft: #dcfff1;
-  --sun-soft: #fef7c8;
-  --sun: #eed12b;
-  --leaf: #94c748;
-  --shadow-panel: 0 4px 20px rgba(35, 60, 78, 0.12), 0 1px 3px rgba(35, 60, 78, 0.06);
-  --shadow-overlay: 0 16px 48px rgba(35, 60, 78, 0.18), 0 2px 6px rgba(35, 60, 78, 0.08);
-  --blanket: rgba(80, 105, 122, 0.22);
-  --status-idle: #6b6e76;
-  --status-resting: #6b6e76;
-  --status-drinking: #6b6e76;
-  --status-working: #1f845a;
-  --status-researching: #227d9b;
-  --status-waiting: #803fa5;
-  --status-delivering: #964ac0;
-  --status-error: #c9372c;
-  --status-walking: #1868db;
+  --green-soft: #d5e6c6;
+  --green-hovered: #b9d6a2;
+  --green-bold: #4a7040;
+  --sage: #3f6b45;
+  --sky-soft: #dcefe9;
+  --leaf-soft: #e6f1d8;
+  --sun-soft: #fbeecb;
+  --sun: #e3b341;
+  --leaf: #8fae5b;
+  --shadow-panel: 0 4px 20px rgba(60, 35, 15, 0.12), 0 1px 3px rgba(60, 35, 15, 0.06);
+  --shadow-overlay: 0 16px 48px rgba(60, 35, 15, 0.18), 0 2px 6px rgba(60, 35, 15, 0.08);
+  --blanket: rgba(70, 45, 25, 0.28);
+  --status-idle: #75614c;
+  --status-resting: #75614c;
+  --status-drinking: #75614c;
+  --status-working: #4a7040;
+  --status-researching: #2f7468;
+  --status-waiting: #7c4a78;
+  --status-delivering: #8f5588;
+  --status-error: #b23a2c;
+  --status-walking: #a84f2b;
   --job-active: var(--text);
-  --job-done: #216e4e;
+  --job-done: #3f6b45;
   --job-error: var(--status-error);
-  --conn-live: #1f845a;
-  --conn-waiting: #803fa5;
-  --conn-connecting: #1868db;
-  --conn-offline: #c9372c;
+  --conn-live: #4a7040;
+  --conn-waiting: #7c4a78;
+  --conn-connecting: #2f7468;
+  --conn-offline: #b23a2c;
 }
 /* Once for the page and again for the mono, since the mono needs its own list and would
  * otherwise inherit the sans one. `font-variant-numeric` also loses to this property, so
@@ -97,5 +97,5 @@
  * why the rules in styles.css that want tabular figures set them here instead. */
 body { font-feature-settings: var(--font-variants-sans); }
 code, pre, kbd, samp { font-feature-settings: var(--font-variants-mono); }
-::selection { background: #cfe1fd; color: #123263; }
+::selection { background: #bfe0d8; color: #18322d; }
 :focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }

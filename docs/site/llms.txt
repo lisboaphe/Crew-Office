@@ -1,6 +1,6 @@
-# The Roving Office
+# Crew Office
 
-> A soft-3D isometric office that shows what your coding agents are doing, live. Each agent session becomes a character who walks in, sits down, does the work you asked for and leaves — watchable in a browser, shareable by link.
+> A pixel-art office that shows what your coding agents are doing, live. Each agent session becomes a character who walks in, sits down, does the work you asked for and leaves — watchable in a browser, shareable by link.
 
 The office runs locally or on a URL, takes live events from several
 coding-agent harnesses over a small HTTP protocol, and needs no account: an office is
@@ -17,7 +17,7 @@ If you are an AI coding agent and somebody has asked you to connect **this sessi
 the office, do not assemble it from the pages below. There is one document written for
 you, it is authoritative, and it is meant to be fetched and followed:
 
-- [Set up The Roving Office](https://therovingoffice.com/agent-setup/prompt.md): mint an office, install the adapter for your own harness, restart the session.
+- [Set up Crew Office](https://therovingoffice.com/agent-setup/prompt.md): mint an office, install the adapter for your own harness, restart the session.
 
 What it will ask of you, so you know before you fetch it:
 
@@ -85,11 +85,11 @@ You have a checkout and something to change.
 - [The Test Data source](https://therovingoffice.com/docs/developer/test-data.md): The simulation, and the test rig.
 - [Extending the office](https://therovingoffice.com/docs/developer/extending.md): Four recipes, each ending in a working thing.
 - [Photographing a prop](https://therovingoffice.com/docs/developer/prop-portraits.md): How the object portraits are generated, and the measurements that came out of it.
-- [Visual assets and their rights](https://therovingoffice.com/docs/developer/visual-assets.md): Every visual asset that ships with The Roving Office, where it came from, and on what basis it is published.
+- [Visual assets and their rights](https://therovingoffice.com/docs/developer/visual-assets.md): Every visual asset that ships with Crew Office, where it came from, and on what basis it is published.
 - [The coplanar-face probe](https://therovingoffice.com/docs/developer/coplanar-probe.md)
 - [Publishing the plugins](https://therovingoffice.com/docs/developer/plugin-distribution.md): How the Claude Code and Codex plugins reach somebody who has never cloned this repository — and what is still missing before they do.
 - [The admin console](https://therovingoffice.com/docs/developer/admin-console.md): A password-gated page of summary statistics about one deployment: how many offices have been opened and closed, how many harnesses have successfully connected, how much work has been delivered and finished, and what people set their rooms…
-- [The AOP spec](https://therovingoffice.com/docs/developer/protocol/aop-spec.md): Status: draft · Version string: "0.1" · Audience: anyone writing an adapter that feeds live agent activity into The Roving Office.
+- [The AOP spec](https://therovingoffice.com/docs/developer/protocol/aop-spec.md): Status: draft · Version string: "0.1" · Audience: anyone writing an adapter that feeds live agent activity into Crew Office.
 - [Adapter notes](https://therovingoffice.com/docs/developer/protocol/aop-harness-adapters.md): Companion to aop-spec.md.
 - [Rovo CLI](https://therovingoffice.com/docs/developer/adapters/rovo-cli.md): Installing it is Rovo CLI.
 - [Claude Code](https://therovingoffice.com/docs/developer/adapters/claude-code.md): Installing it is Claude Code.

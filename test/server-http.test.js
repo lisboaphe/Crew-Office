@@ -140,7 +140,7 @@ test('the llms.txt index is served at the root, as readable text', async () => {
   assert.match(res.headers.get('content-type') ?? '', /text\/plain/);
 
   const body = await res.text();
-  assert.match(body, /^# The Roving Office/, 'served something other than the index');
+  assert.match(body, /^# Crew Office/, 'served something other than the index');
   assert.match(body, /^> /m, 'the summary a reader gets without following a link');
 
   // No second-URL assertion here, and the reason is worth recording: `resolveDocs` falls

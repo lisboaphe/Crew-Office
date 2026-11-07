@@ -20,7 +20,7 @@ test('a working agent is never sent on a break', () => {
 test('an idle agent goes, pauses, and comes back to their desk', () => {
   const ambient = createAmbient({ random: () => 0 });
   const bots = [{ id: 'a', idle: true }];
-  run(ambient, bots, 14.2);
+  run(ambient, bots, 8.2);
   assert.ok(ambient.whereIs('a'), 'has left the desk');
   run(ambient, bots, 1.2);
   assert.equal(ambient.whereIs('a').phase, 'at');
@@ -63,7 +63,7 @@ test('two agents at the break area chat, then both go back', () => {
   assert.equal(ambient.whereIs('b').talking, true);
   assert.equal(ambient.whereIs('a').direction, 1, 'facing each other');
   assert.equal(ambient.whereIs('b').direction, -1);
-  run(ambient, [a, b], 12);
+  run(ambient, [a, b], 6);
   assert.equal(ambient.awayCount, 0);
 });
 
@@ -78,6 +78,18 @@ test('somebody at the break area waits for a colleague on the way, and they chat
   run(ambient, [a, b], 3);
   assert.equal(ambient.whereIs('a').talking, true);
   assert.equal(ambient.whereIs('b').talking, true);
+});
+
+test('an agent who is only sometimes free still gets a break', () => {
+  const ambient = createAmbient({ random: () => 0 });
+  const bot = { id: 'a', idle: true };
+  let left = false;
+  for (let t = 0; t < 60 && !left; t += 0.1) {
+    bot.idle = Math.floor(t) % 2 === 0; // free one second in two
+    ambient.update(0.1, [bot], () => plan());
+    left = Boolean(ambient.whereIs('a'));
+  }
+  assert.ok(left);
 });
 
 test('only a couple of agents are away at once', () => {

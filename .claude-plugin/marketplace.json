@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "roving-office",
-  "description": "The Roving Office: a soft-3D isometric office that shows what your coding agents are doing, live.",
+  "description": "Crew Office: a pixel-art office that shows what your coding agents are doing, live.",
   "owner": {
     "name": "Mike Cannon-Brookes"
   },
@@ -9,7 +9,7 @@
     {
       "name": "roving-office",
       "source": "./",
-      "description": "Watch your coding-agent sessions as characters in a soft-3D isometric office."
+      "description": "Watch your coding-agent sessions as characters in a pixel-art office."
     }
   ]
 }

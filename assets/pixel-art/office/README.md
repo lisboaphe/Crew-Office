@@ -13,7 +13,8 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 | `desk-idle` | Its bot is resting, screen dimmed | None |
 | `desk-standby` | Free for the next bot, drawn faded | None |
 | `floor` | The oak tile, repeated as far as the room needs | None |
-| `window` | Over each column, on the back wall | Clouds passing |
+| `window-day`, `-dawn`, `-dusk`, `-night` | One per room, on the back wall, picked by the host's time. Weather is painted over the glass as the office draws | Clouds, or stars and lit windows after dark |
+| `wall-clock` | A slim digital display in each room and the break area. Its digits are drawn from the host's time | Digits, and a colon ticking each second |
 | `plant` | Beside the lounge and between columns | Swaying |
 | `cooler` | Against the back wall | Bubbles rising |
 | `shelf`, `sofa`, `lamp` | The office's furniture | None |
@@ -21,6 +22,7 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 | `counter`, `coffee` | The break area's coffee machine and mugs, on its counter | Steam |
 | `fridge`, `side-table`, `microwave` | Drawn in `finish-established-art.lua` to match the set | The microwave glows while somebody uses it |
 | `noticeboard` | On the break area's wall | None |
+| `fax`, `armchair`, `rug`, `cabinet`, `boxes`, `bin`, `picture-*` | Chosen per room from its name, so rooms differ but each stays the same | None |
 
 ## How the room is put together
 

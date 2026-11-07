@@ -1,6 +1,6 @@
 # Visual assets: source and release basis
 
-Every visual asset that ships with The Roving Office, where it came from, and on what
+Every visual asset that ships with Crew Office, where it came from, and on what
 basis it is published. Some of them are other companies' brand assets that this project's
 code licence does not and cannot cover; those are named again in
 [`NOTICE`](../../NOTICE), which is the short, legally operative version. This page is the
@@ -31,7 +31,7 @@ and published under Apache-2.0 like the rest of the tree.
 |---|---|---|
 | Project logo and icon set | `assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico` | An isometric cutaway office in a rounded-hex silhouette. Cut from the scene's own render — the method is in [Developing on it](developing.md) |
 | Spot illustrations | `assets/airmail.svg`, `assets/arrivals.svg`, `assets/breather.svg`, `assets/curiosity.svg` | Hand-authored flat illustrations: a paper plane, a reception scene, a mug, a telescope |
-| UI theme | `assets/ui-theme.css` | Hand-authored CSS custom properties. Its colour values come from `@atlaskit/tokens` — see §4 |
+| UI theme | `assets/ui-theme.css` | Hand-authored CSS custom properties, with the project's own colour values |
 | In-house source glyphs | `src/ui/marks.js` — `cursorMark`, `testDataMark`, `museMark`, `plusMark` | Original geometry: a cursor chevron, a die, a laptop wearing headphones, a plus. Not any vendor's logo. Cursor's tile is deliberately an original glyph rather than Cursor's mark. The Muse glyph survives for the 3D name-tag and the debug log; the 2D chrome shows the portrait below |
 | Muse source portrait | `assets/muse-avatar.jpg` | The contributor's assistant avatar portrait, supplied to identify the Muse source. A source record's `image` field swaps it in for the vector mark in 2D chrome — picker, badge, switcher and rows — via `sourceVisual` in `src/ui/marks.js` |
 | The room, and every prop in it | `src/scene/`, `src/plan/` | Original geometry, apart from the two brand-mark standees in §3 |
@@ -98,7 +98,6 @@ UI and the documentation to say which agent an office can listen to, and nothing
 |---|---|---|---|
 | Inter (Latin subset) | `assets/Inter-latin.woff2`, `docs/site/assets/Inter-latin.woff2` | Inter 4.1 | **OFL-1.1**. [`vendor/inter/`](../../vendor/inter/) |
 | JetBrains Mono (Latin subset) | `assets/JetBrainsMono-latin.woff2`, `docs/site/assets/JetBrainsMono-latin.woff2` | JetBrains Mono 2.304 | **OFL-1.1**. [`vendor/jetbrains-mono/`](../../vendor/jetbrains-mono/) |
-| Atlassian Design System tokens | colour values in `assets/ui-theme.css` | `@atlaskit/tokens` 16.11.3 | **Apache-2.0**. Nothing from the package is bundled — only its colour values were transcribed. [`vendor/atlaskit-tokens/`](../../vendor/atlaskit-tokens/) |
 
 ## 5. Images that reproduce a mark
 

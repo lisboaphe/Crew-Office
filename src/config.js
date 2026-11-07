@@ -1,4 +1,4 @@
-// Central palette + layout config for The Roving Office.
+// Central palette + layout config for Crew Office.
 // Everything (props, stations, nav-grid obstacles) derives from here so the
 // visual layout and the walkable map can never drift out of sync.
 

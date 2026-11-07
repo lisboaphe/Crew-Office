@@ -5,7 +5,7 @@
 // State comes from one snapshot plus a stream of events; a reconnect that missed too much
 // is told to resync and fetches the snapshot again, so no state lives only in the page.
 
-import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteOffice, updateNotice, BRAND, reportErrors } from './common.js';
+import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteOffice, updateNotice, BRAND, reportErrors, characterPicker } from './common.js';
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 import { gitTab, filesTab, rulesTab } from './workspace.js';
 import { createAgentEditor } from './agent-editor.js';
@@ -50,7 +50,9 @@ async function boot() {
   ui.ownerOfComputer = (await api('GET', '/api/crew/this-computer').catch(() => ({}))).owner === true;
   buildChrome();
   connect();
-  tutorialOnFirstVisit({ showMe: tourShowMe });
+  // Choosing who you are comes first, then the tour.
+  const chosen = S.me && S.me.character == null ? chooseCharacter({ first: true }) : Promise.resolve();
+  chosen.then(() => tutorialOnFirstVisit({ showMe: tourShowMe }));
   window.addEventListener('office:select', (e) => {
     const id = String(e.detail?.id ?? '');
     const m = id.match(/#crew:(agt_[A-Za-z0-9_-]+)$/);
@@ -143,6 +145,19 @@ function buildChrome() {
   ui.orchestrator = createOrchestrator(editorContext());
   ui.editor = createAgentEditor(editorContext());
   ui.security = createSecurityCenter(editorContext());
+  // The bookshelf in each room of the office opens this. It is the same Files page as the menu's.
+  window.crewOpenFiles = () => toggleDash('files');
+  // Who the office should show as here, and how to change your own character.
+  window.crewPlayers = () => S.members
+    .filter((m) => m.online || m.userId === S.me?.id)
+    .map((m) => ({ id: m.userId, name: m.displayName, character: m.userId === S.me?.id ? S.me.character ?? m.character : m.character }));
+  // Every agent in the office, including those whose worker is not running yet: they have a desk too.
+  window.crewAgents = () => S.agents.map((a) => ({ id: a.id, name: a.name, color: a.color, ownerId: a.ownerId, ownerName: a.ownerName }));
+  window.crewChooseCharacter = (userId) => {
+    if (userId !== S.me?.id) return false;
+    chooseCharacter();
+    return true;
+  };
   ui.knowledge = createKnowledge({ ...editorContext(), setTab: (tab) => { ui.tab = tab; render(); } });
   ui.nav = createNav({
     groups: NAV,
@@ -193,7 +208,7 @@ function renderBar() {
 // is a second way of doing anything; `office3d` is the office itself, with everything put away.
 const NAV = [
   { key: 'workspace', label: 'Workspace', icon: 'workspace', items: [
-    { key: 'office3d', label: '3D Office', icon: 'building', hint: 'Close the panels and watch the floor' },
+    { key: 'office3d', label: 'Office', icon: 'building', hint: 'Close the panels and watch the floor' },
     { key: 'projects', label: 'Projects', icon: 'folder' },
     { key: 'board', label: 'Task Board', icon: 'board' },
     { key: 'files', label: 'Files', icon: 'file' },
@@ -512,7 +527,7 @@ function dashPrefs(body) {
   body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: stored('crew.motion') === 'off', onchange: (e) => { keep('crew.motion', e.target.checked ? 'off' : ''); applyAppearance(); } }), ' Turn off interface animation (your system’s reduced motion setting always applies)'));
   body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: quietMode(), onchange: (e) => keep('crew.quiet', e.target.checked ? '1' : '0') }), ' Quiet mode: only pop up what needs me (approvals, blockers, failures)'));
   body.append(h('h3', 'Tours'), h('div.row', h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }) }, 'How the office works'), h('button.btn', { onclick: () => { goTo('playbooks'); setTimeout(() => ui.orchestrator.tour(), 250); } }, 'How the Orchestrator works')));
-  body.append(h('h3', 'Profile'), h('div.row', h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
+  body.append(h('h3', 'Profile'), h('div.row', h('button.btn', { onclick: () => chooseCharacter() }, 'Change character'), h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));
 }
 
 function dashRoom(body) {
@@ -822,6 +837,25 @@ function roomSettings() {
       try { await api('PATCH', `/api/crew/rooms/${roomId}/settings`, { name: name.value, privacy: privacy.value, maxPlayers: Number(max.value), ...(pass.value ? { password: pass.value } : {}) }); close(true); toast('Saved'); } catch (e) { err.textContent = e.message; }
     };
     return h('div', ...field('Name', name), ...field('Privacy', privacy), ...field('Password', pass), ...field('Max players', max), err, h('div.actions', h('button.btn', { onclick: () => close() }, 'Cancel'), h('button.btn.primary', { onclick: save }, 'Save')));
+  });
+}
+
+/** The selection screen. Everyone in the office sees who you choose. */
+function chooseCharacter({ first = false } = {}) {
+  return modal('Choose your character', (close) => {
+    const picker = characterPicker(S.me?.character ?? 0);
+    const save = async () => {
+      try {
+        const { user } = await api('PATCH', '/api/crew/me', { character: picker.value });
+        S.me = user;
+        close();
+        render();
+      } catch (e) { toast(e.message); }
+    };
+    return h('div',
+      h('p.hint', first ? 'This is you in the office. You can change it any time by clicking your character.' : 'This is you in the office, and everyone here sees it.'),
+      picker,
+      h('div.actions', first ? null : h('button.btn', { onclick: () => close() }, 'Cancel'), h('button.btn.primary', { onclick: save }, first ? 'Start' : 'Save')));
   });
 }
 

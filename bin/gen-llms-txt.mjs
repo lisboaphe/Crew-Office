@@ -53,7 +53,7 @@ const SITE = 'https://therovingoffice.com';
  * deriving it from `docs/user/index.md` would make the file's opening hostage to an edit
  * made for a different reason.
  */
-const SUMMARY = 'A soft-3D isometric office that shows what your coding agents are doing, '
+const SUMMARY = 'A pixel-art office that shows what your coding agents are doing, '
   + 'live. Each agent session becomes a character who walks in, sits down, does the work '
   + 'you asked for and leaves — watchable in a browser, shareable by link.';
 
@@ -91,7 +91,7 @@ If you are an AI coding agent and somebody has asked you to connect **this sessi
 the office, do not assemble it from the pages below. There is one document written for
 you, it is authoritative, and it is meant to be fetched and followed:
 
-- [Set up The Roving Office](${SITE}/agent-setup/prompt.md): mint an office, install the adapter for your own harness, restart the session.
+- [Set up Crew Office](${SITE}/agent-setup/prompt.md): mint an office, install the adapter for your own harness, restart the session.
 
 What it will ask of you, so you know before you fetch it:
 
@@ -209,7 +209,7 @@ function bullet({ title, url, description }) {
 function render() {
   const skip = unpublished();
   const lines = [
-    `# The Roving Office`, '',
+    `# Crew Office`, '',
     `> ${SUMMARY}`, '',
     PREAMBLE.trim(), '',
     // First, and before either documentation set: whoever is reading this file is more

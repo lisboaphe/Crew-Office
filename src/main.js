@@ -1319,21 +1319,13 @@ function animate(timestamp) {
     controls.update();
     clampPan(camera, controls);
   }
-  office2d.draw(world, dt, { selectedId, timeText: clockText(), ownerOf: window.crewOwnerOf });
+  office2d.draw(world, dt, { selectedId, ownerOf: window.crewOwnerOf });
 }
 
 animate();
 
 // Hide loading overlay once the first frame is drawn.
 requestAnimationFrame(() => loading.classList.add('done'));
-
-/** The time for the clock on the wall. */
-function clockText() {
-  const hours = worldClock.hours();
-  const h = Math.floor(hours);
-  const m = Math.floor((hours - h) * 60);
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
 
 /**
  * Point the camera at the room the way `frame` asked for.

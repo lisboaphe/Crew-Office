@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The multiplayer layer — The Roving Office</title>
+  <title>The multiplayer layer — Crew Office</title>
   <meta name="description" content="How the office is built, and how to change it." />
   
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
@@ -18,7 +18,7 @@
   <header class="topbar">
     <a class="brand" href="/">
       <img src="/assets/logo-64.png" alt="" width="26" height="26" />
-      <span>The Roving Office</span>
+      <span>Crew Office</span>
     </a>
     <nav class="tabs" aria-label="Documentation sets">
       <a href="/docs/user/index.html">For everyone</a>
@@ -444,6 +444,8 @@ since it is published in the same place: <strong>push access to <code>main</code
 to every installed copy.</strong> So protect the branch, and keep the tests in the workflow.</p>
 <p>Set <code>CREW_UPDATE_API</code> to point the updater at a stand-in for GitHub. <code>deploy.yml</code> is off unless
 the repository variable <code>DEPLOY_TO_FLY</code> is <code>true</code>.</p>
+<h2 id="the-hosts-time-and-weather" tabindex="-1">The host's time and weather</h2>
+<p><code>GET /api/crew/host-conditions</code> gives the host's time and the weather, so the office's clock and windows match the host's computer for everyone looking at it. <code>lib/crew/host-conditions.cjs</code> asks Open-Meteo, at most every half hour, with a location rounded to one decimal place and nothing else. The location is <code>CREW_WEATHER_LAT</code> and <code>CREW_WEATHER_LON</code>, or a guess from the time zone on systems with a zone table. Without one, with <code>CREW_WEATHER=off</code>, or if the service is down, the window shows a clear sky.</p>
 <h2 id="known-limits" tabindex="-1">Known limits</h2>
 <ul>
 <li>Updating inside the app is Windows only; macOS and Linux get a link to the release.</li>
@@ -485,6 +487,7 @@ models cost $0.</li>
 <li><a href="#security-and-the-relay">Security and the relay</a></li>
 <li><a href="#the-app-window">The app window</a></li>
 <li><a href="#releases-and-updates">Releases and updates</a></li>
+<li><a href="#the-hosts-time-and-weather">The host's time and weather</a></li>
 <li><a href="#known-limits">Known limits</a></li></ul></nav>
     </aside>
   </div>

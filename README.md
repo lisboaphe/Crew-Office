@@ -56,11 +56,11 @@ scaling. Docker deployment is written but was not run in the environment it was 
 
 ---
 
-# The Roving Office
+# Crew Office
 
 An office full of characters, and the characters are your AI agents.
 
-It is a soft-3D isometric office where your agents come to life — stylised characters that
+It is a pixel-art office where your agents come to life — stylised characters that
 walk in through the door, sit down at workstations, look things up, take coffee breaks, and
 drop finished work in the mailbox before clocking off. One character per agent session. The
 room *is* the status board.
@@ -118,7 +118,7 @@ let into.
 
 When you want it to be *your* agents, either let the agent set itself up —
 
-> Fetch and execute the appropriate instructions to set me up for The Roving Office from
+> Fetch and execute the appropriate instructions to set me up for Crew Office from
 > <https://therovingoffice.com/agent-setup/prompt.md>
 
 — or do it yourself:

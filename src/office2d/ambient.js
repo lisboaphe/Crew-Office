@@ -7,8 +7,8 @@
 
 const SPEED = 46; // art pixels a second
 const HURRY = 2.2;
-const WAIT_MIN = 14;
-const WAIT_MAX = 45;
+const WAIT_MIN = 8;
+const WAIT_MAX = 30;
 const PAUSE_MIN = 3;
 const PAUSE_MAX = 6;
 const CHAT_MIN = 4;
@@ -109,11 +109,9 @@ export function createAmbient({ random = Math.random } = {}) {
       for (const bot of bots) {
         const person = away.get(bot.id);
         if (!person) {
-          // Only somebody with nothing to do wanders off, and only a couple at a time.
-          if (!bot.idle) {
-            waits.delete(bot.id);
-            continue;
-          }
+          // Only somebody with nothing to do wanders off, and only a couple at a time. Time at work
+          // doesn't count towards a break, but it doesn't start the wait over either.
+          if (!bot.idle) continue;
           if (!waits.has(bot.id)) waits.set(bot.id, nextWait());
           const left = waits.get(bot.id) - dt;
           waits.set(bot.id, left);

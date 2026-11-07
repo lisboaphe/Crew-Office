@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// aop-openclaw-install — register The Roving Office as an OpenClaw plugin.
+// aop-openclaw-install — register Crew Office as an OpenClaw plugin.
 //
 //   node bin/aop-openclaw-install.cjs --status      report what is currently wired up
 //   node bin/aop-openclaw-install.cjs --dry-run     show the commands, run nothing

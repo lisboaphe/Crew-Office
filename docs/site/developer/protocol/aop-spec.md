@@ -1,6 +1,6 @@
 # Agent Office Protocol (AOP) v0
 
-**Status:** draft · **Version string:** `"0.1"` · **Audience:** anyone writing an adapter that feeds live agent activity into The Roving Office.
+**Status:** draft · **Version string:** `"0.1"` · **Audience:** anyone writing an adapter that feeds live agent activity into Crew Office.
 
 AOP is the wire format between an **agentic harness** (Claude Code, Rovo CLI, Codex CLI, OpenClaw, anything else) and the **office** — the 3D diorama that turns that activity into characters walking to desks, hitting the bookshelf, and dropping work in the outbox.
 
@@ -55,7 +55,7 @@ Every event is a single JSON object. Batches are newline-delimited JSON (NDJSON)
   },
   "project": {
     "id": "the-roving-office",
-    "name": "The Roving Office",
+    "name": "Crew Office",
     "repo": { "remote": "bitbucket.org/atlassian/the-roving-office", "branch": "aop-spec" }
   },
   "payload": { "tool_call_id": "toolu_01", "tool_name": "Read", "tool_class": "read", "target": "src/config.js" }

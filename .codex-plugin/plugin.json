@@ -1,7 +1,7 @@
 {
   "name": "roving-office",
-  "version": "0.15.7",
-  "description": "Watch Codex sessions as characters in a soft-3D isometric office.",
+  "version": "1.0.0-beta",
+  "description": "Watch Codex sessions as characters in a pixel-art office.",
   "author": {
     "name": "Mike Cannon-Brookes"
   },
@@ -14,16 +14,16 @@
     "agent-office-protocol"
   ],
   "interface": {
-    "displayName": "The Roving Office",
+    "displayName": "Crew Office",
     "shortDescription": "See Codex sessions work in a live office diorama.",
-    "longDescription": "A zero-context hook integration that turns Codex lifecycle, tool, plan, permission, compaction, and subagent events into live characters in The Roving Office.",
+    "longDescription": "A zero-context hook integration that turns Codex lifecycle, tool, plan, permission, compaction, and subagent events into live characters in Crew Office.",
     "developerName": "Mike Cannon-Brookes",
     "category": "Developer Tools",
     "capabilities": [
       "Observability"
     ],
     "defaultPrompt": [
-      "Check whether The Roving Office adapter is connected."
+      "Check whether Crew Office adapter is connected."
     ],
     "websiteURL": "https://github.com/atlassian-labs/roving-office",
     "brandColor": "#D7A76B"

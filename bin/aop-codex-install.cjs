@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Install The Roving Office as a local Codex plugin.
+// Install Crew Office as a local Codex plugin.
 //
 //   node bin/aop-codex-install.cjs               install/update
 //   node bin/aop-codex-install.cjs --dry-run     print the commands only

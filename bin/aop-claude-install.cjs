@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// aop-claude-install — wire The Roving Office adapter into Claude Code.
+// aop-claude-install — wire Crew Office adapter into Claude Code.
 //
 //   node bin/aop-claude-install.cjs               install as a plugin
 //   node bin/aop-claude-install.cjs --settings    install as settings.json hooks

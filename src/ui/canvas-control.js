@@ -21,9 +21,9 @@ import { node } from './dom.js';
 
 /** Palette fallbacks, for a canvas painted before the stylesheet is in force. */
 const FALLBACKS = {
-  '--text': '#243247',
-  '--muted': '#53677a',
-  '--brand': '#1868db',
+  '--text': '#2e2117',
+  '--muted': '#5c4a38',
+  '--brand': '#2f7468',
 };
 
 /**

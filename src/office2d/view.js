@@ -8,6 +8,7 @@
 
 import { createAllocator } from './allocation.js';
 import { createAmbient } from './ambient.js';
+import { clockText, hostMinutes, phaseOf } from './sky.js';
 
 const ROOT = '/assets/pixel-art/office/established/';
 
@@ -40,6 +41,21 @@ const TOP_BAR = 56; // the office's top bar, in page pixels, which the scene sta
 const MARGIN = 8;
 const DRAW_EVERY = 1 / 20; // pixel art does not need more unless the camera is moving
 const EASE = 9;
+const ASK_HOST_EVERY = 60_000;
+// How the room's light falls with the time of day, as a wash over everything.
+const ROOM_LIGHT = { dawn: 'rgba(255, 170, 110, 0.07)', day: null, dusk: 'rgba(190, 90, 70, 0.1)', night: 'rgba(24, 28, 74, 0.2)' };
+const WINDOW_GLASS = { x: 3, y: 3, w: 98, h: 43 };
+// What a room may be furnished with, along with the desks every room has.
+const FLOOR_PROPS = [
+  { sprite: 'plant' },
+  { sprite: 'cabinet' },
+  { sprite: 'armchair' },
+  { sprite: 'boxes' },
+  { sprite: 'lamp' },
+  { sprite: 'fax', on: 'side-table' },
+];
+const SMALL_PROPS = [null, 'bin', 'bin'];
+const PICTURES = [null, 'picture-hills', 'picture-chart', 'picture-night'];
 
 const BACKGROUND = '#f6ead2';
 const OAK_LIGHT = '#eeb565';
@@ -55,6 +71,16 @@ const HAIRS = 6;
 const SCREENS = ['code', 'dashboard', 'chart', 'chat', 'terminal', 'landscape'];
 const AT_REST = new Set(['idle', 'resting', 'drinking']);
 const OWNER_DEFAULT = { id: 'owner', name: 'Your team' };
+const CLOCK_DIGITS = {
+  0: ['111', '101', '101', '101', '111'], 1: ['010', '110', '010', '010', '111'], 2: ['111', '001', '111', '100', '111'],
+  3: ['111', '001', '111', '001', '111'], 4: ['101', '101', '111', '001', '001'], 5: ['111', '100', '111', '001', '111'],
+  6: ['111', '100', '111', '101', '111'], 7: ['111', '001', '010', '010', '010'], 8: ['111', '101', '111', '101', '111'],
+  9: ['111', '101', '111', '001', '111'],
+};
+const SHELF_GLOW = '#ffe08a';
+
+/** Free for a break: resting, or only moving about with no job in hand. Anything else is real work. */
+const isFree = (bot) => AT_REST.has(bot.status) || (bot.status === 'walking' && !bot.job);
 
 const hashOf = (text) => [...String(text)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7) >>> 0;
 
@@ -114,7 +140,12 @@ function rosterOf(world, ownerOf) {
     const id = String(agent.id);
     if (id.includes('human-') || String(agent.name).endsWith('(human)')) continue;
     const owner = ownerOf?.(id) ?? OWNER_DEFAULT;
-    bots.push({ id, ownerId: owner.id, ownerName: owner.name, name: agent.name, status: agent.status, color: agent.color });
+    bots.push({ id, ownerId: owner.id, ownerName: owner.name, name: agent.name, status: agent.status, job: agent.job, color: agent.color });
+  }
+  // An agent has a desk from the moment they are added, and sits idle until their worker can run them.
+  for (const agent of window.crewAgents?.() ?? []) {
+    if (bots.some((b) => b.id.endsWith(`#crew:${agent.id}`))) continue;
+    bots.push({ id: `waiting#crew:${agent.id}`, ownerId: agent.ownerId, ownerName: agent.ownerName, name: agent.name, status: 'idle', color: agent.color, waiting: true });
   }
   return bots;
 }
@@ -179,6 +210,7 @@ export function createOffice2D(canvas, input) {
   const context = canvas.getContext('2d');
   const allocator = createAllocator();
   const strips = new Map();
+  const shells = new Map();
   const arrived = new Map();
   let sprites = null;
   let clock = 0;
@@ -191,6 +223,23 @@ export function createOffice2D(canvas, input) {
   let rooms = [];
   let floorPlan = { rooms: [], breakRoom: { x: ROOM_W, y: 0, width: BREAK_W + BORDER * 2 } };
   const ambient = createAmbient();
+  const decor = new Map();
+  let playersOverride = null;
+  let hoveringShelf = null;
+  let shelfGlow = null;
+  let players = new Map();
+  let notice = null;
+  // The host's clock and sky. Until it answers, this browser's own time is the best guess there is.
+  const host = { now: Date.now(), offsetMinutes: -new Date().getTimezoneOffset(), reportedAt: performance.now(), weather: null };
+  const askHost = () => fetch('/api/crew/host-conditions', { cache: 'no-store' })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((report) => {
+      if (report) Object.assign(host, { now: report.now, offsetMinutes: report.offsetMinutes, reportedAt: performance.now(), weather: report.weather });
+    })
+    .catch(() => {});
+  askHost();
+  setInterval(askHost, ASK_HOST_EVERY);
+  const minutesNow = () => hostMinutes({ hostNow: host.now, offsetMinutes: host.offsetMinutes, sinceReport: performance.now() - host.reportedAt });
   let seats = new Map();
   let placed = [];
   let lastSelected = null;
@@ -309,6 +358,24 @@ export function createOffice2D(canvas, input) {
     else zoomOut();
   }, { passive: false });
 
+  const shelfAt = (art) => rooms.find((room) => {
+    if (!sprites) return false;
+    const shelf = shelfOf(room);
+    return art.x >= shelf.x && art.x <= shelf.x + shelf.width && art.y >= shelf.y && art.y <= shelf.y + shelf.height;
+  });
+
+  input.addEventListener('pointermove', (e) => {
+    const hit = shelfAt(toArt(e.clientX, e.clientY));
+    hoveringShelf = hit?.key ?? null;
+    input.style.cursor = hit ? 'pointer' : '';
+  });
+
+  /** The bookshelf opens the office's shared files, which every player and their agents can reach. */
+  function openSharedFiles() {
+    if (window.crewOpenFiles) window.crewOpenFiles();
+    else notice = { text: 'Shared files are in hosted offices. Host one from the lobby.', until: performance.now() + 4000 };
+  }
+
   let dragFrom = null;
   input.addEventListener('pointerdown', (e) => { dragFrom = { x: e.clientX, y: e.clientY, start: dragged ?? { x: 0, y: 0 } }; });
   window.addEventListener('pointerup', () => { dragFrom = null; });
@@ -363,47 +430,114 @@ export function createOffice2D(canvas, input) {
     context.restore();
   }
 
-  function drawShell(x, y, width) {
-    context.fillStyle = OAK_DARK;
-    context.fillRect(x + 4, y, width - 8, ROOM_H);
-    context.fillRect(x, y + 4, width, ROOM_H - 8);
-    context.fillStyle = OAK;
-    context.fillRect(x + 5, y + 1, width - 10, ROOM_H - 2);
-    context.fillRect(x + 1, y + 5, width - 2, ROOM_H - 10);
+  /** A room's frame, floor and wall, painted once for each width and reused, as nothing in it moves. */
+  function shellFor(width) {
+    if (shells.has(width)) return shells.get(width);
+    const shell = document.createElement('canvas');
+    shell.width = width;
+    shell.height = ROOM_H;
+    const g = shell.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.fillStyle = OAK_DARK;
+    g.fillRect(4, 0, width - 8, ROOM_H);
+    g.fillRect(0, 4, width, ROOM_H - 8);
+    g.fillStyle = OAK;
+    g.fillRect(5, 1, width - 10, ROOM_H - 2);
+    g.fillRect(1, 5, width - 2, ROOM_H - 10);
 
     const inner = width - BORDER * 2;
-    const left = x + BORDER;
-    const top = y + BORDER;
     const tile = sprites.floor;
-    context.save();
-    context.beginPath();
-    context.rect(left, top, inner, INNER_H);
-    context.clip();
-    for (let ty = top + WALL_H; ty < top + INNER_H; ty += tile.height) {
-      for (let tx = left; tx < left + inner; tx += tile.width) put('floor', tx, ty);
+    g.beginPath();
+    g.rect(BORDER, BORDER, inner, INNER_H);
+    g.clip();
+    for (let ty = BORDER + WALL_H; ty < BORDER + INNER_H; ty += tile.height) {
+      for (let tx = BORDER; tx < BORDER + inner; tx += tile.width) g.drawImage(tile.image, tx, ty);
     }
-    context.restore();
+    g.fillStyle = '#f3e4c8';
+    g.fillRect(BORDER, BORDER, inner, WALL_H - 4);
+    g.fillStyle = '#ecdabb';
+    g.fillRect(BORDER, BORDER + WALL_H - 14, inner, 10);
+    g.fillStyle = OAK_LIGHT;
+    g.fillRect(BORDER, BORDER + WALL_H - 4, inner, 2);
+    g.fillStyle = OAK_DARK;
+    g.fillRect(BORDER, BORDER + WALL_H - 2, inner, 2);
+    g.fillStyle = 'rgba(70, 35, 10, 0.18)';
+    g.fillRect(BORDER, BORDER + WALL_H, inner, 3);
+    shells.set(width, shell);
+    return shell;
+  }
 
-    context.fillStyle = '#f3e4c8';
-    context.fillRect(left, top, inner, WALL_H - 4);
-    context.fillStyle = '#ecdabb';
-    context.fillRect(left, top + WALL_H - 14, inner, 10);
-    context.fillStyle = OAK_LIGHT;
-    context.fillRect(left, top + WALL_H - 4, inner, 2);
-    context.fillStyle = OAK_DARK;
-    context.fillRect(left, top + WALL_H - 2, inner, 2);
-    context.fillStyle = 'rgba(70, 35, 10, 0.18)';
-    context.fillRect(left, top + WALL_H, inner, 3);
+  function drawShell(x, y, width) {
+    context.drawImage(shellFor(width), Math.round(x), Math.round(y));
+  }
+
+  const widthOf = (prop) => sprites[prop.on ?? prop.sprite].width;
+
+  /**
+   * A room's own furniture, chosen once from its name: the same room always looks the same, and
+   * different rooms differ. All of it stands clear of the desks, the aisle and the walk to the door.
+   */
+  function decorFor(room) {
+    if (decor.has(room.key)) return decor.get(room.key);
+    let seed = hashOf(room.key);
+    const roll = (n) => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return (seed >>> 16) % n;
+    };
+    const flipped = roll(2) === 1;
+    let left = FLOOR_PROPS[roll(FLOOR_PROPS.length)];
+    const others = FLOOR_PROPS.filter((p) => p !== left);
+    let right = others[roll(others.length)];
+    // With the shelf on the left, the gap between it and the player only takes something narrow.
+    if (flipped && widthOf(left) > 38) [left, right] = [right, left];
+    if (flipped && widthOf(left) > 38) left = FLOOR_PROPS[0];
+    const recipe = {
+      flipped,
+      left,
+      right,
+      picture: PICTURES[roll(PICTURES.length)],
+      small: SMALL_PROPS[roll(SMALL_PROPS.length)],
+      rug: roll(2) === 0,
+    };
+    decor.set(room.key, recipe);
+    return recipe;
+  }
+
+  function putStanding(prop, x, bottom) {
+    const main = sprites[prop.sprite];
+    if (prop.on) {
+      // Something that stands on something else, such as a fax on its table.
+      const under = sprites[prop.on];
+      put(prop.on, x, bottom - under.height);
+      put(prop.sprite, x + Math.round((under.width - main.width) / 2) - 2, bottom - under.height - main.height + 12);
+      return;
+    }
+    put(prop.sprite, x, bottom - main.height);
+  }
+
+  /** The bookshelf of a room, which opens the shared files when clicked. */
+  function shelfOf(room) {
+    const { flipped } = decorFor(room);
+    const left = room.x + BORDER;
+    const top = room.y + BORDER;
+    const shelf = sprites.shelf;
+    return { x: flipped ? left + 6 : left + INNER_W - shelf.width - 8, y: top + WALL_H - 44, width: shelf.width, height: shelf.height };
   }
 
   function drawRoom(room) {
     const left = room.x + BORDER;
     const top = room.y + BORDER;
+    const recipe = decorFor(room);
     drawShell(room.x, room.y, ROOM_W);
-    put('window', left + 14, top + 5);
-    put('shelf', left + 240, top + WALL_H - 44);
-    put('plant', left + 8, top + WALL_H + 2);
-    put('plant', left + 248, top + WALL_H + 8);
+    drawWindow(left + (recipe.flipped ? 182 : 14), top + 5);
+    drawClock(left + (recipe.flipped ? 62 : 190), top + 12);
+    if (recipe.picture && room.down === 0 && room.number !== 1) put(recipe.picture, left + AISLE_X - 15, top + 24);
+    if (recipe.rug) put('rug', left + AISLE_X - 36, top + ROW_TOP + 40);
+    drawShelf(room);
+    const bottom = top + WALL_H + 54;
+    putStanding(recipe.left, left + (recipe.flipped ? 58 : 8), bottom);
+    putStanding(recipe.right, left + INNER_W - widthOf(recipe.right) - (recipe.flipped ? 8 : 54), bottom);
+    if (recipe.small) put(recipe.small, left + (recipe.flipped ? INNER_W - 28 - 56 : 56), bottom - sprites[recipe.small].height);
     // A door in the back wall, from the room behind this one.
     if (room.down > 0) put('door', left + AISLE_X - 19, top + WALL_H - 56);
   }
@@ -413,10 +547,11 @@ export function createOffice2D(canvas, input) {
     if (room.number !== 1) return;
     const left = room.x + BORDER;
     const top = room.y + BORDER;
-    put('desk-active-landscape', left + 112, top + WALL_H - 8);
-    const hash = hashOf(room.ownerId);
+    put('desk-active-landscape', left + 120, top + WALL_H - 8);
+    const chosen = players.get(room.ownerId)?.character;
+    const character = Number.isInteger(chosen) ? chosen : hashOf(room.ownerId) % HAIRS;
     const pose = Math.floor(clock * 1.1) % 2;
-    drawPerson(sprites.worker.image, (hash % HAIRS) * POSES + pose, left + 90, top + WALL_H + 12, false);
+    drawPerson(sprites.worker.image, character * POSES + pose, left + 98, top + WALL_H + 12, false);
   }
 
   function drawStation(room, row, index, bots) {
@@ -438,7 +573,7 @@ export function createOffice2D(canvas, input) {
     }
 
     const bot = bots.get(row.botId);
-    const working = !AT_REST.has(bot.status);
+    const working = !isFree(bot);
     const hash = hashOf(row.botId);
     // Each bot keeps its own program on its screen, while it is working.
     desk(working ? `desk-active-${SCREENS[(hash >>> 4) % SCREENS.length]}` : 'desk-idle', at.deskX, deskY);
@@ -477,7 +612,8 @@ export function createOffice2D(canvas, input) {
     const top = breakRoom.y + BORDER;
     drawShell(breakRoom.x, breakRoom.y, breakRoom.width);
 
-    put('noticeboard', left + 146, top + 2);
+    drawClock(left + 201, top + 6);
+    put('noticeboard', left + 141, top + 2);
     put('counter', left + 4, top + WALL_H - 24);
     put('coffee', left + 18, top + WALL_H - 62);
     put('fridge', left + 104, top + WALL_H - 52);
@@ -490,6 +626,118 @@ export function createOffice2D(canvas, input) {
     put('sofa', left + 148, sofaY);
     put('lamp', left + 226, sofaY - 8);
     put('plant', left + 88, top + INNER_H - 74);
+  }
+
+  /** The window for this time of day at the host, with the host's weather across the glass. */
+  function drawWindow(x, y) {
+    put(`window-${phaseOf(minutesNow())}`, x, y);
+    const { weather } = host;
+    if (!weather || weather === 'clear') return;
+    const gx = x + WINDOW_GLASS.x;
+    const gy = y + WINDOW_GLASS.y;
+    const paneRows = WINDOW_GLASS.h;
+    context.save();
+    context.beginPath();
+    context.rect(gx, gy, WINDOW_GLASS.w, paneRows);
+    context.clip();
+    if (weather === 'cloudy' || weather === 'rain' || weather === 'storm') {
+      context.fillStyle = weather === 'cloudy' ? 'rgba(160, 168, 178, 0.45)' : 'rgba(92, 100, 116, 0.62)';
+      context.fillRect(gx, gy, WINDOW_GLASS.w, paneRows);
+      context.fillStyle = weather === 'cloudy' ? 'rgba(232, 234, 236, 0.75)' : 'rgba(120, 126, 140, 0.9)';
+      const drift = Math.floor(clock * 2) % 40;
+      for (let n = 0; n < 5; n++) {
+        const cx = gx + ((n * 23 + drift) % (WINDOW_GLASS.w + 20)) - 14;
+        context.fillRect(cx, gy + 2 + (n % 3) * 5, 22, 4);
+        context.fillRect(cx + 4, gy + (n % 3) * 5, 13, 2);
+      }
+    }
+    if (weather === 'rain' || weather === 'storm') {
+      context.fillStyle = 'rgba(208, 226, 240, 0.8)';
+      for (let n = 0; n < 26; n++) {
+        const fall = Math.floor(clock * 34 + n * 13) % (paneRows + 6);
+        const rx = gx + ((n * 17) % WINDOW_GLASS.w) - Math.floor(fall / 4);
+        context.fillRect(rx, gy + fall - 3, 1, 3);
+      }
+    }
+    if (weather === 'storm' && Math.floor(clock * 4) % 37 === 0) {
+      context.fillStyle = 'rgba(250, 250, 255, 0.7)';
+      context.fillRect(gx, gy, WINDOW_GLASS.w, paneRows);
+    }
+    if (weather === 'snow') {
+      context.fillStyle = 'rgba(190, 200, 212, 0.35)';
+      context.fillRect(gx, gy, WINDOW_GLASS.w, paneRows);
+      context.fillStyle = '#ffffff';
+      for (let n = 0; n < 30; n++) {
+        const fall = Math.floor(clock * 9 + n * 11) % paneRows;
+        const sway = Math.round(Math.sin(clock + n) * 1.5);
+        context.fillRect(gx + ((n * 19) % WINDOW_GLASS.w) + sway, gy + fall, 1, 1);
+      }
+    }
+    if (weather === 'fog') {
+      context.fillStyle = 'rgba(226, 228, 226, 0.68)';
+      context.fillRect(gx, gy, WINDOW_GLASS.w, paneRows);
+    }
+    context.restore();
+  }
+
+  /** A modern wall clock, showing the host's time, with a colon that ticks over each second. */
+  function drawClock(x, y) {
+    const px = Math.round(x);
+    const py = Math.round(y);
+    put('wall-clock', px, py);
+    const text = clockText(minutesNow());
+    let dx = px + 5;
+    for (const char of text) {
+      if (char === ':') {
+        if (Math.floor(performance.now() / 1000) % 2 === 0) {
+          context.fillStyle = '#7fe0cc';
+          context.fillRect(dx, py + 7, 2, 2);
+          context.fillRect(dx, py + 11, 2, 2);
+        }
+        dx += 4;
+        continue;
+      }
+      CLOCK_DIGITS[char].forEach((row, r) => {
+        [...row].forEach((on, c) => {
+          if (on !== '1') return;
+          context.fillStyle = '#7fe0cc';
+          context.fillRect(dx + c * 2, py + 5 + r * 2, 2, 2);
+        });
+      });
+      dx += 9;
+    }
+  }
+
+  /** The bookshelf, which lifts and glows under the pointer because clicking it does something. */
+  function drawShelf(room) {
+    const shelf = shelfOf(room);
+    if (hoveringShelf !== room.key) {
+      put('shelf', shelf.x, shelf.y);
+      return;
+    }
+    if (!shelfGlow) {
+      const sprite = sprites.shelf;
+      shelfGlow = document.createElement('canvas');
+      shelfGlow.width = sprite.width + 4;
+      shelfGlow.height = sprite.height + 4;
+      const g = shelfGlow.getContext('2d');
+      for (const [ox, oy] of [[0, 2], [4, 2], [2, 0], [2, 4], [1, 1], [3, 1], [1, 3], [3, 3]]) g.drawImage(sprite.image, ox, oy);
+      g.globalCompositeOperation = 'source-in';
+      g.fillStyle = SHELF_GLOW;
+      g.fillRect(0, 0, shelfGlow.width, shelfGlow.height);
+    }
+    const lift = 2;
+    context.globalAlpha = 0.65 + Math.sin(clock * 6) * 0.3;
+    context.drawImage(shelfGlow, shelf.x - 2, shelf.y - 2 - lift);
+    context.globalAlpha = 1;
+    put('shelf', shelf.x, shelf.y - lift);
+    context.fillStyle = '#fff6c8';
+    for (let n = 0; n < 4; n++) {
+      if ((Math.floor(clock * 5) + n) % 3 === 0) continue;
+      const sx = shelf.x + (n * 17 + 5) % shelf.width;
+      const sy = shelf.y - lift - 4 + ((n * 23 + Math.floor(clock * 6) * 3) % shelf.height);
+      context.fillRect(sx, sy, 2, 2);
+    }
   }
 
   function drawDoors(plan) {
@@ -627,7 +875,7 @@ export function createOffice2D(canvas, input) {
     context.fillText(text, sx, sy + ratio / 2);
   }
 
-  function drawLabels(selectedId, timeText, visible, floorText, breakPlan) {
+  function drawLabels(selectedId, visible, floorText, breakPlan) {
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.imageSmoothingEnabled = true;
 
@@ -636,16 +884,9 @@ export function createOffice2D(canvas, input) {
       const label = room.number > 1 ? `${room.ownerName || 'Owner'} · Room ${room.number}` : room.ownerName || 'Owner';
       plaque(label, toScreenX(room.x + BORDER + AISLE_X), toScreenY(room.y + BORDER + 9), { fill: OAK_LIGHT, ink: '#4a2c12', border: OAK_DARK });
     }
+
     if (breakPlan) {
-      const bx = breakPlan.x + breakPlan.width / 2;
-      plaque('Break area', toScreenX(bx), toScreenY(breakPlan.y + 3), { fill: OAK_LIGHT, ink: '#4a2c12', border: OAK_DARK });
-      if (detailed && timeText) {
-        context.font = `700 ${Math.max(10 * ratio, 6 * scale)}px "JetBrains Mono", monospace`;
-        context.textAlign = 'right';
-        context.textBaseline = 'middle';
-        context.fillStyle = '#7a4a22';
-        context.fillText(timeText, toScreenX(breakPlan.x + breakPlan.width - BORDER - 6), toScreenY(breakPlan.y + BORDER + 9));
-      }
+      plaque('Break area', toScreenX(breakPlan.x + breakPlan.width / 2), toScreenY(breakPlan.y + 3), { fill: OAK_LIGHT, ink: '#4a2c12', border: OAK_DARK });
     }
 
     const small = Math.max(10 * ratio, 6 * Math.min(scale, 3));
@@ -676,7 +917,19 @@ export function createOffice2D(canvas, input) {
       context.fillText(label, cx, sy + small * 0.72);
     }
 
-    if (floorText) plaque(floorText, canvas.width / 2, (TOP_BAR - 22) * ratio, { size: 12 });
+    for (const room of visible) {
+      const shelf = shelfOf(room);
+      const hovering = hoveringShelf === room.key;
+      if (detailed || hovering) {
+        plaque(hovering ? 'Share a file' : 'Files', toScreenX(shelf.x + shelf.width / 2), toScreenY(shelf.y + shelf.height + 4), hovering
+          ? { size: 8, pad: 4 }
+          : { size: 7, fill: CREAM, ink: GREEN, border: GREEN, pad: 3 });
+      }
+    }
+    if (notice && performance.now() < notice.until) plaque(notice.text, canvas.width / 2, canvas.height - 90 * ratio, { size: 9 });
+
+    // On the frame of the floor, where the office's top bar cannot cover it.
+    if (floorText) plaque(floorText, toScreenX(boundsOf(floorPlan).w / 2), toScreenY(3), { size: 10 });
   }
 
   /** The space the scene may use: below the top bar, and clear of the agent panel when it is open. */
@@ -716,7 +969,7 @@ export function createOffice2D(canvas, input) {
     originY = Math.round(space.top + space.h / 2 - camera.y * scale);
   }
 
-  function paint(world, dt, selectedId, timeText, ownerOf) {
+  function paint(world, dt, selectedId, ownerOf) {
     ratio = window.devicePixelRatio || 1;
     const width = Math.round(canvas.clientWidth * ratio);
     const height = Math.round(canvas.clientHeight * ratio);
@@ -731,7 +984,9 @@ export function createOffice2D(canvas, input) {
     const roster = rosterOf(world, ownerOf);
     const bots = new Map(roster.map((b) => [b.id, b]));
     for (const id of arrived.keys()) if (!bots.has(id)) arrived.delete(id);
-    floors = allocator.sync(roster).floors;
+    const present = (world === null ? [] : playersOverride ?? window.crewPlayers?.()) ?? [];
+    players = new Map(present.map((p) => [p.id, p]));
+    floors = allocator.sync(roster, present).floors;
     floorIndex = Math.min(floorIndex, floors.length - 1);
 
     const everyRoom = allRooms();
@@ -756,12 +1011,12 @@ export function createOffice2D(canvas, input) {
         });
       }
     });
-    ambient.update(dt, roster.map((b) => ({ id: b.id, idle: AT_REST.has(b.status) })), planBreak);
+    ambient.update(dt, roster.map((b) => ({ id: b.id, idle: isFree(b) && !b.waiting })), planBreak);
 
     floorPlan = placeFloor(floors[floorIndex]);
     rooms = floorPlan.rooms;
     if (!rooms.length) {
-      rooms = [{ key: 'empty', ownerId: '', ownerName: '', number: 2, rows: [], across: 0, down: 0, x: 0, y: 0 }];
+      rooms = [{ key: 'empty', ownerId: OWNER_DEFAULT.id, ownerName: OWNER_DEFAULT.name, number: 1, rows: [], across: 0, down: 0, x: 0, y: 0 }];
       floorPlan = { rooms, breakRoom: { x: STEP_X, y: 0, width: BREAK_W + BORDER * 2 } };
     }
     aimCamera(width, height, dt);
@@ -788,9 +1043,17 @@ export function createOffice2D(canvas, input) {
     }
     const walking = drawWalkers(bots);
 
+    // The room's light follows the host's time of day.
+    const light = ROOM_LIGHT[phaseOf(minutesNow())];
+    if (light) {
+      const all = boundsOf(floorPlan);
+      context.fillStyle = light;
+      context.fillRect(0, 0, all.w, all.h);
+    }
+
     const floorText = `FLOOR ${floorIndex + 1}${floors.length > 1 ? ` of ${floors.length}` : ''}`;
     walkingNow = walking;
-    drawLabels(selectedId, timeText, visible, view.mode === 'floor' ? floorText : '', breakPlan);
+    drawLabels(selectedId, visible, view.mode === 'floor' ? floorText : '', breakPlan);
 
     const here = rooms.find((r) => r.key === view.roomKey);
     const text = view.mode === 'room' && here
@@ -806,6 +1069,13 @@ export function createOffice2D(canvas, input) {
     zoomOut,
     showRoom,
     showFloor,
+    /** Where a point of the art is on the canvas, and how many are away, for checking animations. */
+    canvasPoint: (x, y) => ({ x: toScreenX(x), y: toScreenY(y), scale }),
+    get awayCount() { return ambient.awayCount; },
+    /** Show a given set of players, for checking how a team would look. */
+    setPlayersForChecks(list) { playersOverride = list; },
+    /** Show a given time and weather, for checking how the window looks. */
+    setHostForChecks(report) { Object.assign(host, report, { reportedAt: performance.now() }); },
     /** Send an idle bot on a break straight away, for checking how it looks. */
     sendOnBreak(id) {
       const plan = planBreak({ id }, new Set());
@@ -813,7 +1083,7 @@ export function createOffice2D(canvas, input) {
     },
 
     /** Called every frame. It only draws a few times a second, unless the camera is moving. */
-    draw(world, dt, { selectedId = null, timeText = '', ownerOf = null } = {}) {
+    draw(world, dt, { selectedId = null, ownerOf = null } = {}) {
       clock += dt;
       sinceDraw += dt;
       if (!moving && sinceDraw < DRAW_EVERY) return;
@@ -822,7 +1092,7 @@ export function createOffice2D(canvas, input) {
       const source = this.rosterOverride
         ? { manager: { agents: new Map(this.rosterOverride.map((a) => [a.id, { agent: a }])) } }
         : world;
-      paint(source, elapsed, selectedId, timeText, this.rosterOverride ? (id) => this.rosterOverride.find((a) => a.id === id)?.owner : ownerOf);
+      paint(source, elapsed, selectedId, this.rosterOverride ? (id) => this.rosterOverride.find((a) => a.id === id)?.owner : ownerOf);
     },
 
     /** Where the top of a worker's head is, in page pixels, or null if they are out of view. */
@@ -841,6 +1111,13 @@ export function createOffice2D(canvas, input) {
      */
     pick(clientX, clientY) {
       const at = toArt(clientX, clientY);
+      if (shelfAt(at)) {
+        openSharedFiles();
+        return undefined;
+      }
+      // Clicking your own character is how you change it.
+      const self = rooms.find((room) => room.number === 1 && at.x >= room.x + BORDER + 96 && at.x <= room.x + BORDER + 124 && at.y >= room.y + BORDER + WALL_H + 10 && at.y <= room.y + BORDER + WALL_H + 58);
+      if (self && window.crewChooseCharacter?.(self.ownerId)) return undefined;
       const hit = placed.find((p) => p.kind === 'bot' && at.x >= p.rugX && at.x <= p.rugX + 124 && at.y >= p.y - 8 && at.y <= p.y + 56);
       if (view.mode === 'floor') {
         zoomIn(at);

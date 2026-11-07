@@ -263,8 +263,41 @@ save('cooler', bubbles, 3)
 local lamp = load('lamp')
 save('lamp', { lamp }, 0)
 
--- A window for the back wall: three panes in a honey oak frame, looking out over a city and trees.
-local function windowFrame(step)
+-- A window for the back wall: three panes in a honey oak frame, looking out over a city and trees,
+-- with a version for each part of the day. Weather is painted over them as the office draws.
+local PHASES = {
+  day = {
+    skies = { c(136, 196, 224), c(158, 210, 232), c(182, 224, 238), c(208, 236, 240) },
+    cloud = { c(250, 250, 244), c(255, 255, 250), c(214, 232, 238) },
+    towers = { c(128, 154, 182), c(146, 170, 194), c(100, 124, 154), c(178, 198, 214) },
+    glass = c(222, 236, 238),
+    greens = { c(58, 112, 44), c(84, 142, 56), c(118, 172, 72), c(72, 128, 52) },
+  },
+  dawn = {
+    skies = { c(120, 134, 186), c(196, 150, 176), c(240, 180, 150), c(252, 216, 158) },
+    cloud = { c(252, 214, 190), c(255, 232, 210), c(214, 160, 164) },
+    towers = { c(102, 104, 146), c(120, 118, 158), c(78, 80, 122), c(176, 146, 164) },
+    glass = c(250, 222, 150),
+    greens = { c(44, 78, 54), c(60, 100, 62), c(84, 124, 70), c(52, 90, 58) },
+  },
+  dusk = {
+    skies = { c(70, 76, 140), c(150, 92, 142), c(226, 122, 104), c(248, 178, 104) },
+    cloud = { c(232, 150, 124), c(248, 186, 146), c(150, 96, 130) },
+    towers = { c(66, 66, 108), c(82, 78, 120), c(48, 48, 88), c(120, 92, 128) },
+    glass = c(250, 206, 110),
+    greens = { c(34, 56, 48), c(44, 72, 54), c(60, 92, 60), c(38, 62, 50) },
+  },
+  night = {
+    skies = { c(16, 22, 56), c(22, 30, 70), c(30, 40, 84), c(40, 52, 98) },
+    cloud = { c(56, 66, 106), c(72, 82, 122), c(40, 50, 88) },
+    towers = { c(34, 38, 68), c(44, 48, 80), c(24, 28, 54), c(58, 62, 96) },
+    glass = c(250, 212, 120),
+    greens = { c(16, 34, 34), c(22, 44, 38), c(30, 56, 44), c(18, 38, 36) },
+  },
+}
+
+local function windowFrame(step, name)
+  local look = PHASES[name]
   local W, H = 104, 50
   local w = Image(W, H, ColorMode.RGB)
   local function fill(x, y, cw, ch, p)
@@ -272,34 +305,43 @@ local function windowFrame(step)
       if i >= 0 and j >= 0 and i < W and j < H then w:drawPixel(i, j, p) end
     end end
   end
-  local skies = { c(136, 196, 224), c(158, 210, 232), c(182, 224, 238), c(208, 236, 240) }
   for y = 3, 45 do
     for x = 3, W - 4 do
       local band = math.min(4, (y - 3) // 11 + 1)
       local near = (y - 3) % 11 > 7 and (x + y) % 2 == 0
-      w:drawPixel(x, y, skies[near and math.min(4, band + 1) or band])
+      w:drawPixel(x, y, look.skies[near and math.min(4, band + 1) or band])
     end
   end
-  for _, cloud in ipairs({ { 6, 9, 16 }, { 44, 6, 13 }, { 28, 15, 11 } }) do
-    local x = 3 + (cloud[1] + step * 3) % 82
-    fill(x, cloud[2], cloud[3], 2, c(250, 250, 244))
-    fill(x + 3, cloud[2] - 2, cloud[3] - 6, 2, c(255, 255, 250))
-    fill(x + 1, cloud[2] + 2, cloud[3] - 2, 1, c(214, 232, 238))
+  if name == 'night' then
+    -- Stars, and a moon that keeps still while the stars twinkle.
+    for n = 0, 15 do
+      local sx, sy = 5 + (n * 37) % 92, 5 + (n * 23) % 20
+      if (n + step) % 5 ~= 0 then w:drawPixel(sx, sy, n % 3 == 0 and c(255, 250, 220) or c(190, 198, 230)) end
+    end
+    fill(80, 7, 7, 7, c(244, 238, 208)); fill(79, 8, 9, 5, c(244, 238, 208)); fill(83, 8, 3, 3, c(212, 206, 186))
+  else
+    for _, cloud in ipairs({ { 6, 9, 16 }, { 44, 6, 13 }, { 28, 15, 11 } }) do
+      local x = 3 + (cloud[1] + step * 3) % 82
+      fill(x, cloud[2], cloud[3], 2, look.cloud[1])
+      fill(x + 3, cloud[2] - 2, cloud[3] - 6, 2, look.cloud[2])
+      fill(x + 1, cloud[2] + 2, cloud[3] - 2, 1, look.cloud[3])
+    end
   end
   local towers = { { 6, 28, 9 }, { 17, 22, 8 }, { 27, 31, 10 }, { 39, 24, 8 }, { 50, 30, 9 }, { 61, 20, 10 }, { 74, 29, 8 }, { 85, 24, 10 } }
   for n, tower in ipairs(towers) do
-    local body = n % 2 == 0 and c(128, 154, 182) or c(146, 170, 194)
-    fill(tower[1], tower[2], tower[3], 46 - tower[2], body)
-    fill(tower[1] + tower[3] - 1, tower[2], 1, 46 - tower[2], c(100, 124, 154))
-    fill(tower[1], tower[2], tower[3], 1, c(178, 198, 214))
+    fill(tower[1], tower[2], tower[3], 46 - tower[2], look.towers[n % 2 + 1])
+    fill(tower[1] + tower[3] - 1, tower[2], 1, 46 - tower[2], look.towers[3])
+    fill(tower[1], tower[2], tower[3], 1, look.towers[4])
     for j = tower[2] + 2, 42, 3 do
-      for i = tower[1] + 1, tower[1] + tower[3] - 2, 2 do w:drawPixel(i, j, c(222, 236, 238)) end
+      for i = tower[1] + 1, tower[1] + tower[3] - 2, 2 do
+        -- By day every window catches the light. After dark only some are lit, and they change.
+        if name == 'day' or (i * 3 + j * 5 + n + step // 2) % 3 == 0 then w:drawPixel(i, j, look.glass) end
+      end
     end
   end
-  local greens = { c(58, 112, 44), c(84, 142, 56), c(118, 172, 72), c(72, 128, 52) }
   for x = 3, W - 4 do
     local top = 39 + (x * 5 // 7 + x // 3) % 4
-    for y = top, 45 do w:drawPixel(x, y, greens[(x * 7 + y * 3 + x // 4) % 4 + 1]) end
+    for y = top, 45 do w:drawPixel(x, y, look.greens[(x * 7 + y * 3 + x // 4) % 4 + 1]) end
   end
   local hi, mid, lo = c(238, 181, 101), c(201, 138, 69), c(140, 84, 32)
   fill(0, 0, W, 3, mid); fill(0, 0, W, 1, hi); fill(0, 2, W, 1, lo)
@@ -309,7 +351,25 @@ local function windowFrame(step)
   fill(0, 46, W, 4, mid); fill(0, 46, W, 1, hi); fill(0, 49, W, 1, lo)
   return w
 end
-save('window', { windowFrame(0), windowFrame(1), windowFrame(2), windowFrame(3) }, 0.25)
+for _, name in ipairs({ 'day', 'dawn', 'dusk', 'night' }) do
+  save('window-' .. name, { windowFrame(0, name), windowFrame(1, name), windowFrame(2, name), windowFrame(3, name) }, 0.25)
+end
+
+-- A modern wall clock: a slim dark display, its digits drawn by the office from the host's time.
+local function wallClockSprite()
+  local image = Image(48, 20, ColorMode.RGB)
+  local function fill(x, y, w, h, p)
+    for j = y, y + h - 1 do for i = x, x + w - 1 do image:drawPixel(i, j, p) end end
+  end
+  fill(1, 0, 46, 20, c(26, 30, 36)); fill(0, 1, 48, 18, c(26, 30, 36))
+  fill(1, 1, 46, 1, c(92, 100, 112)); fill(1, 1, 1, 17, c(62, 68, 78))
+  fill(46, 2, 1, 16, c(14, 16, 20)); fill(2, 18, 45, 1, c(14, 16, 20))
+  fill(3, 3, 42, 14, c(10, 18, 22))
+  -- A soft line of light across the glass.
+  fill(4, 3, 40, 1, c(24, 38, 44))
+  return image
+end
+save('wall-clock', { wallClockSprite() }, 0)
 
 -- The break area's other furniture, drawn to match: dark outline, a lit edge and a shaded one, and
 -- clusters of tone rather than flat fills. -----------------------------------------------------
@@ -458,6 +518,106 @@ local function doorSprite()
   return image
 end
 
+--- A filing cabinet in cream, with brass pulls and a label on each drawer.
+local function cabinetSprite()
+  local image, p = canvas(34, 56)
+  for r = 0, 4 do p.rect(1 + r, 5 - r, 26, 1, r > 2 and CREAM_HI or CREAM_TOP) end
+  for s = 0, 4 do p.rect(27 + s, 6 - s, 1, 48, s < 2 and CREAM_MID or CREAM_LOW) end
+  p.rect(1, 6, 26, 48, CREAM_TOP); p.rect(1, 6, 1, 48, CREAM_HI)
+  for _, y in ipairs({ 8, 23, 38 }) do
+    p.rect(3, y, 22, 14, CREAM_HI); p.rect(3, y + 13, 22, 1, CREAM_LOW); p.rect(24, y, 1, 14, CREAM_MID)
+    p.rect(7, y + 3, 14, 3, CREAM_MID); p.rect(8, y + 4, 8, 1, c(128, 106, 84))
+    p.rect(10, y + 8, 8, 2, c(226, 176, 78)); p.rect(10, y + 8, 8, 1, c(246, 214, 136))
+  end
+  p.outline(INK)
+  return image
+end
+
+--- A stack of cardboard boxes, the kind that never quite get unpacked.
+local function boxesSprite()
+  local image, p = canvas(44, 44)
+  local function carton(x, y, w, h, d)
+    for r = 0, d - 1 do p.rect(x + r + 1, y - r - 1, w, 1, c(226, 186, 128)) end
+    for s = 0, d - 1 do p.rect(x + w + s, y - s, 1, h, c(150, 104, 58)) end
+    p.rect(x, y, w, h, c(198, 150, 92)); p.rect(x, y, w, 1, c(226, 186, 128)); p.rect(x, y, 1, h, c(214, 170, 112))
+    p.rect(x + w // 2 - 1, y, 3, h, c(226, 206, 160))
+    p.rect(x + 3, y + h - 6, 6, 3, c(250, 243, 228))
+  end
+  carton(2, 22, 26, 20, 6)
+  carton(8, 7, 18, 15, 5)
+  p.outline(INK)
+  return image
+end
+
+--- A waste bin, with paper showing over the rim.
+local function binSprite()
+  local image, p = canvas(24, 28)
+  p.rect(6, 1, 6, 6, CREAM_HI); p.rect(11, 3, 6, 4, CREAM_TOP); p.rect(8, 2, 2, 1, CREAM_LOW)
+  for j = 0, 20 do
+    local inset = j // 7
+    p.rect(2 + inset, 6 + j, 19 - inset * 2, 1, j % 5 == 4 and STEEL_LOW or STEEL)
+    p.rect(2 + inset, 6 + j, 2, 1, STEEL_HI); p.rect(19 - inset, 6 + j, 2, 1, STEEL_LOW)
+  end
+  p.outline(INK)
+  return image
+end
+
+--- Pictures for the wall, in oak frames.
+local function pictureSprite(kind)
+  local image, p = canvas(30, 24)
+  p.rect(1, 1, 28, 22, OAK_MID); p.rect(1, 1, 28, 1, OAK_HI); p.rect(1, 1, 1, 22, OAK_HI); p.rect(28, 2, 1, 21, OAK_LOW); p.rect(2, 22, 27, 1, OAK_LOW)
+  p.rect(4, 4, 22, 16, CREAM_HI)
+  if kind == 'hills' then
+    p.rect(5, 5, 20, 8, c(160, 208, 226))
+    for x = 5, 24 do
+      local top = 11 + math.floor(math.sin(x * 0.5) * 2 + 0.5)
+      p.rect(x, top, 1, 19 - top, x % 5 == 0 and c(84, 142, 56) or c(70, 120, 72))
+    end
+    p.rect(19, 6, 3, 3, c(246, 214, 136))
+  elseif kind == 'chart' then
+    for n, h in ipairs({ 4, 7, 5, 10, 8, 12 }) do p.rect(4 + n * 3, 19 - h, 2, h, n % 2 == 0 and c(79, 143, 134) or c(192, 100, 60)) end
+    p.rect(5, 19, 20, 1, INK)
+  else
+    p.rect(5, 5, 20, 14, c(46, 62, 84))
+    for n = 0, 9 do image:drawPixel(6 + (n * 7) % 18, 6 + (n * 5) % 12, c(246, 240, 214)) end
+    p.rect(17, 7, 4, 4, c(246, 214, 136)); p.rect(18, 7, 4, 3, c(46, 62, 84))
+  end
+  p.outline(INK)
+  return image
+end
+
+--- A bare bulb in a brass fitting, off and then lit.
+local function bulbSprite(lit)
+  local image, p = canvas(20, 32)
+  p.rect(7, 1, 6, 8, c(150, 112, 48)); p.rect(7, 1, 2, 8, c(226, 176, 78)); p.rect(12, 1, 1, 8, c(98, 70, 30))
+  for _, y in ipairs({ 3, 6 }) do p.rect(7, y, 6, 1, c(98, 70, 30)) end
+  local glass = lit and { c(255, 246, 196), c(255, 228, 130), c(246, 190, 84), c(255, 255, 236) }
+    or { c(150, 150, 140), c(116, 116, 110), c(84, 84, 82), c(198, 198, 186) }
+  local rows = { { 7, 6 }, { 6, 8 }, { 5, 10 }, { 4, 12 }, { 3, 14 }, { 3, 14 }, { 3, 14 }, { 3, 14 }, { 3, 14 }, { 3, 14 }, { 3, 14 }, { 4, 12 }, { 4, 12 }, { 5, 10 }, { 6, 8 }, { 7, 6 } }
+  for n, row in ipairs(rows) do
+    local y = 8 + n
+    p.rect(row[1], y, row[2], 1, glass[1])
+    p.rect(row[1] + row[2] - 3, y, 3, 1, glass[2])
+    p.rect(row[1] + row[2] - 1, y, 1, 1, glass[3])
+  end
+  p.rect(6, 12, 2, 5, glass[4]); p.rect(8, 11, 2, 1, glass[4])
+  -- The filament.
+  local wire = lit and c(255, 255, 255) or c(70, 66, 60)
+  p.rect(8, 16, 1, 3, wire); p.rect(11, 16, 1, 3, wire); p.rect(9, 19, 2, 1, wire)
+  p.outline(INK)
+  return image
+end
+save('bulb', { bulbSprite(false), bulbSprite(true) }, 0)
+
+save('cabinet', { cabinetSprite() }, 0)
+save('boxes', { boxesSprite() }, 0)
+save('bin', { binSprite() }, 0)
+save('picture-hills', { pictureSprite('hills') }, 0)
+save('picture-chart', { pictureSprite('chart') }, 0)
+save('picture-night', { pictureSprite('night') }, 0)
+save('fax', { load('fax') }, 0)
+save('armchair', { load('armchair') }, 0)
+save('rug', { load('rug') }, 0)
 save('fridge', { fridgeSprite() }, 0)
 local waves = {}
 for i = 0, 3 do waves[#waves + 1] = microwaveSprite(i) end

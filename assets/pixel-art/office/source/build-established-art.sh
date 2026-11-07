@@ -40,6 +40,9 @@ prop lamp 130x300+985+705 17.5%
 prop sofa 420x270+285+735 17.5%
 prop cooler 170x300+1240+380 17.5%
 prop coffee 345x270+760+405 17.5%
+prop fax 270x265+398+405 17.5%
+prop armchair 230x250+722+752 17.5%
+prop rug 410x220+1118+772 17.5%
 
 # The oak tile. The sheet cannot simply repeat: it has a groove on both its top and bottom edges and
 # its planks narrow towards the bottom. So the tile is its six most even planks, each one lined up
@@ -57,3 +60,8 @@ rm -f "$CUT"/plank?.png "$CUT/planks.txt"
 
 aseprite -b --script-param root="$PWD" --script source/finish-established-art.lua
 rm -rf "$CUT"
+
+# Aseprite writes PNGs quickly rather than small. This changes no pixel.
+for png in "$OUT"/*.png; do
+  magick "$png" -strip -define png:compression-level=9 -define png:compression-strategy=1 "PNG32:$png"
+done

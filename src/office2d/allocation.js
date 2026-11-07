@@ -21,8 +21,15 @@ export function createAllocator() {
   // ownerId -> { id, name, seats: Map<slot, botId> }. A Map keeps owners in the order they arrived,
   // so nobody's column jumps when somebody else's bots come and go.
   const owners = new Map();
+  let present = new Set();
 
-  function sync(bots) {
+  /** @param {Bot[]} bots @param {Array<{id: string, name?: string}>} [players]  who is in the office */
+  function sync(bots, players = []) {
+    present = new Set(players.map((p) => p.id));
+    for (const player of players) {
+      if (!owners.has(player.id)) owners.set(player.id, { id: player.id, name: player.name ?? '', seats: new Map() });
+      else if (player.name) owners.get(player.id).name = player.name;
+    }
     const here = new Map(bots.map((b) => [b.id, b]));
     for (const owner of owners.values()) {
       for (const [slot, id] of owner.seats) {
@@ -50,19 +57,21 @@ export function createAllocator() {
     for (const owner of active) {
       let slot = 0;
       while (owner.seats.has(slot)) slot++;
-      if ([...owner.seats.keys()].some((s) => sameRoom(s, slot))) return { owner, slot };
+      if (!owner.seats.size || [...owner.seats.keys()].some((s) => sameRoom(s, slot))) return { owner, slot };
     }
     return null;
   }
 
   function layout() {
-    const active = [...owners.values()].filter((o) => o.seats.size);
+    // Anyone with a bot, and any player in the office, whether they have bots yet or not.
+    const active = [...owners.values()].filter((o) => o.seats.size || present.has(o.id));
     const standby = standbySlot(active);
 
     /** @type {Array<{columns: Array}>} */
     const floors = [];
     for (const owner of active) {
       const chunks = new Set([...owner.seats.keys()].map((s) => Math.floor(s / BOTS_PER_COLUMN)));
+      if (!chunks.size) chunks.add(0);
       for (const chunk of [...chunks].sort((a, b) => a - b)) {
         // The first floor with room that does not already hold this owner.
         let floor = floors.find((f) => f.columns.length < PLAYERS_PER_FLOOR && !f.columns.some((c) => c.ownerId === owner.id));
@@ -85,6 +94,7 @@ export function createAllocator() {
           number: chunk * Math.ceil(BOTS_PER_COLUMN / BOTS_PER_ROOM) + index + 1,
           rows: rows.filter((r) => r.room === index),
         }));
+        if (!rooms.length) rooms.push({ number: chunk * Math.ceil(BOTS_PER_COLUMN / BOTS_PER_ROOM) + 1, rows: [] });
         floor.columns.push({ ownerId: owner.id, ownerName: owner.name, rows, rooms });
       }
     }

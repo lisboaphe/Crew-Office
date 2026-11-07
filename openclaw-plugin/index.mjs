@@ -1,4 +1,4 @@
-// The Roving Office — an OpenClaw plugin.
+// Crew Office — an OpenClaw plugin.
 //
 // Turns OpenClaw agent activity into Agent Office Protocol events (docs/developer/protocol/aop-spec.md)
 // and publishes them to an office, local or on the other side of the internet.
@@ -376,8 +376,8 @@ export function register(api) {
 
 export default {
   id: 'roving-office',
-  name: 'The Roving Office',
-  description: 'Publishes OpenClaw agent activity to a Roving Office receiver as Agent Office Protocol events.',
+  name: 'Crew Office',
+  description: 'Publishes OpenClaw agent activity to a Crew Office receiver as Agent Office Protocol events.',
   configSchema,
   register,
 };

@@ -1,7 +1,7 @@
 {
   "id": "roving-office",
-  "name": "The Roving Office",
-  "description": "Publishes OpenClaw agent activity to a Roving Office receiver as Agent Office Protocol events.",
+  "name": "Crew Office",
+  "description": "Publishes OpenClaw agent activity to a Crew Office receiver as Agent Office Protocol events.",
   "activation": {
     "onStartup": true
   },

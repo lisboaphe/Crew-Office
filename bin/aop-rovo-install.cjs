@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// aop-rovo-install — register The Roving Office adapter as Rovo CLI event hooks.
+// aop-rovo-install — register Crew Office adapter as Rovo CLI event hooks.
 //
 //   node bin/aop-rovo-install.cjs --dry-run     show the diff, change nothing
 //   node bin/aop-rovo-install.cjs               install (backs up first)

@@ -1,4 +1,4 @@
-// The way around the office: a slim glass dock on the left edge that opens into a sidebar.
+// The way around the office: a slim dock on the left edge, where each button opens its own menu.
 //
 // Hovering opens it, after a short pause so that passing the mouse over it on the way to the office
 // does nothing. Once open it stays open until something says otherwise: a click outside, Esc, or
@@ -42,22 +42,21 @@ export function createNav({ groups, onGo, current, badgeOf = () => 0 }) {
 
   function draw() {
     const here = current();
+    const group = groups.find((g) => g.key === openGroup) ?? groups[0];
+    // Only the section being pointed at, beside the button that opened it.
+    const button = dockButtons.find((b) => b.dataset.group === group.key);
+    panel.style.marginTop = `${button.offsetTop - 6}px`;
     panel.replaceChildren(
-      h('div.cr-nav-head', h('b', 'Go to'), h('button.btn.small', { type: 'button', 'aria-label': 'Close navigation', onclick: () => close(true) }, '✕')),
-      ...groups.map((g) => {
-        const on = g.key === openGroup;
-        return h('section.cr-nav-group', { class: on ? 'on' : '' },
-          h('button.cr-nav-group-head', { type: 'button', 'aria-expanded': on ? 'true' : 'false', onclick: () => { openGroup = on ? null : g.key; draw(); syncDock(); } },
-            icon(g.icon), h('span.grow', g.label), h('span.cr-nav-caret', { 'aria-hidden': 'true' }, '›')),
-          h('div.cr-nav-items', { inert: on ? null : true },
-            h('div', ...g.items.map((it) => {
-              const n = badgeOf(it.key);
-              return h('button.cr-nav-item', {
-                type: 'button', role: 'menuitem', class: here === it.key ? 'on' : '', 'aria-current': here === it.key ? 'page' : null, title: it.hint ?? null,
-                onclick: () => { close(false); onGo(it.key); },
-              }, icon(it.icon), h('span.grow', it.label), n ? h('span.cr-nav-badge', n) : null);
-            }))));
-      }));
+      h('div.cr-nav-head', h('b', group.label), h('button.btn.small', { type: 'button', 'aria-label': 'Close navigation', onclick: () => close(true) }, '✕')),
+      h('section.cr-nav-group.on',
+        h('div.cr-nav-items',
+          h('div', ...group.items.map((it) => {
+            const n = badgeOf(it.key);
+            return h('button.cr-nav-item', {
+              type: 'button', role: 'menuitem', class: here === it.key ? 'on' : '', 'aria-current': here === it.key ? 'page' : null, title: it.hint ?? null,
+              onclick: () => { close(false); onGo(it.key); },
+            }, icon(it.icon), h('span.grow', it.label), n ? h('span.cr-nav-badge', n) : null);
+          })))));
   }
 
   const syncDock = () => {

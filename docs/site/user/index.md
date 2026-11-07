@@ -2,7 +2,7 @@
 
 *An office full of characters, and the characters are your AI agents.*
 
-The Roving Office is a soft-3D isometric office. The characters in it are agent sessions —
+Crew Office is a pixel-art office. The characters in it are agent sessions —
 Claude Code, Cursor, Codex, Rovo CLI, OpenClaw — one character per conversation. When an
 agent starts a piece of work somebody walks in and sits down at a desk. When it looks
 something up, they get up and go to the bookshelf. When it finishes, they carry the work
