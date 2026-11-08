@@ -117,9 +117,23 @@ test('review loop: own branches, changes requested, rework, approval, merge, QA,
   const devTask = tasks.find((x) => x.title.startsWith('Build the greeting'));
   assert.strictEqual(devTask.status, 'completed');
   assert.match(devTask.resultSummary, /Merged into bot\/main/);
-  const onA = path.join(o.pcA.dir, 'worktrees');
-  assert.ok(!fs.existsSync(onA) || !fs.readdirSync(onA).includes(o.dev.id), 'Bob’s agent never had a clone on Alice’s machine');
-  assert.ok(fs.readdirSync(path.join(o.pcB.dir, 'worktrees')).includes(o.dev.id), 'Bob’s agent worked in a clone on Bob’s machine');
+  // Clones live in the project's own folder on the machine of the agent's owner.
+  const clonesOf = (dir) => {
+    const found = [];
+    const walk = (d, depth) => {
+      if (depth > 6 || !fs.existsSync(d)) return;
+      for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        if (!e.isDirectory()) continue;
+        const p = path.join(d, e.name);
+        if (fs.existsSync(path.join(p, '.git'))) found.push(p); else walk(p, depth + 1);
+      }
+    };
+    walk(path.join(dir, 'Projects'), 0);
+    return found;
+  };
+  const agentFolder = `${path.sep}agents${path.sep}${o.dev.name}${path.sep}`;
+  assert.ok(!clonesOf(o.pcA.dir).some((p) => p.includes(agentFolder)), 'Bob’s agent never had a clone on Alice’s machine');
+  assert.ok(clonesOf(o.pcB.dir).some((p) => p.includes(agentFolder)), 'Bob’s agent worked in a clone on Bob’s machine, in the project’s folder');
 });
 
 test('the host refuses: pushes to main, other agents’ branches, secrets, force-pushes, strangers', { timeout: 90_000 }, async (t) => {

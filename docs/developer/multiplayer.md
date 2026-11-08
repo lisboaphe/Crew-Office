@@ -77,6 +77,9 @@ lib/crew-worker/
   scripted.cjs     the scripted test provider (not AI)
   schemas.cjs      tool descriptions and JSON Schemas for models
   local-tools.cjs  sandboxed commands, web fetch, private memory
+  git-local.cjs    the agent's own clone of a project repository, and its Git tools
+  handoff.cjs      the manual Claude Code route: brief out, RESULT.md or PLAN.json back
+  project-folders.cjs  one folder per project on the owner's machine, for clones and hand-offs
   sandbox.cjs      process (Node permission model) or Docker isolation
   vault.cjs        encrypted credential store
 crew/              lobby and in-office overlay (no build step)
@@ -85,6 +88,30 @@ bin/crew-worker.cjs, bin/crew-demo.cjs
 bin/crew-relay.cjs the connectivity service. See [Deploying the connectivity service](connectivity-service.md)
 deploy/relay/      its Docker deployment
 ```
+
+## Project folders on the worker's machine
+
+Everything a worker keeps for a project, its agents' clones and the manual hand-offs, goes in one
+folder for that project, so a project is cleared away by deleting it:
+
+```
+<projects root>/<office name>/<project name>/
+  .crew-project.json        the project's id, so a renamed project keeps its folder
+  agents/<agent>/<task (id)>/<repository>
+  handoffs/<task (id)>/HANDOFF.md, RESULT.md or PLAN.json
+```
+
+The root is `CREW_PROJECTS_DIR` if set. Otherwise the worker that somebody runs uses
+`~/Crew Office Projects`, outside synced folders because clones churn files, and a worker started
+with its own `CREW_WORKER_DIR` uses `Projects` inside that. Anything else that builds the worker's
+tools, a test or the demo, gets `Projects` inside its data folder, so nothing but a real worker
+ever writes to somebody's home folder. Hand-offs are still listed in `<data dir>/handoffs`, which
+the worker page reads; each entry records the folder its files are in. A clone made before this
+layout stays where it is and is used until its task ends.
+
+A connection whose token the office answers with 401 *Unknown or revoked worker token* is
+forgotten from `worker.json` and stops, since waiting never makes such a token valid again. Any
+other failure to reach the office is retried every 10 seconds as before.
 
 ## Security model
 
