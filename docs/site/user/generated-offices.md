@@ -2,6 +2,8 @@
 
 *A seed is a room. Any string at all, the way any string is a Minecraft world seed.*
 
+> **This page describes the 3D office, which the app no longer shows.** The office is now drawn in 2D pixel art, and [Watching the office](watching.md) says what you see in it. This page is kept for reference.
+
 `misty-quay-3100` is *Three Blocks*: eight desks in two teams of six and two, one block in
 the middle of a warehouse floor, a post box and a
 [printer](../item-movements.html#printer), and one warm couch in a big cold room.

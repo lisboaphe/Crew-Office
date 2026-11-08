@@ -3,6 +3,8 @@
 *Where the sun is, what season it is, and which way the room faces. The office runs on a
 real clock and, if you ask it to, a real place on earth.*
 
+> **This page describes the 3D office, which the app no longer shows.** The office is now drawn in 2D pixel art, and [Watching the office](watching.md) says what you see in it. This page is kept for reference.
+
 <img src="../images/panels/scene-panel.png" width="736" alt="The scene panel: Building with all eight offices as buttons, an Auto button and Lights switch, Time with a Now button and scrubber, the four Seasons beneath it, an Orientation compass card and a Location sun map.">
 
 *Press **`S`** for the scene panel. Everything on this page is one of these dials — Time, Season, Orientation, Location and Lights.*

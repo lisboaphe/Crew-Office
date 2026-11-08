@@ -4,29 +4,30 @@
 
 Crew Office is a pixel-art office. The characters in it are agent sessions —
 Claude Code, Cursor, Codex, Rovo CLI, OpenClaw — one character per conversation. When an
-agent starts a piece of work somebody walks in and sits down at a desk. When it looks
-something up, they get up and go to the bookshelf. When it finishes, they carry the work
-to the mailbox and post it. When it fails, they crumple it up and bin it.
+agent joins, somebody comes in through the break area's door, gets a coffee and takes
+their desk. While an agent works, its character types at that desk. With nothing on, they
+sit back, stroll about their room, or go to the break area for a coffee, some food or a
+glass of water, and come straight back the moment there is real work.
 
 That is the entire idea. The room *is* the status board, and nothing in it is a metaphor
 you have to decode.
 
-<img src="../images/screens/office.png" width="875" alt="An isometric cutaway office on a street corner: characters at work, some seated at desks with lit monitors, one walking across the floor, a coffee machine, a bookshelf with a globe, a telescope at the window and a printer by the wall.">
+<img src="../images/screens/office-2d.png" width="875" alt="A pixel-art office floor seen from above at an angle: two rooms of desks with agents typing at lit screens, an armchair, lamp and plant in a cozy corner, a bookshelf in each room, one agent walking down the aisle, and a break area with a coffee machine, fridge, microwave and water cooler.">
 
 *One room, and everybody you can see is a real conversation somewhere.*
 
 > **See it now → [the demo office](https://therovingoffice.com/office/TEST-0000)**
 >
 > Nothing to install. That room runs on *simulated* agents, so it is already busy —
-> people arriving, coffee breaks, parcels in the mailbox, somebody stooped over the
-> telescope. [Reception](https://therovingoffice.com/) will cut you an empty office of
-> your own.
+> people arriving, typing, wandering off for a coffee and coming back.
+> [Reception](https://therovingoffice.com/) will cut you an empty office of your own.
 
 It is not a fleet monitor and does not want to be. It holds about a dozen desks, and it is
-a way to watch a team work. It is also, deliberately, a bit silly: the coffee machine is a
-three-group espresso machine with cups warming on top, and one print in six overshoots the
-tray and lands on the floor. None of that tells you anything. It is there because an
-office with nothing to notice is a screensaver.
+a way to watch a team work. It is also, deliberately, a bit silly: two people at the
+break area at once stop for a chat, the microwave only turns while somebody is heating
+something, and the windows and clocks follow the time and weather where the office is
+hosted. None of that tells you anything. It is there because an office with nothing to
+notice is a screensaver.
 
 ## Three ways in
 

@@ -73,7 +73,7 @@ const STEPS = [
   {
     icon: '👀', title: 'Watch the office',
     lines: [
-      'Agents sit at their desk and type while they work, and take a break by the sofa or the kitchen when they have nothing on.',
+      'Agents sit at their desk and type while they work, and stroll about their room or go to the break area when they have nothing on.',
       'The tag above each head says what it is doing right now: Thinking, Reading server.js, Asking Boris, Idle.',
       'Speech bubbles are real messages between agents. Click any character to open its control panel.',
     ],

@@ -3,6 +3,8 @@
 *An arrangement of furniture is a thing in its own right: it is kept, it can be named, and
 it can be handed to somebody else as a file.*
 
+> **This page describes the 3D office, which the app no longer shows.** The office is now drawn in 2D pixel art, and [Watching the office](watching.md) says what you see in it. This page is kept for reference.
+
 <img src="../images/panels/editor-strip.png" width="736" alt="The editor strip along the bottom of the screen: Add item, the Selected panel, a snap-grid scrubber, a Paths switch, and the Layout row of Copy, Paste, Download, Reset and Random with the layout picker beside them.">
 
 *The **Layout** row at the right-hand end is this page: Copy, Paste, Download, Reset, and the picker that names which layout the room is showing.*

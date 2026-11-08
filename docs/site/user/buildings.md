@@ -2,6 +2,8 @@
 
 *Eight buildings. One floor plan, and everything else different.*
 
+> **This page describes the 3D office, which the app no longer shows.** The office is now drawn in 2D pixel art, and [Watching the office](watching.md) says what you see in it. This page is kept for reference.
+
 Every office shares the same floor — the same room dimensions, the same places the desks
 can stand — and differs in all the ways you actually notice: the walls, the floor finish,
 the light, the way in, and the city outside the windows.

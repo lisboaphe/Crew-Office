@@ -9,7 +9,7 @@
 import { createAllocator } from './allocation.js';
 import { createAmbient } from './ambient.js';
 import {
-  AISLE_X, BORDER, BREAK_DOOR_X, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
+  AISLE_X, BORDER, BREAK_DOOR_X, DESK_H, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
   STEP_X, WALL_H, WORKER_H, WORKER_W, decorOf, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
 } from './floor-plan.js';
 import { restingPose, workingPose } from './desk-poses.js';
@@ -33,10 +33,13 @@ const FLOOR_BANDS = 7;
 
 const BACKGROUND = '#f6ead2';
 const OAK_LIGHT = '#eeb565';
-const OAK = '#d9913f';
 const OAK_DARK = '#8c5420';
 const GREEN = '#3f6248';
 const CREAM = '#fbf3e4';
+// The walls between and around the rooms, in charcoal brown, lit from the top left.
+const WALL = '#4a3a32';
+const WALL_DARK = '#2f2420';
+const WALL_LIGHT = '#5e4b40';
 
 // Each person's frames: standing, breathing and two strides, then from behind for the chair and for
 // walking away. desk-poses.js has what the rest of them are for.
@@ -48,7 +51,7 @@ const WALK_CYCLE = [2, 0, 3, 0];
 const WALK_AWAY_CYCLE = [8, 4, 9, 4];
 const PLAYER_ROUTINE = 40; // seconds, of which the player's working share is at the keyboard
 const PLAYER_WORKING = 0.7;
-const STRIDE = 6; // art pixels to each of those frames
+const STRIDE = 8; // art pixels to each of those frames
 const HAIRS = 6;
 const SCREENS = ['code', 'dashboard', 'chart', 'chat', 'terminal', 'landscape'];
 const AT_REST = new Set(['idle', 'resting', 'drinking']);
@@ -187,6 +190,7 @@ export function createOffice2D(canvas, input) {
   let scale = 1;
   let dragged = null; // art-pixel offset a drag has added, while looking around
   let moving = true;
+  let walkersMoving = false;
 
   // Moving the camera ---------------------------------------------------------------------------
 
@@ -365,9 +369,12 @@ export function createOffice2D(canvas, input) {
     try { sessionStorage.setItem(WELCOMED_KEY, JSON.stringify([...welcomed])); } catch { /* as above */ }
   }
 
-  function drawPerson(image, frame, x, y, flip, rows = WORKER_H) {
-    const px = Math.round(x);
-    const py = Math.round(y);
+  /** The nearest whole screen pixel to a point of the art, which at a zoom of 3 is a third of one. */
+  const fine = (v) => (scale >= 1 ? Math.round(v * scale) / scale : Math.round(v));
+
+  function drawPerson(image, frame, x, y, flip, rows = WORKER_H, round = Math.round) {
+    const px = round(x);
+    const py = round(y);
     context.save();
     if (flip) {
       context.translate(px * 2 + WORKER_W, 0);
@@ -385,12 +392,15 @@ export function createOffice2D(canvas, input) {
     shell.height = ROOM_H;
     const g = shell.getContext('2d');
     g.imageSmoothingEnabled = false;
-    g.fillStyle = OAK_DARK;
+    g.fillStyle = WALL_DARK;
     g.fillRect(4, 0, width - 8, ROOM_H);
     g.fillRect(0, 4, width, ROOM_H - 8);
-    g.fillStyle = OAK;
+    g.fillStyle = WALL;
     g.fillRect(5, 1, width - 10, ROOM_H - 2);
     g.fillRect(1, 5, width - 2, ROOM_H - 10);
+    g.fillStyle = WALL_LIGHT;
+    g.fillRect(5, 1, width - 10, 1);
+    g.fillRect(1, 5, 1, ROOM_H - 10);
 
     const inner = width - BORDER * 2;
     const tile = sprites.floor;
@@ -434,6 +444,11 @@ export function createOffice2D(canvas, input) {
     return decor.get(room.key);
   }
 
+  /** Something to draw in front of whatever is further back, by where it meets the floor. */
+  function inDepth(layer, depth, draw) {
+    layer.push({ depth, draw });
+  }
+
   function putStanding(prop, x, bottom) {
     const main = sprites[prop.sprite];
     if (prop.on) {
@@ -453,7 +468,8 @@ export function createOffice2D(canvas, input) {
     return { x: room.x + BORDER + recipe.shelfX, y: room.y + BORDER + recipe.shelfY, width: shelf.width, height: shelf.height };
   }
 
-  function drawRoom(room) {
+  /** The room's walls and floor now, and what stands on the floor into `layer`, to go in depth. */
+  function drawRoom(room, layer) {
     const left = room.x + BORDER;
     const top = room.y + BORDER;
     const recipe = decorFor(room);
@@ -462,12 +478,15 @@ export function createOffice2D(canvas, input) {
     drawClock(left + recipe.clockX, top + 25); // below the plaque with the room's name
     if (recipe.picture && room.down === 0 && room.number !== 1) put(recipe.picture, left + AISLE_X - 15, top + 24);
     if (recipe.rug) put('rug', left + AISLE_X - 36, top + ROW_TOP + 40);
-    drawShelf(room);
-    const bottom = top + recipe.propsBottom;
-    for (const { prop, x } of recipe.standing) putStanding(prop, left + x, bottom);
-    if (recipe.small) put(recipe.small, left + recipe.smallX, bottom - sprites[recipe.small].height);
+    // The cozy corner's rug, under its armchair, lamp and plant.
+    if (recipe.cozy) put('rug', left + 14, top + WALL_H + 28);
     // A door in the back wall, from the room behind this one.
     if (room.down > 0) put('door', left + AISLE_X - 19, top + WALL_H - 56);
+    const shelf = shelfOf(room);
+    inDepth(layer, shelf.y + shelf.height, () => drawShelf(room));
+    const bottom = top + recipe.propsBottom;
+    for (const { prop, x } of recipe.standing) inDepth(layer, bottom, () => putStanding(prop, left + x, bottom));
+    if (recipe.small) inDepth(layer, bottom, () => put(recipe.small, left + recipe.smallX, bottom - sprites[recipe.small].height));
   }
 
   /** The frame of somebody in their chair, either at the keyboard or sitting back. */
@@ -476,10 +495,14 @@ export function createOffice2D(canvas, input) {
   }
 
   /** The player, at the top middle of their first room. They own the room and have no bot's seat. */
-  function drawPlayer(room) {
+  function drawPlayer(room, layer) {
     if (room.number !== 1) return;
     const left = room.x + BORDER;
     const top = room.y + BORDER;
+    inDepth(layer, top + PLAYER.deskY + DESK_H, () => drawPlayerNow(room, left, top));
+  }
+
+  function drawPlayerNow(room, left, top) {
     put('desk-active-landscape', left + PLAYER.deskX, top + PLAYER.deskY);
     const chosen = players.get(room.ownerId)?.character;
     const character = Number.isInteger(chosen) ? chosen : hashOf(room.ownerId) % HAIRS;
@@ -492,7 +515,8 @@ export function createOffice2D(canvas, input) {
     put('chair-back', deskX, deskY);
   }
 
-  function drawStation(room, row, index, bots) {
+  /** A workstation: its patch of floor now, and its desk and whoever is at it into `layer`. */
+  function drawStation(room, row, index, bots, layer) {
     const at = stationAt(room, index);
     const { y } = at;
     context.fillStyle = 'rgba(247, 232, 196, 0.2)';
@@ -504,11 +528,27 @@ export function createOffice2D(canvas, input) {
     const desk = at.right ? put : putFlipped;
     const deskY = y - 8;
     if (row.standby) {
-      context.globalAlpha = 0.6;
-      desk('desk-standby', at.deskX, deskY);
-      context.globalAlpha = 1;
+      inDepth(layer, deskY + DESK_H, () => {
+        context.globalAlpha = 0.6;
+        desk('desk-standby', at.deskX, deskY);
+        context.globalAlpha = 1;
+      });
       return { kind: 'standby', x: at.workerX + 13, y: y + 22 };
     }
+    inDepth(layer, deskY + DESK_H, () => drawStationNow(at, row, bots));
+    const bot = bots.get(row.botId);
+    const seat = sittingAt(at.deskX, deskY, at.right);
+    return {
+      kind: 'bot', id: row.botId, bot, hash: hashOf(row.botId), y, rugX: at.rugX, badgeX: at.badgeX, nameX: at.nameX,
+      centreX: seat.x + WORKER_W / 2, headY: seat.y,
+    };
+  }
+
+  /** The desk, and the worker at it unless they are up and about. */
+  function drawStationNow(at, row, bots) {
+    const { y } = at;
+    const desk = at.right ? put : putFlipped;
+    const deskY = y - 8;
 
     const bot = bots.get(row.botId);
     const hash = hashOf(row.botId);
@@ -550,16 +590,21 @@ export function createOffice2D(canvas, input) {
 
   // The break area, and the doors that join it all up. ---------------------------------------------
 
-  function drawBreakRoom(breakRoom, heating) {
+  function drawBreakRoom(breakRoom, heating, layer) {
     const left = breakRoom.x + BORDER;
     const top = breakRoom.y + BORDER;
     drawShell(breakRoom.x, breakRoom.y, breakRoom.width);
 
     drawClock(left + 201, top + 6);
     put('noticeboard', left + 141, top + 2);
-    // The microwave only turns while somebody is heating something.
-    for (const item of BREAK_FURNITURE) put(item.sprite, left + item.x, top + item.y, item.sprite === 'microwave' && !heating ? 0 : null);
     put('door', left + BREAK_DOOR_X - sprites.door.width / 2, top + WALL_H - sprites.door.height);
+    // The microwave only turns while somebody is heating something. What stands on something else
+    // goes with it.
+    let depth = 0;
+    for (const item of BREAK_FURNITURE) {
+      depth = item.onTop ? depth + 0.01 : top + item.y + sprites[item.sprite].height;
+      inDepth(layer, depth, () => put(item.sprite, left + item.x, top + item.y, item.sprite === 'microwave' && !heating ? 0 : null));
+    }
   }
 
   /** The window for this time of day at the host, with the host's weather across the glass. */
@@ -677,16 +722,16 @@ export function createOffice2D(canvas, input) {
   function drawDoors(plan) {
     const side = (x, y) => {
       // An opening in the shared wall, at floor level, with the frame showing either side of it.
-      context.fillStyle = '#c87a33';
+      context.fillStyle = '#6e3f1f';
       context.fillRect(x, y - 30, BORDER, 44);
-      context.fillStyle = '#9a5a24';
+      context.fillStyle = '#55301a';
       context.fillRect(x, y - 22, BORDER, 1);
       context.fillRect(x, y - 7, BORDER, 1);
       context.fillRect(x, y + 8, BORDER, 1);
       for (const postY of [y - 36, y + 14]) {
-        context.fillStyle = OAK_DARK;
+        context.fillStyle = WALL_DARK;
         context.fillRect(x - 3, postY, BORDER + 6, 7);
-        context.fillStyle = OAK_LIGHT;
+        context.fillStyle = WALL_LIGHT;
         context.fillRect(x - 2, postY + 1, BORDER + 4, 2);
       }
     };
@@ -695,7 +740,7 @@ export function createOffice2D(canvas, input) {
       if (room.across > 0 && room.down === 0) side(room.x, footOf(room));
       if (room.down > 0) {
         // Through the shared wall from the room behind, to the door on this side of it.
-        context.fillStyle = '#b9742c';
+        context.fillStyle = '#6e3f1f';
         context.fillRect(room.x + BORDER + AISLE_X - 15, room.y, 30, BORDER);
       }
     }
@@ -715,48 +760,55 @@ export function createOffice2D(canvas, input) {
     return path ? { path, spot } : null;
   }
 
-  /** Whoever is away from their desk on this floor, drawn over the room. */
-  function drawWalkers(bots) {
+  /** Whoever is away from their desk on this floor, into `layer`, and their chat bubbles into `over`. */
+  function drawWalkers(bots, layer, over) {
     const walkers = [];
     for (const [id, seat] of seats) {
       if (seat.floor !== floorIndex) continue;
       const where = ambient.whereIs(id);
       if (where && bots.has(id)) walkers.push({ id, where, bot: bots.get(id) });
     }
-    walkers.sort((a, b) => a.where.y - b.where.y);
     const shown = [];
+    walkersMoving = walkers.some(({ where }) => where.moving || where.hidden);
     for (const { id, where, bot } of walkers) {
       const hash = hashOf(id);
       shown.push({ id, x: where.x + WORKER_W / 2, y: where.y });
       if (where.hidden) continue; // on the far side of a door for a moment
-      const cycle = where.facingAway ? WALK_AWAY_CYCLE : WALK_CYCLE;
-      // At the coffee machine or the like they face it, with their back to us.
-      const usingSomething = ambient.actionOf(id) && ambient.actionOf(id) !== 'wander' && !where.talking;
-      let pose = Math.floor(clock * 1.1 + (hash % 5)) % 2;
-      if (where.moving) pose = cycle[Math.floor(where.walked / STRIDE) % cycle.length];
-      else if (usingSomething) pose = BEHIND;
-      // Getting up and sitting down: they fade between the chair and the floor beside the desk.
-      const seat = seats.get(id);
-      const home = seatFeet(seat.room, seat.index);
-      const fromHome = Math.hypot(where.x + WORKER_W / 2 - home.x, where.y + WORKER_H - home.y);
-      context.globalAlpha = Math.min(1, 0.2 + fromHome / 14);
-      context.fillStyle = 'rgba(58, 28, 8, 0.28)';
-      context.fillRect(Math.round(where.x) + 4, Math.round(where.y) + WORKER_H - 2, WORKER_W - 8, 2);
-      drawPerson(workerStrip(bot.color), (hash % HAIRS) * POSES + pose, where.x, where.y, where.direction < 0);
-      context.globalAlpha = 1;
-      if (where.holding) {
-        const handX = Math.round(where.x) + (where.direction < 0 ? 2 : 21);
-        const handY = Math.round(where.y) + 24;
-        context.fillStyle = '#3a2212';
-        context.fillRect(handX - 1, handY - 1, 6, 6);
-        context.fillStyle = CREAM;
-        context.fillRect(handX, handY, 4, 4);
-        context.fillStyle = '#6b3f21';
-        context.fillRect(handX, handY, 4, 1);
-      }
-      if (where.talking) drawBubble(where.x + WORKER_W / 2, where.y - 4, hash);
+      inDepth(layer, where.y + WORKER_H, () => drawWalker(id, where, bot, hash));
+      if (where.talking) over.push(() => drawBubble(where.x + WORKER_W / 2, where.y - 4, hash));
     }
     return shown;
+  }
+
+  function drawWalker(id, where, bot, hash) {
+    const cycle = where.facingAway ? WALK_AWAY_CYCLE : WALK_CYCLE;
+    // At the coffee machine or the like they face it, with their back to us.
+    const usingSomething = ambient.actionOf(id) && ambient.actionOf(id) !== 'wander' && !where.talking;
+    let pose = Math.floor(clock * 1.1 + (hash % 5)) % 2;
+    if (where.moving) pose = cycle[Math.floor(where.walked / STRIDE) % cycle.length];
+    else if (usingSomething) pose = BEHIND;
+    // Getting up and sitting down: they fade between the chair and the floor beside the desk.
+    const seat = seats.get(id);
+    const home = seatFeet(seat.room, seat.index);
+    const fromHome = Math.hypot(where.x + WORKER_W / 2 - home.x, where.y + WORKER_H - home.y);
+    context.globalAlpha = Math.min(1, 0.2 + fromHome / 14);
+    // Drawn to the screen's pixel rather than the art's, so a walk glides instead of stepping.
+    const x = fine(where.x);
+    const y = fine(where.y);
+    context.fillStyle = 'rgba(58, 28, 8, 0.28)';
+    context.fillRect(x + 4, y + WORKER_H - 2, WORKER_W - 8, 2);
+    drawPerson(workerStrip(bot.color), (hash % HAIRS) * POSES + pose, x, y, where.direction < 0, WORKER_H, fine);
+    context.globalAlpha = 1;
+    if (where.holding) {
+      const handX = x + (where.direction < 0 ? 2 : 21);
+      const handY = y + 24;
+      context.fillStyle = '#3a2212';
+      context.fillRect(handX - 1, handY - 1, 6, 6);
+      context.fillStyle = CREAM;
+      context.fillRect(handX, handY, 4, 4);
+      context.fillStyle = '#6b3f21';
+      context.fillRect(handX, handY, 4, 1);
+    }
   }
 
   /** A small speech bubble with dots, which is all a chat ever shows. */
@@ -956,21 +1008,28 @@ export function createOffice2D(canvas, input) {
     const seen = (x, y, w) => toScreenX(x + w) > 0 && toScreenX(x) < width && toScreenY(y + ROOM_H) > 0 && toScreenY(y) < height;
     const visible = rooms.filter((r) => seen(r.x, r.y, ROOM_W));
     const breakPlan = seen(floorPlan.breakRoom.x, floorPlan.breakRoom.y, floorPlan.breakRoom.width) ? floorPlan.breakRoom : null;
+    // Walls and floors first, then everything that stands on a floor, the furthest back first, so
+    // somebody walking behind a desk or a plant goes behind it, and in front of it once past it.
+    const layer = [];
+    const over = [];
     if (breakPlan) {
       const heating = [...seats.entries()].some(([id, seat]) => seat.floor === floorIndex && ambient.actionOf(id) === 'microwave');
-      drawBreakRoom(breakPlan, heating);
+      drawBreakRoom(breakPlan, heating, layer);
     }
     placed = [];
-    for (const room of visible) drawRoom(room);
+    for (const room of visible) drawRoom(room, layer);
     drawDoors(floorPlan);
     for (const room of visible) {
-      drawPlayer(room);
+      drawPlayer(room, layer);
       room.rows.forEach((row, r) => {
-        const item = drawStation(room, row, r, bots);
+        const item = drawStation(room, row, r, bots, layer);
         placed.push({ ...item, number: row.number, roomKey: room.key });
       });
     }
-    const walking = drawWalkers(bots);
+    const walking = drawWalkers(bots, layer, over);
+    layer.sort((a, b) => a.depth - b.depth);
+    for (const { draw } of layer) draw();
+    for (const draw of over) draw();
 
     // The room's light follows the host's time of day.
     const light = ROOM_LIGHT[phaseOf(minutesNow())];
@@ -1015,7 +1074,8 @@ export function createOffice2D(canvas, input) {
     draw(world, dt, { selectedId = null, ownerOf = null } = {}) {
       clock += dt;
       sinceDraw += dt;
-      if (!moving && sinceDraw < DRAW_EVERY) return;
+      // Somebody walking is drawn every frame, so they move smoothly; otherwise a few times a second.
+      if (!moving && !walkersMoving && sinceDraw < DRAW_EVERY) return;
       const elapsed = sinceDraw;
       sinceDraw = 0;
       const source = this.rosterOverride
