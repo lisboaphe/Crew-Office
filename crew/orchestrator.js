@@ -340,7 +340,7 @@ export function createOrchestrator(ctx) {
         ] },
         { title: 'Watch it happen', spot: () => document.querySelector('.cr-tabs'), lines: [
           'The Runs tab shows the same board, lit up by what each step is really doing. Click any step to open its logs and files.',
-          'Agents also work on the 3D floor, and talk in the project’s channel in the chat on the right.',
+          'Agents also work in the office itself, and talk in the project’s channel in the chat on the right.',
           'Approvals wait for you at the tick at the top of the screen.',
         ] },
         { title: 'What agents can use', lines: [
@@ -441,6 +441,9 @@ export function createOrchestrator(ctx) {
     if (!seen && !touring && editorRoot.isConnected) setTimeout(tour, 350);
   }
 
+  /** The page went away: a tour pointing at it has nothing left to point at. */
+  const closeTour = () => touring?.close();
+
   load().catch(() => {});
-  return { showEditor, showRuns, changed, playbooksUsing, addToPlaybook, tour, playbooks: () => data.playbooks };
+  return { showEditor, showRuns, changed, playbooksUsing, addToPlaybook, tour, closeTour, playbooks: () => data.playbooks };
 }

@@ -2143,6 +2143,7 @@ async function main() {
     file: officeFile,
     idleTtlMs: IDLE_TTL_MS,
     maxOffices: MAX_OFFICES,
+    claimable: PUBLISH && !PINNED_OFFICE,
     log: (msg) => console.log(msg),
     // The tally, hung off the store because the store is the only place that sees every
     // office begin and end (see `createOfficeStore`). It counts and cannot refuse.

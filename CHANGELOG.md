@@ -14,6 +14,16 @@
 - The office no longer updates the hidden 3D scene every frame.
 - The user documentation shows the 2D office, and says which pages describe the old 3D one.
 
+## Small fixes after the 2D office
+
+- The Orchestrator's guided tour closes when you leave the Orchestrator, instead of staying over the office.
+- The office no longer logs a "409 Conflict" error on every load.
+- **Add an agent** is now called that, instead of **Add a worker**, which is the name of the program that runs agents.
+- The tours describe the 2D office.
+- The agent roster starts put away in a crew office, and **Agent roster** in the menu shows it.
+- New offices start with two chat channels instead of five; add more with **+** in the chat.
+- **Revoke Invitation** only shows when there is an invitation link to revoke.
+
 ## Glass interface, new navigation, Memory & Knowledge
 
 ### Added
