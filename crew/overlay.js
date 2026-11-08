@@ -14,8 +14,11 @@ import { addWorkerWizard } from './wizard.js';
 import { createSecurityCenter } from './security.js';
 import { workerLink, connectionsView, usageView, usageBar } from './connections.js';
 import { createNav } from './nav.js';
+import { recallPanel, rememberPanel } from '../src/ui/panel-state.js';
 import { createKnowledge } from './knowledge.js';
 
+// Set before boot() runs below, which reads it straight away.
+const ROSTER = 'agent-panel';
 const code = (location.pathname.match(/^\/office\/([^/]+)/) ?? [])[1];
 const S = { room: null, me: null, members: [], agents: [], projects: [], tasks: [], channels: [], approvals: [], notifications: [], workers: [], feed: [], artifacts: [], permissions: {}, providers: {}, host: {} };
 let roomId = null;
@@ -30,6 +33,17 @@ function applyAppearance() {
   const root = document.documentElement;
   if (stored('crew.theme') === 'light') root.dataset.theme = 'light'; else delete root.dataset.theme;
   if (stored('crew.motion') === 'off') root.dataset.motion = 'off'; else delete root.dataset.motion;
+}
+
+/**
+ * The office's roster of who is on the floor. In a crew office it starts put away, because it
+ * covers part of the room and the menu already lists the agents; whoever opens it keeps it open.
+ */
+function showRoster(open) {
+  const roster = document.getElementById(ROSTER);
+  if (!roster) return;
+  roster.classList.toggle('hidden', !open);
+  rememberPanel(ROSTER, open);
 }
 
 async function boot() {
@@ -135,6 +149,8 @@ function upsert(list, item, match = (x) => x.id === item.id) {
 // --- chrome ---------------------------------------------------------------
 
 function buildChrome() {
+  // After the office's own start-up, which opens the roster by default and would undo this.
+  document.getElementById(ROSTER)?.classList.toggle('hidden', !recallPanel(ROSTER, false));
   ui.bar = h('div.cr', { id: 'crew-bar' });
   ui.dash = h('section.cr.cr-drawer.left.hidden', { 'aria-label': 'Dashboard' });
   ui.side = h('section.cr.cr-drawer.right.hidden', { 'aria-label': 'Chat and agents' });
@@ -183,6 +199,7 @@ function render() {
     if (!renderQueued) return;
     renderQueued = false;
     renderBar();
+    closeStrayTours();
     ui.nav.refresh();
     if (!ui.dash.classList.contains('hidden')) renderDash();
     if (!ui.side.classList.contains('hidden')) renderSide();
@@ -243,6 +260,7 @@ function fitTopBars() {
 const NAV = [
   { key: 'workspace', label: 'Workspace', icon: 'workspace', items: [
     { key: 'office3d', label: 'Office', icon: 'building', hint: 'Close the panels and watch the floor' },
+    { key: 'roster', label: 'Agent roster', icon: 'agents', hint: 'Show or hide the list of everyone on the floor' },
     { key: 'projects', label: 'Projects', icon: 'folder' },
     { key: 'board', label: 'Task Board', icon: 'board' },
     { key: 'files', label: 'Files', icon: 'file' },
@@ -275,6 +293,7 @@ const NAV_PARENT = { crew: 'agents', runs: 'playbooks', costs: 'usage', delivera
 const navKeyFor = (tab) => (NAV_KEYS.has(tab) ? tab : NAV_PARENT[tab] ?? null);
 
 function goTo(key) {
+  if (key === 'roster') { showRoster(document.getElementById(ROSTER)?.classList.contains('hidden')); return; }
   if (key === 'office3d') { ui.dash.classList.add('hidden'); ui.editor.close?.(); render(); return; }
   // On a tab within this destination, as much as on the destination itself.
   if (!ui.dash.classList.contains('hidden') && navKeyFor(ui.tab) === key) { ui.dash.classList.add('hidden'); render(); return; }
@@ -333,6 +352,12 @@ const SECTIONS = [
 const sectionOf = (tab) => SECTIONS.find((s) => s.tabs.some(([k]) => k === tab)) ?? SECTIONS[0];
 const onThisComputer = () => ['localhost', '127.0.0.1'].includes(location.hostname);
 const localWorker = () => workerLink(`http://127.0.0.1:${S.host?.workerPort ?? 8790}`);
+
+/** A guided tour of a page must not outlive the page. */
+function closeStrayTours() {
+  const onOrchestrator = !ui.dash.classList.contains('hidden') && ['playbooks', 'runs'].includes(ui.tab);
+  if (!onOrchestrator) ui.orchestrator?.closeTour();
+}
 
 function renderDash() {
   // These hold their own state and update themselves. A half-drawn playbook, its zoom and a
@@ -423,9 +448,9 @@ function dashAgents(body) {
   const filter = () => { const q = search.value.trim().toLowerCase(); ui.agentQuery = search.value; for (const r of rows) r.hidden = Boolean(q) && !r.dataset.search.includes(q); };
   search.addEventListener('input', filter);
   filter();
-  body.append(h('div.row', h('div.grow', search), S.room.myRole !== 'guest' ? h('button.btn.primary', { onclick: () => addWorkerWizard(editorContext()) }, 'Add a worker') : null));
+  body.append(h('div.row', h('div.grow', search), S.room.myRole !== 'guest' ? h('button.btn.primary', { onclick: () => addWorkerWizard(editorContext()) }, 'Add an agent') : null));
   body.append(h('div.cr-list', { style: { marginTop: '12px' } }, ...rows));
-  if (!S.agents.length) body.append(h('p.hint', 'No agents yet. Add a worker to put someone on the floor.'));
+  if (!S.agents.length) body.append(h('p.hint', 'No agents yet. Add an agent to put someone on the floor.'));
   if (ui.agentQueryFocus) { search.focus(); search.setSelectionRange(search.value.length, search.value.length); }
   search.addEventListener('focus', () => { ui.agentQueryFocus = true; });
   search.addEventListener('blur', () => { ui.agentQueryFocus = false; });
@@ -522,9 +547,9 @@ function dashCosts(body) {
 
 function dashCrew(body) {
   body.append(h('div.row', h('h2.grow', 'My Crew'),
-    h('button.btn.primary', { onclick: () => addWorkerWizard(editorContext()) }, 'Add a worker'),
+    h('button.btn.primary', { onclick: () => addWorkerWizard(editorContext()) }, 'Add an agent'),
     helpTip('How to add a worker', [
-      'Press Add a worker and choose what they should do.',
+      'Press Add an agent and choose what they should do.',
       'Choose an AI. The app checks this computer for it.',
       'If it asks, sign in on the provider’s own page. The app never sees your password.',
       'Name them and press Create.',

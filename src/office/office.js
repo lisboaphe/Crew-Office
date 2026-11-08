@@ -430,7 +430,8 @@ export async function removeScene(id) {
  */
 export async function claimLocalEndpoint() {
   const wantsLive = scenes.some((scene) => getSources(scene.sources).some((def) => def.kind === 'aop'));
-  if (!wantsLive || office?.claimed) return false;
+  // An older server does not say, and is asked as before.
+  if (!wantsLive || office?.claimed || office?.claimable === false) return false;
   const res = await request('POST', `${base}/api/claim`);
   if (!res?.ok) return false;
   office = await res.json();
