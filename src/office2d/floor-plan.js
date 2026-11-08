@@ -41,15 +41,22 @@ export const BREAK_FURNITURE = [
   { sprite: 'side-table', x: 150, y: WALL_H - 12 },
   { sprite: 'microwave', x: 152, y: WALL_H - 26, onTop: true },
   { sprite: 'cooler', x: 210, y: WALL_H - 32 },
-  { sprite: 'plant', x: 88, y: INNER_H - 74 },
+  // A round table with four chairs where the sofa was, clear of the ways up to the coffee machine,
+  // the microwave and the water cooler.
+  { sprite: 'break-table', x: 84, y: INNER_H - 100 },
+  { sprite: 'plant', x: 236, y: INNER_H - 74 },
 ];
 
-// The cozy corner at the top left of the player's own room: a rug, an armchair, a lamp and a plant.
+// The cozy corner at the top left of the player's own room, against the back wall: an arc lamp
+// leaning over an armchair, and a plant, on a round rug.
+const COZY_BOTTOM = WALL_H + 26;
 export const COZY_CORNER = [
-  { prop: { sprite: 'armchair' }, x: 6 },
-  { prop: { sprite: 'lamp' }, x: 47 },
-  { prop: { sprite: 'plant' }, x: 70 },
+  // Only the lamp's base stands on the floor; its arc reaches over the armchair.
+  { prop: { sprite: 'lamp-arc' }, x: 2, bottom: COZY_BOTTOM, base: 15 },
+  { prop: { sprite: 'armchair' }, x: 18, bottom: COZY_BOTTOM },
+  { prop: { sprite: 'plant' }, x: 62, bottom: COZY_BOTTOM + 2 },
 ];
+export const COZY_RUG = { sprite: 'rug-round', x: 8, y: WALL_H + 6 };
 
 // What a room may be furnished with, along with the desks every room has.
 const FLOOR_PROPS = [
@@ -177,14 +184,14 @@ function roomSolids(room, sizes, ownSeat) {
   const top = room.y + BORDER;
   const decor = decorOf(room, sizes);
   const bottom = top + decor.propsBottom;
-  const standing = (prop, x) => {
+  const standing = (prop, x, foot = bottom, base = null) => {
     const under = sizes[prop.on ?? prop.sprite];
     const height = prop.on ? under.height + sizes[prop.sprite].height - 12 : under.height;
-    return rect(left + x, bottom - height, under.width, height);
+    return rect(left + x, foot - height, base ?? under.width, height);
   };
   const solids = [
     rect(left + decor.shelfX, top + decor.shelfY, sizes.shelf.width, sizes.shelf.height),
-    ...decor.standing.map(({ prop, x }) => standing(prop, x)),
+    ...decor.standing.map((item) => standing(item.prop, item.x, item.bottom === undefined ? bottom : top + item.bottom, item.base)),
   ];
   if (decor.small) solids.push(rect(left + decor.smallX, bottom - sizes[decor.small].height, sizes[decor.small].width, sizes[decor.small].height));
   if (room.number === 1) {

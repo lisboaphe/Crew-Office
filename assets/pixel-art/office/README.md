@@ -18,10 +18,13 @@ Everything is in `established/`. `sprites.json` gives each one's size, and a PNG
 | `wall-clock` | A slim digital display in each room and the break area. Its digits are drawn from the host's time | Digits, and a colon ticking each second |
 | `plant` | Beside the lounge and between columns | Swaying |
 | `cooler` | Against the back wall | Bubbles rising |
-| `shelf`, `sofa`, `lamp` | The office's furniture | None |
+| `shelf`, `lamp` | The office's furniture | None |
+| `sofa` | Not drawn at present, since the break area lost its sofa | None |
+| `lamp-arc`, `rug-round` | The cozy corner at the top left of the player's first room: an arc lamp with a yellow shade leaning over the armchair, on a round rug | None |
 | `door` | In the back wall, between rooms one behind the other | None |
 | `coffee` | The break area's cabinet, with the coffee machine and mugs on it | Steam |
 | `fridge`, `side-table`, `microwave` | Cut from the break nook and scene sheets | The microwave glows while somebody uses it |
+| `break-table` | A round table with four chairs, in the break area | None |
 | `noticeboard` | On the break area's wall | None |
 | `fax`, `armchair`, `rug`, `cabinet`, `boxes`, `bin`, `picture-*` | Chosen per room from its name, so rooms differ but each stays the same | None |
 
@@ -41,3 +44,5 @@ sh source/build-established-art.sh <folder holding those sheets>
 ```
 
 ImageMagick cuts each sprite and reduces it to a pixel grid, then Aseprite finishes it with `source/finish-established-art.lua`. `established/source/` holds an editable `.aseprite` for each sprite. Rebuilding overwrites both those and the PNGs, so hand edits made in Aseprite are lost unless they also go in the script.
+
+Some are no longer what the rebuild makes. `door`, `fax`, `lamp-arc`, `rug-round` and `break-table` were drawn pixel by pixel in Aseprite, and the rebuild does not make the last three at all, so it would also drop them from `sprites.json`. `worker` had the shadow under its shoes and the stray specks in its recoloured hair cleaned off afterwards, and `armchair` was recoloured from sage to cognac leather. After a rebuild, put those back from version control, or redo them.

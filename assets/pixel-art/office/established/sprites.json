@@ -35,5 +35,8 @@
   "side-table": { "width": 45, "height": 34, "frames": 1, "fps": 0 },
   "noticeboard": { "width": 58, "height": 36, "frames": 1, "fps": 0 },
   "door": { "width": 37, "height": 56, "frames": 1, "fps": 0 },
-  "coffee": { "width": 78, "height": 71, "frames": 4, "fps": 3 }
+  "coffee": { "width": 78, "height": 71, "frames": 4, "fps": 3 },
+  "rug-round": { "width": 70, "height": 30, "frames": 1, "fps": 0 },
+  "lamp-arc": { "width": 34, "height": 58, "frames": 1, "fps": 0 },
+  "break-table": { "width": 76, "height": 60, "frames": 1, "fps": 0 }
 }

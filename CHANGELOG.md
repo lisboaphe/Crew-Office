@@ -9,7 +9,7 @@
 - **Walking is slower and smoother.** People walk at about two thirds of the old speed and are drawn every frame while they move.
 - **People go behind furniture properly.** Somebody walking behind a desk, plant or shelf goes behind it, and in front of it once they are past.
 - **The walls are charcoal brown.**
-- **The break area has no sofa**, and the player's first room has a **cozy corner** at its top left, with an armchair, a lamp, a plant and a rug.
+- **The break area has no sofa**, and the player's first room has a **cozy corner** at its top left, against the back wall: a yellow arc lamp leaning over a cognac leather armchair, and a plant, on a round rug. The break area has a round table with four chairs.
 - **The door and the fax machine are redrawn**, and the characters no longer have stray pixels round their feet and in their hair.
 - The office no longer updates the hidden 3D scene every frame.
 - The user documentation shows the 2D office, and says which pages describe the old 3D one.
