@@ -41,7 +41,10 @@ export const BREAK_FURNITURE = [
   { sprite: 'side-table', x: 150, y: WALL_H - 12 },
   { sprite: 'microwave', x: 152, y: WALL_H - 26, onTop: true },
   { sprite: 'cooler', x: 210, y: WALL_H - 32 },
-  { sprite: 'plant', x: 88, y: INNER_H - 74 },
+  // A round table with four chairs where the sofa was, clear of the ways up to the coffee machine,
+  // the microwave and the water cooler.
+  { sprite: 'break-table', x: 84, y: INNER_H - 100 },
+  { sprite: 'plant', x: 236, y: INNER_H - 74 },
 ];
 
 // The cozy corner at the top left of the player's own room, against the back wall: an arc lamp

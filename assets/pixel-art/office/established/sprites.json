@@ -37,5 +37,6 @@
   "door": { "width": 37, "height": 56, "frames": 1, "fps": 0 },
   "coffee": { "width": 78, "height": 71, "frames": 4, "fps": 3 },
   "rug-round": { "width": 70, "height": 30, "frames": 1, "fps": 0 },
-  "lamp-arc": { "width": 34, "height": 58, "frames": 1, "fps": 0 }
+  "lamp-arc": { "width": 34, "height": 58, "frames": 1, "fps": 0 },
+  "break-table": { "width": 76, "height": 60, "frames": 1, "fps": 0 }
 }
