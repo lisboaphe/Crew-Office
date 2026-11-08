@@ -1,5 +1,9 @@
 # Changelog
 
+## The lobby lamp's own switch
+
+- **Click the lobby's hanging bulb** to start or stop its swing and flicker, or choose in **Preferences → Lobby lamp**. Out of the box it follows the system, so with Windows' **Animation effects** off it hangs still and stays lit, which is why it seemed to have gone.
+
 ## Walking, art and layout in the 2D office
 
 ### Changed

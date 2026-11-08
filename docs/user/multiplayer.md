@@ -249,7 +249,9 @@ The dock on the left edge of the office is the menu. Rest the mouse on it and it
 click somewhere else, press Esc, or choose a destination. With a keyboard, Tab to the dock and press Enter, then use the
 arrow keys. Chat stays on the right, and the office stays visible behind everything.
 
-Preferences has the appearance, animation and quiet-mode choices.
+Preferences has the appearance, animation and quiet-mode choices, and whether the lobby's hanging lamp sways and
+flickers. Out of the box the lamp follows your system: with reduced motion turned on, as it is when Windows'
+**Animation effects** are off, it hangs still and stays lit. Click the bulb in the lobby to switch it either way.
 
 ## Memory & Knowledge
 
