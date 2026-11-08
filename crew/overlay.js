@@ -15,6 +15,7 @@ import { createSecurityCenter } from './security.js';
 import { workerLink, connectionsView, usageView, usageBar } from './connections.js';
 import { createNav } from './nav.js';
 import { recallPanel, rememberPanel } from '../src/ui/panel-state.js';
+import { lampSetting, setLampSetting } from './lamp.js';
 import { createKnowledge } from './knowledge.js';
 
 // Set before boot() runs below, which reads it straight away.
@@ -597,6 +598,8 @@ function dashPrefs(body) {
   body.append(h('label', 'Appearance'), h('select', { onchange: (e) => { keep('crew.theme', e.target.value === 'light' ? 'light' : ''); applyAppearance(); } },
     h('option', { value: '', selected: stored('crew.theme') !== 'light' }, 'Dark glass'), h('option', { value: 'light', selected: stored('crew.theme') === 'light' }, 'Light glass')));
   body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: stored('crew.motion') === 'off', onchange: (e) => { keep('crew.motion', e.target.checked ? 'off' : ''); applyAppearance(); } }), ' Turn off interface animation (your system’s reduced motion setting always applies)'));
+  body.append(h('label', 'Lobby lamp'), h('select', { onchange: (e) => setLampSetting(e.target.value) },
+    ...[['', 'Follow my system'], ['on', 'Swing and flicker'], ['off', 'Keep still']].map(([value, text]) => h('option', { value, selected: lampSetting() === value }, text))));
   body.append(h('label.cr-check', h('input', { type: 'checkbox', checked: quietMode(), onchange: (e) => keep('crew.quiet', e.target.checked ? '1' : '0') }), ' Quiet mode: only pop up what needs me (approvals, blockers, failures)'));
   body.append(h('h3', 'Tours'), h('div.row', h('button.btn', { onclick: () => openTutorial({ showMe: tourShowMe }) }, 'How the office works'), h('button.btn', { onclick: () => { goTo('playbooks'); setTimeout(() => ui.orchestrator.tour(), 250); } }, 'How the Orchestrator works')));
   body.append(h('h3', 'Profile'), h('div.row', h('button.btn', { onclick: () => chooseCharacter() }, 'Change character'), h('button.btn', { onclick: profile }, 'Change name or avatar colour'), h('a.btn', { href: '/crew' }, 'Back to lobby')));

@@ -673,9 +673,14 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 @keyframes cr-lamp-sway { from { transform: rotate(-2.5deg); } to { transform: rotate(2.5deg); } }
 .cr-lamp-cord { width: 4px; height: 62px; margin: 0 auto; background: repeating-linear-gradient(#2e1c12 0 4px, #4a2c12 4px 8px); }
 .cr-lamp-bulb {
+  display: block;
   width: 60px;
   height: 96px;
-  margin-top: -4px;
+  margin: -4px auto 0;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  pointer-events: auto;
   background: url('/assets/pixel-art/office/established/bulb.png') 0 0 / 200% 100% no-repeat;
   image-rendering: pixelated;
   position: relative;
@@ -694,7 +699,11 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
   opacity: 0;
 }
 .cr-lamp.on .cr-lamp-glow { opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .cr-lamp-swing { animation: none; } }
+/* The lamp moves only when lamp.js says so, which is the person's choice or else their system's. It
+   is stronger than the rules that still every animation, as it is a choice made for this lamp alone. */
+.cr-lamp:not(.moving) .cr-lamp-swing { animation: none; }
+.cr .cr-lamp.moving .cr-lamp-swing, .cr-lamp.moving .cr-lamp-swing { animation: cr-lamp-sway 6s steps(8) infinite alternate !important; }
+.cr-lamp-bulb:focus-visible { outline: 2px solid var(--cr-accent); outline-offset: 2px; }
 
 /* Rounder: bigger stepped corners, with the gradient clipped to them so its bands reach the frame. */
 :root { --cr-pixel-frame: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'11'%20height%3D'11'%20shape-rendering%3D'crispEdges'%3E%3Crect%20x%3D'3'%20y%3D'0'%20width%3D'5'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'2'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'8'%20y%3D'1'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'1'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'9'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'0'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'10'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'1'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'9'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'2'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'8'%20y%3D'9'%20width%3D'1'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'3'%20y%3D'10'%20width%3D'5'%20height%3D'1'%20fill%3D'%23120a05'%2F%3E%3Crect%20x%3D'3'%20y%3D'1'%20width%3D'5'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'2'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'1'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'8'%20y%3D'2'%20width%3D'1'%20height%3D'1'%20fill%3D'%23a8744a'%2F%3E%3Crect%20x%3D'2'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%231c110a'%2F%3E%3Crect%20x%3D'3'%20y%3D'9'%20width%3D'5'%20height%3D'1'%20fill%3D'%231c110a'%2F%3E%3Crect%20x%3D'8'%20y%3D'8'%20width%3D'1'%20height%3D'1'%20fill%3D'%231c110a'%2F%3E%3Crect%20x%3D'9'%20y%3D'3'%20width%3D'1'%20height%3D'5'%20fill%3D'%231c110a'%2F%3E%3C%2Fsvg%3E"); --cr-pixel-round: polygon(0 6px, 2px 6px, 2px 4px, 4px 4px, 4px 2px, 6px 2px, 6px 0, calc(100% - 6px) 0, calc(100% - 6px) 2px, calc(100% - 4px) 2px, calc(100% - 4px) 4px, calc(100% - 2px) 4px, calc(100% - 2px) 6px, 100% 6px, 100% calc(100% - 6px), calc(100% - 2px) calc(100% - 6px), calc(100% - 2px) calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) calc(100% - 2px), calc(100% - 6px) calc(100% - 2px), calc(100% - 6px) 100%, 6px 100%, 6px calc(100% - 2px), 4px calc(100% - 2px), 4px calc(100% - 4px), 2px calc(100% - 4px), 2px calc(100% - 6px), 0 calc(100% - 6px)); }
