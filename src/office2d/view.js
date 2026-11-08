@@ -9,7 +9,7 @@
 import { createAllocator } from './allocation.js';
 import { createAmbient } from './ambient.js';
 import {
-  AISLE_X, BORDER, BREAK_DOOR_X, DESK_H, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
+  AISLE_X, BORDER, BREAK_DOOR_X, COZY_RUG, DESK_H, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
   STEP_X, WALL_H, WORKER_H, WORKER_W, decorOf, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
 } from './floor-plan.js';
 import { restingPose, workingPose } from './desk-poses.js';
@@ -478,14 +478,18 @@ export function createOffice2D(canvas, input) {
     drawClock(left + recipe.clockX, top + 25); // below the plaque with the room's name
     if (recipe.picture && room.down === 0 && room.number !== 1) put(recipe.picture, left + AISLE_X - 15, top + 24);
     if (recipe.rug) put('rug', left + AISLE_X - 36, top + ROW_TOP + 40);
-    // The cozy corner's rug, under its armchair, lamp and plant.
-    if (recipe.cozy) put('rug', left + 14, top + WALL_H + 28);
+    // The cozy corner's rug, under its lamp, armchair and plant.
+    if (recipe.cozy) put(COZY_RUG.sprite, left + COZY_RUG.x, top + COZY_RUG.y);
     // A door in the back wall, from the room behind this one.
     if (room.down > 0) put('door', left + AISLE_X - 19, top + WALL_H - 56);
     const shelf = shelfOf(room);
     inDepth(layer, shelf.y + shelf.height, () => drawShelf(room));
     const bottom = top + recipe.propsBottom;
-    for (const { prop, x } of recipe.standing) inDepth(layer, bottom, () => putStanding(prop, left + x, bottom));
+    for (const item of recipe.standing) {
+      // Most stand along one line across the room; the cozy corner stands back against the wall.
+      const foot = item.bottom === undefined ? bottom : top + item.bottom;
+      inDepth(layer, foot, () => putStanding(item.prop, left + item.x, foot));
+    }
     if (recipe.small) inDepth(layer, bottom, () => put(recipe.small, left + recipe.smallX, bottom - sprites[recipe.small].height));
   }
 
