@@ -2,6 +2,8 @@
 
 > **Not available right now.** The office is now 2D, drawn from one fixed angle, and furniture can't be dragged in it yet. Saved layouts still apply.
 
+> **This page describes the 3D office, which the app no longer shows.** The office is now drawn in 2D pixel art, and [Watching the office](watching.md) says what you see in it. This page is kept for reference.
+
 *Press `E`, drag the desks about, and watch everybody's route bend round them.*
 
 The office keeps running while you do it. Nothing is paused — agents go on walking,

@@ -7,14 +7,13 @@ import {
 } from './office/office.js';
 import { openNewOffice } from './office/new-office.js';
 import {
-  createCamera, updateCameraAspect, createControls, clampPan,
+  createCamera, updateCameraAspect, createControls,
   createFirstPersonCamera, updateFirstPersonAspect,
 } from './scene/camera.js';
 import { saveCameraView } from './scene/camera-view.js';
-import { applyTimeOfDay, dayLength, declinationFor } from './scene/lighting.js';
-import { applyNightLights } from './scene/night-lights.js';
+import { dayLength, declinationFor } from './scene/lighting.js';
 import { buildWorld, changeAppearance, disposeWorld } from './world.js';
-import { applyLayout, resetLayout, stationsOfKind } from './layout.js';
+import { applyLayout, resetLayout } from './layout.js';
 import { createFpvRide } from './fpv.js';
 import { createOffice2D } from './office2d/view.js';
 import { setTagLegibility, tagLegibilityFor } from './agents/Agent.js';
@@ -1277,48 +1276,21 @@ function animate(timestamp) {
   timer.update(timestamp);
   const dt = Math.min(timer.getDelta(), 0.05);
   if (world) {
+    // The agents themselves: where they are and what they are doing is what the office shows.
     world.manager.update(dt);
-    // Each desk runs the board on its second screen — and only while it is being
-    // worked at, so this is one cheap early return per desk in an empty room.
-    for (const desk of world.props.desks) desk.update(dt);
-    world.props.mailbox?.update(dt);
-    // Every printer, because the ready light and the touchscreen are per machine and
-    // `props.printer` is only ever the last one built. By station, which is the index
-    // that stays correct when a kind has more than one (see scene/props.js).
-    for (const s of stationsOfKind('printer')) world.props.byStation[s.id]?.update?.(dt);
-    // One globe per bookshelf, and a room may have more than one shelf. Each spins
-    // down on its own after whoever turned it walks away.
-    for (const shelf of world.props.bookshelves) shelf.globe?.update(dt);
-    // And one tube per telescope, sweeping while somebody has an eye to it and
-    // easing back to its resting pitch once they walk away.
-    for (const t of world.props.telescopes ?? []) t.scope?.update(dt);
-    world.props.door?.update(dt);
+    // Mail and parcels are only delivered when they land, and landing is what fills the
+    // mailbox, so they keep flying though nobody sees them.
     world.mail.update(dt);
-    world.birds.update(dt);
     world.deliveries.update(dt);
-    highlightSelected();
-    // Cheap: a handful of uniform writes. Doing it per frame is what makes
-    // scrubbing the clock feel continuous rather than stepped.
-    const sun = applyTimeOfDay(world.lights, worldClock.hours(), world.theme, scene);
-    // The street lamps and ceiling fittings ride the same clock, so dusk brings
-    // them up as the sun goes down — unless the scene panel is overriding it.
-    automaticLightLevel = sun.lampOn;
-    applyNightLights(world.props.nightLights, lightsLevel(automaticLightLevel));
   }
+  // Nothing else of the 3D scene runs. It is not drawn, as the office is drawn in 2D, so its
+  // screens, globes, printers, birds, lighting and camera would be work for nobody to see.
   scenePanel.update(dt);
   devPanel.update(dt);
   // After manager.update(), so the route ribbons are drawn from where people have just
   // got to rather than trailing them by a frame. A no-op unless edit mode is open.
   editor?.tick();
-  // Aiming happens after manager.update() and before the render, so the eye is at
-  // this frame's head position rather than trailing it by one.
   ride.track(dt);
-  if (!ride.id) {
-    // Damping and pan clamping only mean anything for the lens they belong to;
-    // running them while riding would have the office view drifting unseen.
-    controls.update();
-    clampPan(camera, controls);
-  }
   office2d.draw(world, dt, { selectedId, ownerOf: window.crewOwnerOf });
 }
 

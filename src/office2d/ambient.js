@@ -5,7 +5,7 @@
 // nothing from an agent except whether they are free. It cannot change an agent's work, deliveries or
 // status, and it has no way to reach them. An agent who gets real work while away heads straight back.
 
-const SPEED = 46; // art pixels a second
+const SPEED = 30; // art pixels a second, an unhurried stroll
 const HURRY = 2.2;
 const WORKING_SHARE = 0.7; // of the time somebody is free, the share they spend at the keyboard
 const FIRST_STINT_MIN = 5;
@@ -32,9 +32,9 @@ function retraced(points) {
 }
 
 /**
- * @param {{random?: () => number}} [opts]
+ * @param {{random?: () => number, speed?: number}} [opts]  speed in art pixels a second
  */
-export function createAmbient({ random = Math.random } = {}) {
+export function createAmbient({ random = Math.random, speed = SPEED } = {}) {
   /** id -> what they are doing, for anyone not simply at their desk. */
   const away = new Map();
   /** id -> what they are doing at their desk, and how their free time has gone so far. */
@@ -224,7 +224,7 @@ export function createAmbient({ random = Math.random } = {}) {
         }
 
         if (person.phase === 'going') {
-          if (walk(person, dt, bot.idle ? SPEED : SPEED * HURRY)) {
+          if (walk(person, dt, bot.idle ? speed : speed * HURRY)) {
             person.phase = 'at';
             if (person.action === 'wander' || person.arriving) continue;
             const other = [...away.entries()].find(([id, p]) => id !== bot.id && p.phase === 'at' && !p.partner && p.action !== 'wander' && !p.arriving);
@@ -247,7 +247,7 @@ export function createAmbient({ random = Math.random } = {}) {
             endChat(person, away);
             turnBack(person);
           }
-        } else if (walk(person, dt, bot.idle ? SPEED : SPEED * HURRY)) {
+        } else if (walk(person, dt, bot.idle ? speed : speed * HURRY)) {
           away.delete(bot.id);
           startWorking(desk);
         }

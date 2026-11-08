@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { findPath, isClear, isLineClear } from '../src/office2d/walkways.js';
 import { createAllocator } from '../src/office2d/allocation.js';
 import {
-  BREAK_FURNITURE, BREAK_SPOTS, WALL_H, WORKER_H, WORKER_W, arrivalRoute, placeFloor, routeTo, seatFeet, spotFeet, strollFrom, walkMapOf,
+  AISLE_X, BORDER, FOOT_Y, INNER_H, INNER_W, BREAK_FURNITURE, BREAK_SPOTS, WALL_H, WORKER_H, WORKER_W, arrivalRoute, placeFloor, routeTo, seatFeet, spotFeet, strollFrom, walkMapOf,
 } from '../src/office2d/floor-plan.js';
 
 const sizes = JSON.parse(readFileSync(new URL('../assets/pixel-art/office/established/sprites.json', import.meta.url)));
@@ -181,4 +181,40 @@ test('everyone can come in by the break room door, get a coffee and reach their 
       assert.deepEqual(route.path.at(-1), route.home[0], 'the way to the desk starts at the coffee');
     });
   }
+});
+
+test('a trip to the break area keeps to the lanes: down the aisle, then along the foot of each room', () => {
+  for (const [players, each] of LAYOUTS) {
+    const { bots, present } = team(players, each);
+    everySeat(createAllocator().sync(bots, present).floors, (seat) => {
+      const feet = routeTo(seat, BREAK_SPOTS[1], sizes).map((p) => ({ x: p.x + WORKER_W / 2, y: p.y + WORKER_H }));
+      const label = `${players}x${each} ${seat.room.key} seat ${seat.index}`;
+      const passes = (x, y) => feet.some((p) => p.x === x && p.y === y);
+      const left = seat.room.x + BORDER;
+      assert.ok(feet.some((p) => p.x === left + AISLE_X), `${label}: out by the aisle`);
+      for (const room of seat.plan.rooms) {
+        if (room.down !== 0 || room.across <= seat.room.across) continue;
+        assert.ok(passes(room.x + BORDER + AISLE_X, room.y + BORDER + FOOT_Y), `${label}: along the foot of ${room.key}`);
+      }
+    });
+  }
+});
+
+test('a stroll stays in its own room, turning back at whatever is in the way', () => {
+  let seed = 7;
+  const random = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 2 ** 32; };
+  const { bots, present } = team(2, 10);
+  everySeat(createAllocator().sync(bots, present).floors, (seat) => {
+    const left = seat.room.x + BORDER;
+    const top = seat.room.y + BORDER;
+    for (let i = 0; i < 4; i++) {
+      const stroll = strollFrom(seat, sizes, random);
+      for (const p of stroll.path) {
+        const x = p.x + WORKER_W / 2;
+        const y = p.y + WORKER_H;
+        assert.ok(x >= left && x <= left + INNER_W && y >= top + WALL_H && y <= top + INNER_H, `${seat.room.key}: ${x}, ${y} is in the room`);
+      }
+      assert.equal(stroll.path.some((p) => p.through), false, 'no doors on a stroll');
+    }
+  });
 });

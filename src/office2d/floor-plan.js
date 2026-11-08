@@ -1,7 +1,7 @@
 // Where everything in the office stands. The drawing and the walking both read it from here, so
 // what you see and what people walk around cannot drift apart. No drawing in this file.
 
-import { findPath, isClear } from './walkways.js';
+import { findPath, isClear, isLineClear } from './walkways.js';
 
 // All in art pixels. Every room is this size: the player at the top middle, two agents down each
 // side of an aisle, and a strip along the foot of the room to walk to the doors by.
@@ -41,9 +41,14 @@ export const BREAK_FURNITURE = [
   { sprite: 'side-table', x: 150, y: WALL_H - 12 },
   { sprite: 'microwave', x: 152, y: WALL_H - 26, onTop: true },
   { sprite: 'cooler', x: 210, y: WALL_H - 32 },
-  { sprite: 'sofa', x: 148, y: INNER_H - 72 },
-  { sprite: 'lamp', x: 226, y: INNER_H - 80 },
   { sprite: 'plant', x: 88, y: INNER_H - 74 },
+];
+
+// The cozy corner at the top left of the player's own room: a rug, an armchair, a lamp and a plant.
+export const COZY_CORNER = [
+  { prop: { sprite: 'armchair' }, x: 6 },
+  { prop: { sprite: 'lamp' }, x: 47 },
+  { prop: { sprite: 'plant' }, x: 70 },
 ];
 
 // What a room may be furnished with, along with the desks every room has.
@@ -60,8 +65,14 @@ const PICTURES = [null, 'picture-hills', 'picture-chart', 'picture-night'];
 const SEATS_IN_A_ROOM = 4;
 const CHAIR_X = 48; // where the middle of the chair is in the desk's sprite, which is drawn mirrored on the left
 const CHAIR_TOP = 13;
-const WANDER_STOPS = 3;
-const WANDER_TRIES = 12;
+const WANDER_LEGS = 6; // straight walks in a stroll, each ending at whatever is in the way
+const WANDER_STEP = 2; // art pixels, how far ahead somebody looks before each step
+const WANDER_LEG_MIN = 24;
+const WANDER_LEG_MAX = 110;
+const HEADINGS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]].map(([x, y]) => {
+  const length = Math.hypot(x, y);
+  return { x: x / length, y: y / length };
+});
 
 export const hashOf = (text) => [...String(text)].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7) >>> 0;
 
@@ -126,7 +137,9 @@ export function decorOf({ key, number }, sizes) {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     return (seed >>> 16) % n;
   };
-  const flipped = roll(2) === 1;
+  // The player's room keeps its shelf on the right, as its left is the cozy corner.
+  const cozy = number === 1;
+  const flipped = roll(2) === 1 && !cozy;
   let left = FLOOR_PROPS[roll(FLOOR_PROPS.length)];
   const others = FLOOR_PROPS.filter((p) => p !== left);
   let right = others[roll(others.length)];
@@ -135,12 +148,15 @@ export function decorOf({ key, number }, sizes) {
   // player's room, where their desk stands.
   const beside = number === 1 ? null : (flipped ? left : right);
   const besideX = beside && (flipped ? shelfX + sizes.shelf.width + 4 : shelfX - widthOf(beside) - 2);
+  const picture = PICTURES[roll(PICTURES.length)];
+  const small = SMALL_PROPS[roll(SMALL_PROPS.length)];
   return {
     flipped,
-    picture: PICTURES[roll(PICTURES.length)],
-    small: SMALL_PROPS[roll(SMALL_PROPS.length)],
+    picture,
+    small: cozy ? null : small,
     rug: roll(2) === 0,
-    standing: [
+    cozy,
+    standing: cozy ? COZY_CORNER : [
       flipped ? { prop: right, x: INNER_W - widthOf(right) - 8 } : { prop: left, x: 8 },
       ...(beside ? [{ prop: beside, x: besideX }] : []),
     ],
@@ -249,43 +265,108 @@ export function spotFeet(plan, spot) {
  */
 export function routeTo(seat, spot, sizes) {
   const map = walkMapOf(seat.plan, sizes, seat);
-  const path = findPath(seatFeet(seat.room, seat.index), spotFeet(seat.plan, spot), map);
-  return path?.map((p) => ({ ...p, x: p.x - WORKER_W / 2, y: p.y - WORKER_H })) ?? null;
+  const path = laneWay(seat, spotFeet(seat.plan, spot), map);
+  return path?.map(drawnAt) ?? null;
+}
+
+const drawnAt = (p) => ({ ...p, x: p.x - WORKER_W / 2, y: p.y - WORKER_H });
+
+const dedupe = (points) => points.filter((p, i) => !i || p.x !== points[i - 1].x || p.y !== points[i - 1].y);
+
+/**
+ * The lanes everybody keeps to on the way to the break area and back: out to the aisle, down it to
+ * the strip along the foot of the room, along that strip and through the doors to the break area,
+ * and then straight up to whatever they are going to use. Somebody in a stacked room goes up their
+ * own aisle and through the door at the top first. Between lane points the way still goes around
+ * whatever stands there, and if a lane is ever blocked the way is simply the shortest one.
+ */
+function laneWay(seat, to, map) {
+  const from = seatFeet(seat.room, seat.index);
+  const top = seat.room.y + BORDER;
+  const left = seat.room.x + BORDER;
+  const at = stationAt(seat.room, seat.index);
+  const lanes = [{ x: left + AISLE_X, y: at.y + 6 + WORKER_H }];
+  if (seat.room.down === 0) lanes.push({ x: left + AISLE_X, y: top + FOOT_Y });
+  // Along the foot of every room in the top row between here and the break area.
+  const along = seat.plan.rooms
+    .filter((r) => r.down === 0 && r.across > seat.room.across)
+    .sort((a, b) => a.across - b.across)
+    .map((r) => ({ x: r.x + BORDER + AISLE_X, y: r.y + BORDER + FOOT_Y }));
+  if (seat.room.down > 0) {
+    const above = seat.plan.rooms.find((r) => r.down === 0 && r.across === seat.room.across);
+    if (above) lanes.push({ x: above.x + BORDER + AISLE_X, y: above.y + BORDER + FOOT_Y });
+  }
+  lanes.push(...along, { x: to.x, y: seat.plan.breakRoom.y + BORDER + FOOT_Y });
+
+  const way = [from];
+  for (const point of [...lanes.filter((p) => isClear(p, map)), to]) {
+    const leg = findPath(way.at(-1), point, map);
+    if (!leg) return findPath(from, to, map);
+    way.push(...leg.slice(1));
+  }
+  return dedupe(way);
+}
+
+/** The same way walked back, with each door still marking the stretch it is on. */
+function retraced(points) {
+  return points.map((point, i) => {
+    const rest = { ...point };
+    delete rest.through;
+    return points[i + 1]?.through ? { ...rest, through: true } : rest;
+  }).reverse();
 }
 
 /**
- * A stroll: a few random places around their own room, now and then further afield, with a moment
- * at each. Null if nowhere could be found this time.
+ * A stroll around their own room: out to the aisle, then off in a straight line until something is
+ * in the way, a wall or a desk or a plant, and then turn and go another way. A few of those, with a
+ * moment to look around now and then, and back the way they came. Null if they cannot get going.
  *
  * @param {{room: object, plan: object, index: number}} seat
  * @param {Record<string, {width: number, height: number}>} sizes
  * @param {() => number} random
  */
 export function strollFrom(seat, sizes, random) {
-  const map = walkMapOf(seat.plan, sizes, seat);
-  const ownFloor = map.walkable.find((r) => r.x <= seat.room.x + BORDER + AISLE_X && r.x + r.w >= seat.room.x + BORDER + AISLE_X
-    && r.y <= seat.room.y + BORDER + ROW_TOP && r.y + r.h >= seat.room.y + BORDER + ROW_TOP);
-  const floors = map.walkable.filter((r) => r.h > 100);
-  const anywhere = () => {
-    const area = random() < 0.75 ? ownFloor : floors[Math.floor(random() * floors.length)];
-    return { x: Math.round(area.x + random() * area.w), y: Math.round(area.y + random() * area.h) };
-  };
-  const stops = 1 + Math.floor(random() * WANDER_STOPS);
-  const way = [seatFeet(seat.room, seat.index)];
-  for (let stop = 0; stop < stops; stop++) {
-    let leg = null;
-    for (let tries = 0; tries < WANDER_TRIES && !leg; tries++) {
-      const place = anywhere();
-      if (isClear(place, map)) leg = findPath(way.at(-1), place, map);
+  const whole = walkMapOf(seat.plan, sizes, seat);
+  const left = seat.room.x + BORDER;
+  const top = seat.room.y + BORDER;
+  // Their own room's floor, and nothing else: its walls are what they turn back from.
+  const own = whole.walkable.find((r) => r.x <= left + AISLE_X && r.x + r.w >= left + AISLE_X && r.y <= top + ROW_TOP && r.y + r.h >= top + ROW_TOP);
+  if (!own) return null;
+  const map = { walkable: [own], solids: whole.solids };
+  const start = seatFeet(seat.room, seat.index);
+  const aisle = { x: left + AISLE_X, y: start.y };
+  const out = findPath(start, aisle, map);
+  if (!out) return null;
+  const way = [...out];
+  let heading = Math.floor(random() * HEADINGS.length);
+  for (let leg = 0; leg < WANDER_LEGS; leg++) {
+    const from = way.at(-1);
+    const wanted = WANDER_LEG_MIN + random() * (WANDER_LEG_MAX - WANDER_LEG_MIN);
+    // Try the way they face, and if that is blocked straight away, turn around and then aside.
+    let end = null;
+    for (const turn of [0, 4, 2, 6, 1, 7, 3, 5]) {
+      const dir = HEADINGS[(heading + turn) % HEADINGS.length];
+      let reach = 0;
+      while (reach + WANDER_STEP <= wanted) {
+        const next = { x: from.x + dir.x * (reach + WANDER_STEP), y: from.y + dir.y * (reach + WANDER_STEP) };
+        if (!isClear(next, map)) break;
+        reach += WANDER_STEP;
+      }
+      if (reach >= WANDER_STEP * 3) {
+        end = { x: Math.round(from.x + dir.x * reach), y: Math.round(from.y + dir.y * reach) };
+        if (!isClear(end, map) || !isLineClear(from, end, map)) { end = null; continue; }
+        // Next time, they set off away from whatever stopped them.
+        heading = (heading + turn + (reach < wanted ? 4 : Math.floor(random() * 3) - 1) + HEADINGS.length) % HEADINGS.length;
+        break;
+      }
     }
-    if (!leg) break;
-    way.push(...leg.slice(1));
-    // A moment to look around before moving on.
-    if (stop < stops - 1) way[way.length - 1] = { ...way.at(-1), rest: 0.6 + random() * 1.4 };
+    if (!end) break;
+    way.push(random() < 0.35 ? { ...end, rest: 0.6 + random() * 1.4 } : end);
   }
-  if (way.length < 2) return null;
+  if (way.length < 3) return null;
+  delete way.at(-1).rest;
   return {
-    path: way.map((p) => ({ ...p, x: p.x - WORKER_W / 2, y: p.y - WORKER_H })),
+    path: way.map(drawnAt),
     spot: { action: 'wander', pause: 0.8 + random() * 1.7 },
   };
 }
@@ -300,10 +381,10 @@ export function strollFrom(seat, sizes, random) {
 export function arrivalRoute(seat, sizes) {
   const map = walkMapOf(seat.plan, sizes, seat);
   const door = { x: seat.plan.breakRoom.x + BORDER + BREAK_DOOR_X, y: seat.plan.breakRoom.y + BORDER + WALL_H + 4 };
-  const coffee = BREAK_SPOTS.find((s) => s.action === 'coffee');
-  const toCoffee = findPath(door, spotFeet(seat.plan, coffee), map);
-  const toDesk = findPath(spotFeet(seat.plan, coffee), seatFeet(seat.room, seat.index), map);
-  if (!toCoffee || !toDesk) return null;
-  const drawn = (p) => ({ ...p, x: p.x - WORKER_W / 2, y: p.y - WORKER_H });
-  return { path: toCoffee.map(drawn), home: toDesk.map(drawn), spot: { action: 'coffee', pause: 2.5 } };
+  const coffee = spotFeet(seat.plan, BREAK_SPOTS.find((s) => s.action === 'coffee'));
+  const toCoffee = findPath(door, coffee, map);
+  // To their desk by the lanes, which is the way back from the desk to the coffee, walked backwards.
+  const fromDesk = laneWay(seat, coffee, map);
+  if (!toCoffee || !fromDesk) return null;
+  return { path: toCoffee.map(drawnAt), home: retraced(fromDesk).map(drawnAt), spot: { action: 'coffee', pause: 2.5 } };
 }

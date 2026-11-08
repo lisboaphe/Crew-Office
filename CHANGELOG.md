@@ -1,5 +1,19 @@
 # Changelog
 
+## Walking, art and layout in the 2D office
+
+### Changed
+
+- **Trips to the break area keep to lanes**: down the aisle, along the walkway at the foot of each room, through the doors, then up to the coffee machine, microwave or water cooler.
+- **A stroll stays in the agent's own room.** They walk in a straight line until a wall, desk or plant is in the way, then turn and go another way.
+- **Walking is slower and smoother.** People walk at about two thirds of the old speed and are drawn every frame while they move.
+- **People go behind furniture properly.** Somebody walking behind a desk, plant or shelf goes behind it, and in front of it once they are past.
+- **The walls are charcoal brown.**
+- **The break area has no sofa**, and the player's first room has a **cozy corner** at its top left, with an armchair, a lamp, a plant and a rug.
+- **The door and the fax machine are redrawn**, and the characters no longer have stray pixels round their feet and in their hair.
+- The office no longer updates the hidden 3D scene every frame.
+- The user documentation shows the 2D office, and says which pages describe the old 3D one.
+
 ## Glass interface, new navigation, Memory & Knowledge
 
 ### Added

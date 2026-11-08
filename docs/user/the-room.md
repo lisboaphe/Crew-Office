@@ -2,6 +2,8 @@
 
 *Every prop is somewhere an agent goes. None of it is set dressing.*
 
+> **This page describes the 3D office, which the app no longer shows.** The office is now drawn in 2D pixel art, and [Watching the office](watching.md) says what you see in it. This page is kept for reference.
+
 <img src="../images/screens/office.png" width="900" alt="An isometric cutaway office: characters at desks and walking, a coffee machine, a bookshelf with a globe, a telescope at the window and a printer by the wall.">
 
 *Every prop in this picture is somewhere somebody goes, and every one of them is on this page.*
