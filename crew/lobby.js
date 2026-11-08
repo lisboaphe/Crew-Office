@@ -341,7 +341,7 @@ function hostedView(draw) {
       h('div.cr-list', ...players.map((p) => h('div.cr-item.row', avatar(p.displayName, p.color), h('b.grow', p.displayName), h('span.cr-link', { class: p.online ? 'ok' : '' }, p.online ? 'Here' : 'Away')))),
       h('div.actions',
         h('button.btn', { onclick: () => { view = 'home'; draw(); } }, '← Lobby'),
-        s.room.status !== 'open' ? h('button.btn.primary', { onclick: renew }, 'Host Office') : s.invite ? h('button.btn', { onclick: revoke }, 'Revoke Invitation') : h('button.btn', { onclick: renew }, 'New invitation'),
+        s.room.status !== 'open' ? h('button.btn.primary', { onclick: renew }, 'Host Office') : s.invite && (s.link || s.lanLink) ? h('button.btn', { onclick: revoke }, 'Revoke Invitation') : s.invite ? null : h('button.btn', { onclick: renew }, 'New invitation'),
         s.room.status === 'open' ? h('button.btn.danger', { onclick: async () => { await api('POST', `/api/crew/rooms/${room.id}/hosting`, { on: false }); toast('Stopped hosting. Everything is kept.'); await refresh(); } }, 'Stop Hosting') : null,
         h('button.btn.primary', { onclick: () => { location.href = `/office/${s.room.code}`; } }, 'Enter office')),
       s.lanLink ? h('details.cr-conn-group', h('summary', h('b', 'On your own network')),

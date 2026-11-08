@@ -28,7 +28,7 @@ const STEPS = [
   {
     icon: '🤖', title: 'Build your AI team',
     lines: [
-      'Open the menu on the left, then AI Management → Agents → Add a worker. Give it a name, a role (Backend Developer, QA Engineer…), skills and instructions.',
+      'Open the menu on the left, then AI Management → Agents → Add an agent. Give it a name, a role (Backend Developer, QA Engineer…), skills and instructions.',
       'Pick the AI behind each agent: your ChatGPT plan (Sign in with ChatGPT, or the Codex app), your Claude plan (you run each task in your own Claude Code), a local model, or an API key. Mix them freely.',
       'Only you can change, pause or remove your agents — not even the office owner can.',
     ],
@@ -73,7 +73,7 @@ const STEPS = [
   {
     icon: '👀', title: 'Watch the office',
     lines: [
-      'Agents sit at a desk while working, go to the bookshelf to read notes, and turn amber when they are waiting for a human.',
+      'Agents sit at their desk and type while they work, and take a break by the sofa or the kitchen when they have nothing on.',
       'The tag above each head says what it is doing right now: Thinking, Reading server.js, Asking Boris, Idle.',
       'Speech bubbles are real messages between agents. Click any character to open its control panel.',
     ],

@@ -26,7 +26,7 @@ export function addWorkerWizard(ctx) {
   const link = ctx.workerLink();
   const state = { step: 0, preset: null, card: null, cards: null, neverPaid: true };
 
-  return modal('Add a worker', (close) => {
+  return modal('Add an agent', (close) => {
     const stepper = h('ol.cr-stepper');
     const page = h('div.cr-wizard-page');
     const root = h('div.cr-wizard', stepper, page);
