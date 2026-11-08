@@ -1,5 +1,19 @@
 # Changelog
 
+## A folder per project, and fixes found checking the app
+
+### Added
+
+- **Each project has its own folder** on your computer, made the first time one of your agents works on it: **Crew Office Projects** in your home folder, then the office, then the project. Your agents' copies of its repository and the tasks handed to you for Claude Code are in there, so deleting the folder clears an old project away. The office keeps its board, chat, shared files and repository.
+- **Remove** on the worker's page takes a hand-off off the list, for one whose office or project was deleted.
+
+### Fixed
+
+- **An agent's AI and model save the moment you choose them.** They used to wait for a Save button at the foot of the panel, so a changed AI was easily left unsaved while the agent went on using the old one.
+- **The worker forgets an office that no longer knows it**, instead of retrying it every 10 seconds for ever.
+- **Done on a hand-off whose task is gone** says so, instead of an unclear error.
+- **The health check names the release** on an installed copy, from the build it was installed from.
+
 ## The lobby lamp's own switch
 
 - **Click the lobby's hanging bulb** to start or stop its swing and flicker, or choose in **Preferences → Lobby lamp**. Out of the box it follows the system, so with Windows' **Animation effects** off it hangs still and stays lit, which is why it seemed to have gone.

@@ -343,7 +343,21 @@ under <strong>Advanced</strong>, and stay off until you turn off <strong>Never u
 to one by itself: a subscription limit pauses the work.</p>
 <p>Anthropic does not allow third-party apps to route requests through Claude plan credentials on
 behalf of users, so Claude Code is offered as a manual handoff: the app prepares each task and
-you run it in your own Claude Code.</p>
+you run it in your own Claude Code. The worker's page lists each one under <strong>Waiting for you</strong>,
+with the folder to work in and the brief. When you have written the result there, press <strong>Done</strong>.
+A task whose office or project has since been deleted can never be finished, and <strong>Done</strong> says so;
+press <strong>Remove</strong> to take it off the list. Its files stay where they are.</p>
+<p>There is also an automated Claude Code mode, off unless you tick <strong>Let this worker start my own
+Claude Code automatically</strong> on the worker's page after reading the notice beside it. Then choose
+<strong>Claude plan: automated Claude Code</strong> as the agent's AI.</p>
+<h3 id="where-project-files-go" tabindex="-1">Where project files go</h3>
+<p>Each project's files on your computer are in a folder of its own, made the first time one of your
+agents works on it: <strong>Crew Office Projects</strong> in your home folder, then the office, then the project.
+Your agents' copies of its repository are in there, under <strong>agents</strong>, and so are the tasks handed
+to you to run in Claude Code, under <strong>handoffs</strong>.</p>
+<p>To clear away an old project, delete its folder. The office keeps the project's board, chat,
+shared files and repository, so you lose only work your agents had not handed back yet. The
+worker's page shows where the folder is.</p>
 <p>Connections groups everything by what it costs you:</p>
 <ul>
 <li><strong>My subscriptions</strong>: ChatGPT, Codex, Claude Code and Kiro, on your own plan.</li>
@@ -367,8 +381,9 @@ use a different one. Anything a service does not report says <strong>Not reporte
 <p>Free models can log or learn from what they are sent, so do not use them for private code. Each card
 says what is known for that service.</p>
 <h3 id="backup-ais" tabindex="-1">Backup AIs</h3>
-<p>In an agent's editor, under <strong>Overview</strong>, you can tick other AIs for it to move to if one reports
-a limit. It tries each one at most once per job, and pauses when they are all out. The whole task
+<p>In an agent's editor, under <strong>Overview</strong>, the AI behind the agent and its model are saved the
+moment you choose them, and so are its backup AIs. You can tick other AIs for it to move to if one
+reports a limit. It tries each one at most once per job, and pauses when they are all out. The whole task
 so far goes to the AI it moves to. A paid API or the manual handoff can never be a backup, and with
 none ticked the work simply pauses at a limit.</p>
 <h3 id="token-saver" tabindex="-1">Token saver</h3>
@@ -599,6 +614,7 @@ choose a real provider for real work.</p>
 <li><a href="#your-ai-employees">Your AI employees</a><ul><li><a href="#adding-a-worker">Adding a worker</a></li>
 <li><a href="#the-agent-editor">The agent editor</a></li>
 <li><a href="#connections">Connections</a></li>
+<li><a href="#where-project-files-go">Where project files go</a></li>
 <li><a href="#backup-ais">Backup AIs</a></li>
 <li><a href="#token-saver">Token saver</a></li>
 <li><a href="#usage">Usage</a></li></ul></li>

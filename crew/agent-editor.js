@@ -150,15 +150,27 @@ export function createAgentEditor(ctx) {
         if (free.length) models.textContent = `${free.length} models may run on this connection. Start typing to see them. Anything that would cost money is refused on your worker, whatever is typed here.`;
       } catch { /* the worker is not on this computer */ }
     };
-    provider.addEventListener('change', () => { model.value = S.providers[provider.value].defaultModel; showModels(); });
+    // The AI and its model save the moment they change, like the backup AIs below them. With one
+    // Save at the foot of a long panel, a changed AI was easily left unsaved, and the agent went on
+    // using the old one while looking as if it had the new.
+    let backupList = backups(a);
+    const saveAi = saved(async () => {
+      await saveAgent({ provider: provider.value, model: model.value });
+      Object.assign(a, { provider: provider.value, model: model.value });
+      const fresh = backups(a);
+      backupList.replaceWith(fresh);
+      backupList = fresh;
+    }, 'AI saved');
+    provider.addEventListener('change', () => { model.value = S.providers[provider.value].defaultModel; showModels(); saveAi(); });
+    model.addEventListener('change', saveAi);
     showModels();
     return h('div', facts, actions,
       h('div.row.cr-two', field('Name', name), field('Colour', color)),
       field('Role', role),
       h('div.row.cr-two', field('AI behind this agent', provider), field('Model', model)), known, models,
-      backups(a),
+      backupList,
       capacity(a),
-      h('div.actions', h('button.btn.primary', { onclick: saved(() => saveAgent({ name: name.value, role: role.value, color: color.value, provider: provider.value, model: model.value })) }, 'Save')));
+      h('div.actions', h('button.btn.primary', { onclick: saved(() => saveAgent({ name: name.value, role: role.value, color: color.value, provider: provider.value, model: model.value })) }, 'Save name, role and colour')));
   }
 
   /** Other AIs this agent may move to at a limit. Paid APIs and the manual handoff are not offered. */

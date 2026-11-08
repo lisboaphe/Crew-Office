@@ -217,6 +217,12 @@ const MAX_OFFICES = Number(process.env.ROVING_OFFICE_MAX_OFFICES) > 0
   ? Number(process.env.ROVING_OFFICE_MAX_OFFICES)
   : undefined;
 
+// An installed copy has no deploy environment, but its installer wrote build.json beside it,
+// naming the release build and its commit. The environment still wins where it is set.
+const INSTALLED = (() => {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'build.json'), 'utf8')); } catch { return null; }
+})();
+
 /**
  * What this process is running, and how it got here.
  *
@@ -236,14 +242,17 @@ const MAX_OFFICES = Number(process.env.ROVING_OFFICE_MAX_OFFICES) > 0
  */
 const BUILD = Object.freeze({
   version: require('./package.json').version,
-  commit: process.env.ROVING_OFFICE_GIT_SHA || null,
+  commit: process.env.ROVING_OFFICE_GIT_SHA || INSTALLED?.commit || null,
+  // The release build number, for an installed copy. Its tree state is not recorded, so `dirty`
+  // below stays null for it: nobody said.
+  release: process.env.ROVING_OFFICE_GIT_SHA ? null : INSTALLED?.build ?? null,
   // Three states, not two: `null` is "nobody said", which is different from a stamped
   // image reporting a clean tree. Keyed off the commit rather than off its own variable,
   // because a dirty flag with no hash beside it describes nothing.
   dirty: process.env.ROVING_OFFICE_GIT_SHA
     ? Boolean(process.env.ROVING_OFFICE_GIT_DIRTY)
     : null,
-  source: process.env.ROVING_OFFICE_DEPLOY_SOURCE || 'unknown',
+  source: process.env.ROVING_OFFICE_DEPLOY_SOURCE || (INSTALLED?.commit ? 'release' : 'unknown'),
   run: process.env.ROVING_OFFICE_DEPLOY_RUN || null,
   builtAt: process.env.ROVING_OFFICE_BUILD_TIME || null,
 });

@@ -188,7 +188,25 @@ to one by itself: a subscription limit pauses the work.
 
 Anthropic does not allow third-party apps to route requests through Claude plan credentials on
 behalf of users, so Claude Code is offered as a manual handoff: the app prepares each task and
-you run it in your own Claude Code.
+you run it in your own Claude Code. The worker's page lists each one under **Waiting for you**,
+with the folder to work in and the brief. When you have written the result there, press **Done**.
+A task whose office or project has since been deleted can never be finished, and **Done** says so;
+press **Remove** to take it off the list. Its files stay where they are.
+
+There is also an automated Claude Code mode, off unless you tick **Let this worker start my own
+Claude Code automatically** on the worker's page after reading the notice beside it. Then choose
+**Claude plan: automated Claude Code** as the agent's AI.
+
+### Where project files go
+
+Each project's files on your computer are in a folder of its own, made the first time one of your
+agents works on it: **Crew Office Projects** in your home folder, then the office, then the project.
+Your agents' copies of its repository are in there, under **agents**, and so are the tasks handed
+to you to run in Claude Code, under **handoffs**.
+
+To clear away an old project, delete its folder. The office keeps the project's board, chat,
+shared files and repository, so you lose only work your agents had not handed back yet. The
+worker's page shows where the folder is.
 
 Connections groups everything by what it costs you:
 
@@ -218,8 +236,9 @@ says what is known for that service.
 
 ### Backup AIs
 
-In an agent's editor, under **Overview**, you can tick other AIs for it to move to if one reports
-a limit. It tries each one at most once per job, and pauses when they are all out. The whole task
+In an agent's editor, under **Overview**, the AI behind the agent and its model are saved the
+moment you choose them, and so are its backup AIs. You can tick other AIs for it to move to if one
+reports a limit. It tries each one at most once per job, and pauses when they are all out. The whole task
 so far goes to the AI it moves to. A paid API or the manual handoff can never be a backup, and with
 none ticked the work simply pauses at a limit.
 
