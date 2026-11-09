@@ -30,6 +30,8 @@ New here? Press **📘 How it works** in the lobby or the office for a short tou
 turns into **Update available** when a new build is out. Nothing installs until you press it. The app checks the
 published build's checksum, replaces itself, and comes back within about a minute; your
 offices, projects and sign-ins are kept. Everyone in the office is disconnected until then.
+While it runs, the update window shows each step as it happens: downloading, with how much has
+arrived, checking the download, installing and restarting, and then opens the new version.
 
 Close any worker window first. A worker runs from the same folder, so while it is open the
 update stops and tells you, leaving the app as it was. Updating inside the app is Windows

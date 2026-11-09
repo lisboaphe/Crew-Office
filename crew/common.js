@@ -173,13 +173,35 @@ function updateDialog(first) {
   modal('Update Crew Office', (close) => {
     const body = h('div');
     const err = h('p.error');
+    // Each step shows as it happens, so nobody wonders whether pressing the button did anything.
     const install = async (u) => {
       err.textContent = '';
+      const view = updateProgress();
+      body.replaceChildren(view.el, err);
+      view.set('downloading', { text: 'Starting the download…' });
+      let watching = true;
+      (async () => {
+        while (watching) {
+          try {
+            const p = await api('GET', '/api/crew/update/progress');
+            if (!watching) break;
+            if (p.stage === 'downloading') view.set('downloading', { pct: p.total ? Math.round((100 * p.received) / p.total) : null, text: p.total ? `${mb(p.received)} of ${mb(p.total)} MB` : `${mb(p.received)} MB so far` });
+            else if (p.stage === 'checking') view.set('checking', { pct: 100, text: 'Making sure it is exactly what was published…' });
+          } catch { /* the next look will do */ }
+          await new Promise((r) => { setTimeout(r, 400); });
+        }
+      })();
       try {
         await api('POST', '/api/crew/update/install');
-        close();
-        waitForUpdate(u.current.build);
-      } catch (e) { err.textContent = e.message; }
+        watching = false;
+        view.set('installing', { text: 'Installing over this version. The office stops for a moment and everyone in it reconnects when it is back.' });
+        waitForUpdate(u.current.build, view, () => body.append(h('div.actions', cancel('Close'))));
+      } catch (e) {
+        watching = false;
+        view.set('failed', { text: 'The update was not installed. You are still on this version.' });
+        err.textContent = e.message;
+        body.append(h('div.actions', cancel('Close'), h('button.btn.primary', { onclick: () => install(u) }, 'Try again')));
+      }
     };
     const check = async () => {
       body.replaceChildren(h('p.hint', 'Asking GitHub…'));
@@ -209,21 +231,59 @@ function updateDialog(first) {
   });
 }
 
-function waitForUpdate(from) {
-  const note = h('p.hint', 'Installing. This usually takes under a minute.');
-  const back = h('div.cr.cr-modal-back', h('div.cr-modal', h('h2', 'Updating Crew Office…'), note));
-  document.body.append(back);
+const mb = (n) => (n / 1048576).toFixed(1);
+
+const UPDATE_STEPS = [
+  ['downloading', 'Downloading from GitHub'],
+  ['checking', 'Checking the download'],
+  ['installing', 'Installing'],
+  ['restarting', 'Restarting the office'],
+  ['done', 'Done'],
+];
+
+/** The steps of an update, the one under way marked, with a bar for how far it has got. */
+function updateProgress() {
+  const steps = h('ol.cr-update-steps', ...UPDATE_STEPS.map(([key, label]) => h('li', { 'data-step': key }, h('span.cr-update-mark', { 'aria-hidden': 'true' }), label)));
+  const bar = h('div.cr-progress.cr-update-bar', { role: 'progressbar', 'aria-label': 'Update progress' }, h('div'));
+  const note = h('p.hint', { 'aria-live': 'polite' });
+  const set = (stage, { pct = null, text = '' } = {}) => {
+    const at = UPDATE_STEPS.findIndex(([key]) => key === stage);
+    steps.querySelectorAll('li').forEach((li, i) => {
+      li.className = stage === 'failed' ? (li.className === 'now' ? 'failed' : li.className) : i < at ? 'done' : i === at ? 'now' : '';
+    });
+    // No number to show: the bar moves on its own, so it still says something is happening.
+    bar.classList.toggle('indeterminate', pct === null && stage !== 'failed');
+    bar.firstChild.style.width = pct === null ? '' : `${pct}%`;
+    if (pct === null) bar.removeAttribute('aria-valuenow'); else bar.setAttribute('aria-valuenow', String(pct));
+    bar.hidden = stage === 'failed';
+    if (text) note.textContent = text;
+  };
+  return { el: h('div.cr-update-progress', steps, bar, note), set };
+}
+
+/** Waits for the office to come back on a new build, showing it restart, then reloads into it. */
+function waitForUpdate(from, view, giveUp) {
   const started = Date.now();
+  let wentAway = false;
   const poll = setInterval(async () => {
     let info = null;
-    try { info = await api('GET', '/api/crew/host-info'); } catch { /* still restarting */ }
-    if (info && info.build !== from) { clearInterval(poll); location.reload(); return; }
+    try { info = await api('GET', '/api/crew/host-info'); } catch { /* restarting */ }
+    if (!info && !wentAway) {
+      wentAway = true;
+      view.set('restarting', { text: 'The office is restarting on the new version…' });
+    }
+    if (info && info.build !== from) {
+      clearInterval(poll);
+      view.set('done', { pct: 100, text: `Updated to build ${info.build}. Opening it…` });
+      setTimeout(() => location.reload(), 1200);
+      return;
+    }
     if (Date.now() - started > 180_000) {
       clearInterval(poll);
-      note.textContent = info ? 'The update did not install, so you are still on the old build. The reason is in update.log in the Crew Office data folder.' : 'The office has not come back. Start Crew Office from its shortcut.';
-      back.firstChild.append(h('div.actions', h('button.btn', { onclick: () => back.remove() }, 'Close')));
+      view.set('failed', { text: info ? 'The update did not install, so you are still on the old build. The reason is in update.log in the Crew Office data folder.' : 'The office has not come back. Start Crew Office from its shortcut.' });
+      giveUp?.();
     }
-  }, 2000);
+  }, 1500);
 }
 
 export function initials(name) {
