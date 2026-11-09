@@ -13,6 +13,14 @@
 
 - **The worker no longer stops when an AI program it started quits early**, as Claude Code does when a run is stopped while it is starting.
 
+## Agents can use the .zip files you upload
+
+### Added
+
+- **An uploaded .zip is unpacked for the agents.** The text inside it goes into the project's files, in a folder named after the zip, where every agent on the project can read it and use it in its sandbox. Images, fonts and other binaries stay in the zip, and UNPACKED.md says which. Agents could not open uploads at all before, so a mod template uploaded for them was invisible to them.
+- **Unpack for the agents**, beside a .zip already uploaded.
+- **Agents are told what has been uploaded**, and where to find the text of a .zip.
+
 ## Download a project's files
 
 ### Added

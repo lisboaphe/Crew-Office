@@ -273,6 +273,12 @@ project's agent-written files under <code>Agents' work/</code> and the newest ve
 stops at 200 MB and lists what it left out in <code>NOT INCLUDED.txt</code>. <code>…/folder</code> and <code>…/folder/open</code>
 give the host's path and open it, and only to <code>ownerOfComputer</code>: a request on the host machine,
 not forwarded, holding its machine key. Everybody else gets <code>null</code> and 403.</p>
+<p>Uploads (<code>lib/crew/files.cjs</code>) are binary and outside what agents read, so finalising one whose path
+ends in <code>.zip</code> calls <code>crew.work.unpackZip</code>, and <code>POST …/blobs/:blob/unpack</code> does the same on request.
+<code>readZip</code> in <code>lib/crew/zip.cjs</code> refuses archives over 5,000 entries or 100 MB unpacked, any entry
+whose path leaves the archive, and any that inflates past the size it declares. Valid UTF-8 without
+NUL bytes, up to the 256 KB file limit, is written as project files under <code>&lt;upload without .zip&gt;/</code>,
+dropping a single top folder such as GitHub's <code>&lt;repo&gt;-main/</code>; the rest is listed in <code>UNPACKED.md</code>.</p>
 <h2 id="autonomous-agents" tabindex="-1">Autonomous agents</h2>
 <p>A limited agent thinks through a model and acts only through the office's tools. An autonomous one
 (<code>lib/crew-worker/native.cjs</code>) is Claude Code run as itself in a folder, given the task as
