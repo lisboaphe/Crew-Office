@@ -190,9 +190,26 @@ owner's room role. Room roles (`guest < member < admin < owner`) govern the room
 create agents and projects, invite, manage players, change settings, stop the room.
 
 **Grants.** An owner lends an agent to a project with a subset of its permissions, a
-project budget, and `requiresApproval`. The tools a job is issued are recomputed on every
-call as *agent permissions ∩ grant permissions* (`host-tools.issuedTools`), so revoking a
-grant takes effect mid-job. Assigning work to an agent whose owner did not request it
+project budget, and `requiresApproval`. The permissions an agent has on a project come from
+`work.toolsOn()`: on a project its owner created, exactly the agent's own switches; on anyone
+else's, *agent permissions ∩ grant permissions*. A grant that lent everything keeps following
+the agent when its switches change (`work.followAgentTools`); a narrowed one keeps its choice,
+minus whatever is switched off. The tools a job is issued are recomputed on every call
+(`host-tools.issuedTools`), so switching a permission off takes effect mid-job. The rule is
+that a player switches a tool on once, in the agent's panel, and it works everywhere that is
+theirs: a per-project copy that silently stayed behind read to players as a broken switch.
+
+**Chat jobs.** A chat in a project channel is issued the agent's tools on that project, minus
+the ones that act on a task (`complete_task`, `submit_plan`, merges). A direct chat with no
+project gets the tools that need none, plus `start_project` with `delegate`: it creates a
+project the agent manages, lends it the owner's other agents and starts it.
+
+**Plans.** A plan whose every task is assigned to the project creator's own agents, with the
+approval mode not `manual`, is released at once (`work.acceptPlan`): the creator asked for the
+work and the agents are theirs, so a second yes only added waiting. A task for anyone else's
+agent, a task nobody fits, or manual approvals, and the plan waits for the creator.
+
+Assigning work to an agent whose owner did not request it
 creates an approval only that owner can decide — the project creator, the manager agent and
 the room owner cannot bypass it.
 

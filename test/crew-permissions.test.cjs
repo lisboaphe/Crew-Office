@@ -115,14 +115,15 @@ test('agents may only talk across teams inside a shared project; grants are rech
   present(crew, r.id, bob.id);
   const wb = workerFor(crew, r.id, bob.id).auth();
   assert.strictEqual(status(() => crew.jobs.held(wb, job.id)), 409);
-  // Revoking files.write mid-job removes write_file on the very next call.
+  // Switching files.write off on the agent removes write_file on the very next call: on her own
+  // project, the agent's own switches are the only ones.
   const ok = await crew.hostTools.call(wk, { jobId: job.id, name: 'write_file', args: { path: 'a.txt', content: 'x' } });
   assert.strictEqual(ok.ok, true);
-  crew.work.grant(r.id, alice.id, p.id, fe.id, { tools: ['messaging', 'files.read'], requiresApproval: false });
+  crew.agents.update(fe.id, alice.id, { tools: ['messaging', 'files.read'] });
   const denied = await crew.hostTools.call(wk, { jobId: job.id, name: 'write_file', args: { path: 'b.txt', content: 'x' } }).catch((e) => ({ ok: false, error: e.message }));
   assert.match(denied.error, /not permitted/);
   // Path traversal out of the project is refused.
-  crew.work.grant(r.id, alice.id, p.id, fe.id, { requiresApproval: false });
+  crew.agents.update(fe.id, alice.id, { tools: ['messaging', 'files.read', 'files.write'] });
   const esc = await crew.hostTools.call(wk, { jobId: job.id, name: 'write_file', args: { path: '../../evil.txt', content: 'x' } });
   assert.match(esc.error, /Not an allowed project path/);
   presentA.leave();
