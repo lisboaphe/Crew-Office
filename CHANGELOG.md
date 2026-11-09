@@ -1,5 +1,17 @@
 # Changelog
 
+## Autonomous agents
+
+### Added
+
+- **Freedom, for each agent: Limited or Autonomous.** Limited works through the office's tools, as before, and you choose which under Skills & Tools. Autonomous is Claude Code working as itself, with its own tools: reading, writing, running commands, unzipping, installing. It works in its project's folder, and what it makes comes back into the project when it finishes.
+- **Let it use the whole computer**, inside Autonomous, for playing alone or with people you trust.
+- **Autonomous agents on this computer**, on the worker's page: the most an autonomous agent may reach there, which only the app on that computer can raise. Choosing Autonomous in the app on your own computer sets it too.
+
+### Fixed
+
+- **The worker no longer stops when an AI program it started quits early**, as Claude Code does when a run is stopped while it is starting.
+
 ## Download a project's files
 
 ### Added

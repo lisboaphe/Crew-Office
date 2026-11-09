@@ -80,6 +80,7 @@ lib/crew-worker/
   git-local.cjs    the agent's own clone of a project repository, and its Git tools
   handoff.cjs      the manual Claude Code route: brief out, RESULT.md or PLAN.json back
   health.cjs       what real work says about each AI: answered, signed out or at its limit
+  native.cjs       an autonomous agent: Claude Code as itself, in its project folder or anywhere
   provider-status.cjs  each AI's state for the office, from tests and from health.cjs
   project-folders.cjs  one folder per project on the owner's machine, for clones and hand-offs
   sandbox.cjs      process (Node permission model) or Docker isolation
@@ -123,6 +124,24 @@ project's agent-written files under `Agents' work/` and the newest version of ea
 stops at 200 MB and lists what it left out in `NOT INCLUDED.txt`. `…/folder` and `…/folder/open`
 give the host's path and open it, and only to `ownerOfComputer`: a request on the host machine,
 not forwarded, holding its machine key. Everybody else gets `null` and 403.
+
+## Autonomous agents
+
+A limited agent thinks through a model and acts only through the office's tools. An autonomous one
+(`lib/crew-worker/native.cjs`) is Claude Code run as itself in a folder, given the task as
+`.crew/TASK.md`, which reports through `.crew/RESULT.md` or `.crew/PLAN.json`. `importResult` in
+`handoff.cjs`, shared with the manual route, turns that into `submit_plan`, `review_decision`,
+`repo_sync` and `request_merge`, or `complete_task`. Without a repository, the project's shared
+files are mirrored into `<project folder>/workspace` first, and new or changed text files are
+written back afterwards with `write_file`, so every rule on those tools still applies.
+
+How far it reaches is `reachOf(agent, ceiling)`: the smaller of the agent's `freedom` (in its
+profile, kept by the office's host) and the worker's `autonomous` setting (`off`, `project` or
+`computer`, in the worker's own settings). The worker's page only accepts changes from a page
+served by this computer, so an office's host can ask for more but never get it. `project` is
+`claude -p --restricted` with commands and web tools named and allowed: Claude Code confines its file
+tools to the working folder, which was checked by asking it to write outside and seeing it refused,
+but not what a command touches. `computer` is `--dangerously-skip-permissions`.
 
 ## Security model
 
