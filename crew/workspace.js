@@ -152,6 +152,23 @@ export function filesTab(body, ctx) {
   const input = h('input', { type: 'file', style: { display: 'none' }, onchange: (e) => { const f = e.target.files[0]; if (f) uploadBrowser(f, U, ctx).then(load); e.target.value = ''; } });
   body.append(h('div.row', h('select', { onchange: (e) => { ui.projectId = e.target.value; ui.blobs = null; render(); } }, ...S.projects.map((x) => h('option', { value: x.id, selected: x.id === p.id }, x.name))), h('span.grow'),
     p.members.includes(S.me.id) ? h('button.btn.primary', { onclick: () => input.click() }, 'Upload a file') : null, input));
+  // What the project's agents wrote, which is most of what a project makes, and all of it at once.
+  const work = S.artifacts.filter((f) => f.projectId === p.id);
+  const anything = work.length || (ui.blobs?.projectId === p.id && ui.blobs.files.length);
+  const folder = ui.ownerOfComputer ? (ui.folders ??= {})[p.id] : null;
+  if (ui.ownerOfComputer && folder === undefined) {
+    ui.folders[p.id] = null;
+    api('GET', `${U}/folder`).then((r) => { ui.folders[p.id] = r.folder ?? null; render(); }).catch(() => {});
+  }
+  body.append(h('div.row', { style: { marginTop: '10px' } },
+    anything ? h('a.btn', { href: `${U}/download.zip`, download: '' }, 'Download all (.zip)') : null,
+    ui.ownerOfComputer ? h('button.btn', { onclick: () => api('POST', `${U}/folder/open`).catch((e) => toast(e.message)) }, 'Open folder') : null));
+  if (folder) body.append(h('p.hint', 'On this computer, the agents’ work is in ', h('code', folder)));
+  body.append(h('h3', 'What the agents made'));
+  body.append(work.length ? h('div.cr-list', ...work.map((f) => h('div.cr-item.click.row', { onclick: () => ctx.viewFile?.(p.id, f.path), title: 'Open it' },
+    h('code.grow', f.path), h('span.muted', `${f.agentName ?? 'human'} · ${Math.max(1, Math.ceil(f.size / 1024))} KB`))))
+    : h('p.hint', 'Nothing yet. What the agents write for this project shows here.'));
+  body.append(h('h3', 'Uploaded files'));
   body.append(h('p.hint', 'Releases, images, designs and other binaries. Source code belongs in Git / Sync. Transfers resume if the connection drops, and files are verified before anyone is told they are ready.'));
   if (ui.upload) body.append(h('div.cr-item', h('b', ui.upload.name), h('div.cr-progress', h('div', { style: { width: `${ui.upload.pct}%` } })), h('div.hint', ui.upload.note)));
   if (ui.blobs?.projectId !== p.id) { body.append(h('p.hint', 'Loading…')); load(); return; }
@@ -161,7 +178,7 @@ export function filesTab(body, ctx) {
   body.append(h('div.cr-list', ...(files.length ? files.map((f) => h('div.cr-item',
     h('div.row', h('code.grow', f.path), h('span.pill', `v${f.version}`), h('span.muted', `${mb(f.size)} · ${f.byName} · ${ago(f.createdAt)}`), h('a.btn.small', { href: `${U}/blobs/${f.id}`, download: '' }, 'Download')),
     f.note ? h('p.hint', f.note) : null,
-    f.history.length > 1 ? h('details', h('summary', `${f.history.length} versions`), ...f.history.map((v) => h('div.row.hint', `v${v.version} · ${mb(v.size)} · ${v.byName} · ${ago(v.createdAt)} · ${v.sha256.slice(0, 12)}`, h('a.btn.small', { href: `${U}/blobs/${v.id}`, download: '' }, 'Download')))) : null)) : [h('p.hint', 'No files yet.')])));
+    f.history.length > 1 ? h('details', h('summary', `${f.history.length} versions`), ...f.history.map((v) => h('div.row.hint', `v${v.version} · ${mb(v.size)} · ${v.byName} · ${ago(v.createdAt)} · ${v.sha256.slice(0, 12)}`, h('a.btn.small', { href: `${U}/blobs/${v.id}`, download: '' }, 'Download')))) : null)) : [h('p.hint', 'No uploads yet.')])));
 }
 
 /** SHA-256 in plain JS for plain-http LAN pages, where crypto.subtle does not exist. */

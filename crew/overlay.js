@@ -372,7 +372,7 @@ function renderDash() {
   // connection card's progress all survive the office's updates by simply not being redrawn.
   if (['playbooks', 'runs', 'connections', 'usage', 'security', 'memory', 'graph', 'plugins'].includes(ui.tab) && ui.dash.dataset.tab === ui.tab) return;
   const body = h('div.body');
-  const wsCtx = { S, roomId, ui, render, taskDetail };
+  const wsCtx = { S, roomId, ui, render, taskDetail, viewFile };
   const section = sectionOf(ui.tab);
   (ui.lastTab ??= {})[section.key] = ui.tab;
   ({ memory: (b) => b.append(ui.knowledge.showMemory()), graph: (b) => { b.classList.add('cr-fill'); b.append(ui.knowledge.showGraph()); }, plugins: (b) => b.append(ui.knowledge.showPlugins()), friends: dashFriends, prefs: dashPrefs, git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()), security: (b) => b.append(ui.security.show()) })[ui.tab](body);
@@ -530,7 +530,7 @@ function dashDeliverables(body) {
   if (!projects.length) { body.append(h('p.hint', 'No projects yet.')); return; }
   for (const p of projects) {
     const files = S.artifacts.filter((f) => f.projectId === p.id);
-    body.append(h('h3', p.name), files.length ? h('div.cr-list', ...files.map((f) => h('div.cr-item.click.row', { onclick: () => viewFile(p.id, f.path) },
+    body.append(h('div.row', h('h3.grow', p.name), files.length ? h('a.btn.small', { href: `/api/crew/rooms/${roomId}/projects/${p.id}/download.zip`, download: '' }, 'Download all (.zip)') : null), files.length ? h('div.cr-list', ...files.map((f) => h('div.cr-item.click.row', { onclick: () => viewFile(p.id, f.path) },
       h('code.grow', f.path), h('span.pill', f.kind), h('span.muted', `${f.agentName ?? 'human'} · ${Math.ceil(f.size / 1024)} KB`)))) : h('p.hint', 'No files yet.'));
   }
 }

@@ -115,6 +115,15 @@ A connection whose token the office answers with 401 *Unknown or revoked worker 
 forgotten from `worker.json` and stops, since waiting never makes such a token valid again. Any
 other failure to reach the office is retried every 10 seconds as before.
 
+## Downloading a project
+
+`GET …/projects/:project/download.zip` (`lib/crew/api.cjs`, built by `lib/crew/zip.cjs`) puts a
+project's agent-written files under `Agents' work/` and the newest version of each upload under
+`Office files/`, for the same people as any other project read. The zip is made in memory, so it
+stops at 200 MB and lists what it left out in `NOT INCLUDED.txt`. `…/folder` and `…/folder/open`
+give the host's path and open it, and only to `ownerOfComputer`: a request on the host machine,
+not forwarded, holding its machine key. Everybody else gets `null` and 403.
+
 ## Security model
 
 **Identity.** A player is a name and a colour, per host, created by `POST /api/crew/enter`
