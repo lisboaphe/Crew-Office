@@ -748,3 +748,21 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 #crew-bar .btn.cr-bell.has-news .cr-count { background: #2a1a06; color: #fff3d6; }
 #crew-bar .btn.cr-bell.ring svg { animation: cr-bell-ring 0.9s ease-in-out 1; transform-origin: 50% 10%; }
 @keyframes cr-bell-ring { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(16deg); } 30% { transform: rotate(-14deg); } 45% { transform: rotate(10deg); } 60% { transform: rotate(-6deg); } 75% { transform: rotate(3deg); } }
+
+/* An update under way: its steps, the one now marked with a turning ring, and a bar for how far. */
+.cr-update-steps { list-style: none; margin: 4px 0 12px; padding: 0; display: grid; gap: 7px; }
+.cr-update-steps li { display: flex; align-items: center; gap: 10px; color: var(--cr-ink-3, var(--cr-ink-2)); opacity: 0.6; }
+.cr-update-steps li.now, .cr-update-steps li.done, .cr-update-steps li.failed { opacity: 1; color: var(--cr-ink); }
+.cr-update-mark { width: 14px; height: 14px; flex: none; border-radius: 50% !important; border: 2px solid var(--cr-line); box-sizing: border-box; }
+.cr-update-steps li.now .cr-update-mark { border-color: var(--cr-accent); border-top-color: transparent; animation: cr-turn 0.8s linear infinite; }
+.cr-update-steps li.done .cr-update-mark { border-color: var(--cr-ok); background: var(--cr-ok); }
+.cr-update-steps li.failed .cr-update-mark { border-color: var(--cr-bad); background: var(--cr-bad); }
+@keyframes cr-turn { to { transform: rotate(360deg); } }
+.cr-update-bar { height: 10px; }
+.cr-update-bar.indeterminate > div { width: 35% !important; animation: cr-sweep 1.2s ease-in-out infinite; }
+@keyframes cr-sweep { from { transform: translateX(-100%); } to { transform: translateX(290%); } }
+/* With reduced motion the ring stands still, half drawn, and the bar fills instead of sweeping. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-update-steps li.now .cr-update-mark { animation: none !important; }
+  .cr-update-bar.indeterminate > div { animation: none !important; width: 100% !important; opacity: 0.45; }
+}

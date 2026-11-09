@@ -1,5 +1,11 @@
 # Changelog
 
+## See an update happening
+
+### Changed
+
+- **Update now shows each step as it happens**: downloading, with a bar and how many megabytes have arrived, checking the download, installing, restarting, and done, after which the new version opens. Before, nothing on screen changed until the whole download had finished.
+
 ## Talk to a project's agents in its channel
 
 ### Added

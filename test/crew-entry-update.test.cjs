@@ -285,6 +285,8 @@ test('a download that does not match its checksum is never handed to the install
   try {
     const updater = createUpdater({ root, apiBase: bad.base, platform: 'win32', launchInstaller: (a) => { launched = a; } });
     await assert.rejects(updater.install(), /checksum/);
+    assert.equal(updater.progress().stage, 'failed', 'a failed update says so to the window showing it');
+    assert.match(updater.progress().error, /checksum/);
     assert.equal(launched, null);
   } finally { bad.close(); }
 });
@@ -295,8 +297,13 @@ test('a verified download reaches the installer, with a copy of the script that 
   let launched = null;
   try {
     const updater = createUpdater({ root, apiBase: good.base, platform: 'win32', dataDir: root, launchInstaller: (a) => { launched = a; } });
+    assert.deepEqual(updater.progress(), { stage: 'idle', received: 0, total: null, error: null });
     assert.equal((await updater.install({ waitPid: 1234, appArgs: ['--private'] })).build, 7);
     assert.equal(fs.readFileSync(launched.zipFile, 'utf8'), 'the new app');
+    // The window showing the update follows it: all of the download, then the installer.
+    const p = updater.progress();
+    assert.equal(p.stage, 'installing');
+    assert.equal(p.received, 'the new app'.length, 'every byte of the download was counted');
     assert.ok(!launched.script.startsWith(root), 'the script cannot run from the folder it replaces');
     assert.equal(launched.target, root);
     assert.equal(launched.waitPid, 1234);
