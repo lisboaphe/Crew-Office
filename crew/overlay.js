@@ -109,6 +109,7 @@ function connect() {
   on('approval', (a) => { upsert(S.approvals, a); render(); });
   on('notification', (n) => {
     S.notifications.unshift(n);
+    ui.bellRang = Date.now(); // the bell rings once for something new
     // Quiet mode holds back news, never decisions or problems: those still appear, and everything stays in the list.
     if (!quietMode() || n.level !== 'info') toast(n.text, 5000);
     render();
@@ -228,7 +229,13 @@ function renderBar() {
     players,
     updateNotice(),
     h('button.btn.cr-icon-btn', { class: dashShows('approvals') ? 'on' : '', 'aria-pressed': String(dashShows('approvals')), onclick: () => toggleDash('approvals'), title: 'Approvals', 'aria-label': pending ? `Approvals, ${pending} waiting` : 'Approvals' }, icon('check'), pending ? h('span.badge', pending) : null),
-    h('button.btn.cr-icon-btn', { class: dashShows('notifications') ? 'on' : '', 'aria-pressed': String(dashShows('notifications')), onclick: () => toggleDash('notifications'), title: 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications' }, icon('bell'), unread ? h('span.badge', unread) : null),
+    // The count sits inside the button, as the chat's does: the buttons' rounded pixel corners cut off
+    // anything hanging outside them, which is where it used to be, so it never showed.
+    h('button.btn.cr-icon-btn.cr-bell', {
+      class: [dashShows('notifications') ? 'on' : '', unread ? 'has-news' : '', unread && Date.now() - (ui.bellRang ?? 0) < 1500 ? 'ring' : ''].filter(Boolean).join(' '),
+      'aria-pressed': String(dashShows('notifications')), onclick: () => toggleDash('notifications'),
+      title: unread ? `${unread} new notification${unread === 1 ? '' : 's'}` : 'Notifications', 'aria-label': unread ? `Notifications, ${unread} unread` : 'Notifications',
+    }, icon('bell'), unread ? h('span.cr-count', unread > 99 ? '99+' : String(unread)) : null),
     h('button.btn', { class: ui.side.classList.contains('hidden') ? '' : 'on', onclick: toggleChat, 'aria-pressed': ui.side.classList.contains('hidden') ? 'false' : 'true' }, icon('chat'), h('span.cr-says-less', 'Chat'), unreadTotal() ? h('span.cr-count', unreadTotal()) : null),
     stopButton(),
     h('button.btn.cr-icon-btn', { onclick: () => openTutorial({ showMe: tourShowMe }), title: 'How it works: a short tour', 'aria-label': 'How it works' }, '?'),
@@ -732,7 +739,7 @@ function renderSide() {
   const hadFocus = oldInput && document.activeElement === oldInput;
   const caret = hadFocus ? oldInput.selectionStart : null;
   const list = h('div.cr-msgs', ...msgs.map(messageView));
-  const input = h('input.grow', { 'aria-label': `Message ${channelLabel(ch)}`, placeholder: ch.kind === 'dm' ? 'Message your agent…' : `Message ${channelLabel(ch)}, @Name for an agent`, value: (ui.drafts ??= new Map()).get(ch.id) ?? '', oninput: (e) => ui.drafts.set(ch.id, e.target.value) });
+  const input = h('input.grow', { 'aria-label': `Message ${channelLabel(ch)}`, placeholder: ch.kind === 'dm' ? 'Message your agent…' : ch.projectId ? `Talk to the project's agents. @Name asks one; otherwise its lead answers` : `Message ${channelLabel(ch)}, @Name for an agent`, value: (ui.drafts ??= new Map()).get(ch.id) ?? '', oninput: (e) => ui.drafts.set(ch.id, e.target.value) });
   const send = async () => {
     const text = input.value.trim();
     if (!text) return;
@@ -740,7 +747,11 @@ function renderSide() {
     ui.drafts.delete(ch.id);
     try {
       if (ch.kind === 'dm') await api('POST', `/api/crew/rooms/${roomId}/agents/${ch.dmAgentId}/chat`, { text });
-      else await api('POST', `/api/crew/rooms/${roomId}/channels/${ch.id}/messages`, { body: text });
+      else {
+        const sent = await api('POST', `/api/crew/rooms/${roomId}/channels/${ch.id}/messages`, { body: text });
+        // Who will answer, and whose agents only read it later: answers run on their owner's plan.
+        if (sent.inbox?.length) toast(`${sent.inbox.join(', ')} ${sent.inbox.length === 1 ? 'belongs' : 'belong'} to someone else or ${sent.inbox.length === 1 ? 'is' : 'are'} on holiday, so ${sent.inbox.length === 1 ? 'it reads' : 'they read'} this on ${sent.inbox.length === 1 ? 'its' : 'their'} next task.`, 6000);
+      }
     } catch (e) { toast(e.message); }
   };
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
