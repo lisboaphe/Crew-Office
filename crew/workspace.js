@@ -123,6 +123,13 @@ function linkContract(p, ctx) {
 
 // --- Office files --------------------------------------------------------------------------
 
+/** What unpacking a .zip did, in a sentence, or null when nothing was unpacked. */
+function unpackedText(u) {
+  if (!u) return null;
+  if (u.error) return `Uploaded, but it could not be unpacked for the agents: ${u.error}`;
+  return `Uploaded. ${u.unpacked} file${u.unpacked === 1 ? '' : 's'} unpacked into ${u.folder}/ for the agents${u.left ? `; ${u.left} stayed in the zip (see UNPACKED.md)` : ''}.`;
+}
+
 export function filesTab(body, ctx) {
   const { S, roomId, ui, render } = ctx;
   const p = S.projects.find((x) => x.id === ui.projectId) ?? S.projects[0];
@@ -176,7 +183,11 @@ export function filesTab(body, ctx) {
   const mb = (n) => `${(n / 1048576).toFixed(n < 1048576 ? 2 : 1)} MB`;
   body.append(h('p.hint', `${mb(usedBytes)} of ${mb(quotaBytes)} used`));
   body.append(h('div.cr-list', ...(files.length ? files.map((f) => h('div.cr-item',
-    h('div.row', h('code.grow', f.path), h('span.pill', `v${f.version}`), h('span.muted', `${mb(f.size)} · ${f.byName} · ${ago(f.createdAt)}`), h('a.btn.small', { href: `${U}/blobs/${f.id}`, download: '' }, 'Download')),
+    h('div.row', h('code.grow', f.path), h('span.pill', `v${f.version}`), h('span.muted', `${mb(f.size)} · ${f.byName} · ${ago(f.createdAt)}`),
+      /\.zip$/i.test(f.path) && p.members.includes(S.me.id)
+        ? h('button.btn.small', { title: 'Put the text inside it into the project’s files, where the agents can read it', onclick: () => api('POST', `${U}/blobs/${f.id}/unpack`).then((u) => toast(unpackedText(u), 7000)).catch((e) => toast(e.message)) }, 'Unpack for the agents')
+        : null,
+      h('a.btn.small', { href: `${U}/blobs/${f.id}`, download: '' }, 'Download')),
     f.note ? h('p.hint', f.note) : null,
     f.history.length > 1 ? h('details', h('summary', `${f.history.length} versions`), ...f.history.map((v) => h('div.row.hint', `v${v.version} · ${mb(v.size)} · ${v.byName} · ${ago(v.createdAt)} · ${v.sha256.slice(0, 12)}`, h('a.btn.small', { href: `${U}/blobs/${v.id}`, download: '' }, 'Download')))) : null)) : [h('p.hint', 'No uploads yet.')])));
 }
@@ -253,9 +264,9 @@ async function uploadBrowser(file, U, ctx) {
       }
       progress(Math.round(((i + 1) / begun.chunks) * 100), `${i + 1} of ${begun.chunks} parts sent`);
     }
-    await api('POST', `${U}/uploads/${begun.uploadId}/finalize`);
+    const done = await api('POST', `${U}/uploads/${begun.uploadId}/finalize`);
     ui.upload = null;
-    toast('Uploaded and verified.');
+    toast(unpackedText(done.unpacked) ?? 'Uploaded and verified.', done.unpacked ? 7000 : undefined);
   } catch (e) {
     ui.upload = null;
     toast(e.message, 6000);

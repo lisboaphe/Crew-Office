@@ -205,6 +205,12 @@ its agents wrote; open one to read it. Below that are the files people uploaded.
 On the computer hosting the office, the page also says where the agents' work is kept, and
 **Open folder** opens it. Nobody else is ever shown the host's folders.
 
+Agents read text, and they cannot open an upload themselves. So when you upload a **.zip**, the
+office unpacks the text inside it, code, scripts, settings and documents, into the project's files,
+in a folder named after the zip, where every agent on the project can read it. Images, fonts and
+other binary files stay in the zip, and **UNPACKED.md** in that folder lists them. A zip uploaded
+before this, or one you want unpacked afresh, has **Unpack for the agents** beside it.
+
 ### Where project files go
 
 Each project's files on your computer are in a folder of its own, made the first time one of your
