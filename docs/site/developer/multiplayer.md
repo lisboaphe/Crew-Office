@@ -143,6 +143,14 @@ served by this computer, so an office's host can ask for more but never get it. 
 tools to the working folder, which was checked by asking it to write outside and seeing it refused,
 but not what a command touches. `computer` is `--dangerously-skip-permissions`.
 
+No agent may change the settings that bound it. None of the office's tools can (a test lists them).
+On the worker, `budget.update(patch, { locked })` refuses, with 423, any change `widening()` names,
+while `autonomousWorking()` counts a run: an autonomous agent's command could otherwise post to the
+worker's page, which cannot tell a script from the owner. The guarded settings' fingerprint is kept
+in the vault as `settingsSeal`, so a `settings.json` edited outside the worker is reset to the
+defaults at start and reported to the owner. An agent with `computer` reach runs as the owner and
+could defeat both; that is why it is opt-in on both sides.
+
 ## Security model
 
 **Identity.** A player is a name and a colour, per host, created by `POST /api/crew/enter`

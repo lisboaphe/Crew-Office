@@ -7,6 +7,7 @@
 - **Freedom, for each agent: Limited or Autonomous.** Limited works through the office's tools, as before, and you choose which under Skills & Tools. Autonomous is Claude Code working as itself, with its own tools: reading, writing, running commands, unzipping, installing. It works in its project's folder, and what it makes comes back into the project when it finishes.
 - **Let it use the whole computer**, inside Autonomous, for playing alone or with people you trust.
 - **Autonomous agents on this computer**, on the worker's page: the most an autonomous agent may reach there, which only the app on that computer can raise. Choosing Autonomous in the app on your own computer sets it too.
+- **No agent changes the settings.** While an autonomous agent works, the worker refuses any change that would let agents do more, whoever asks. Every change to those settings is shown to you, and a settings file changed behind the worker's back is put back to safe when it starts, and you are told.
 
 ### Fixed
 

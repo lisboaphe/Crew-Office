@@ -156,3 +156,57 @@ test('a computer that has not allowed Claude Code to start by itself is waited o
   assert.equal(finished.status, 'waiting');
   assert.equal(finished.error, 'Automated Claude Code is off.');
 });
+
+// --- No agent changes the settings ----------------------------------------------------------------------
+
+const { createBudget, widening } = require('../lib/crew-worker/budget.cjs');
+const { TOOLS } = require('../lib/crew/catalog.cjs');
+
+test('no tool an agent is given can change a setting', () => {
+  const names = Object.keys(TOOLS);
+  assert.ok(names.length > 20, 'the tool list is read');
+  const settingsLike = names.filter((n) => /setting|rule|permission|freedom|budget|grant|provider|autonom|config|role|approv(e|al)_|policy/i.test(n) && n !== 'request_human_approval');
+  assert.deepEqual(settingsLike, [], 'an agent can ask a human, never set anything itself');
+});
+
+test('what counts as letting agents do more', () => {
+  const safe = { neverPaidApi: true, allowClaudeAutomation: false, autonomous: 'off', allowWeakSandbox: false, localStop: false };
+  assert.deepEqual(widening(safe, { neverPaidApi: true, autonomous: 'off' }), []);
+  assert.equal(widening(safe, { neverPaidApi: false }).length, 1);
+  assert.equal(widening(safe, { allowClaudeAutomation: true }).length, 1);
+  assert.equal(widening(safe, { autonomous: 'project' }).length, 1);
+  assert.equal(widening({ ...safe, autonomous: 'computer' }, { autonomous: 'project' }).length, 0, 'turning it down is not more');
+  assert.equal(widening(safe, { allowWeakSandbox: true }).length, 1);
+  assert.equal(widening({ ...safe, localStop: true }, { localStop: false }).length, 1);
+});
+
+test('while an autonomous agent works, nothing that lets agents do more can change; less always can', () => {
+  const budget = createBudget(tmp());
+  assert.throws(() => budget.update({ autonomous: 'computer' }, { locked: true }), (err) => err.status === 423 && /Not while an autonomous agent is working/.test(err.message));
+  assert.throws(() => budget.update({ neverPaidApi: false }, { locked: true }), (err) => err.status === 423);
+  assert.equal(budget.status().autonomous, 'off', 'nothing changed');
+  budget.update({ autonomous: 'project' });
+  budget.update({ autonomous: 'off', taskDefaultPct: 50 }, { locked: true });
+  assert.equal(budget.status().autonomous, 'off', 'turning down works while locked');
+});
+
+test('a settings file changed behind the worker’s back is put back to safe, and says what was changed', () => {
+  const dir = tmp();
+  let sealed = null;
+  const seal = { get: () => sealed, set: (v) => { sealed = v; } };
+  const first = createBudget(dir, { seal });
+  assert.equal(first.tampered(), null, 'a first run is trusted, and sealed');
+  first.update({ allowClaudeAutomation: true, autonomous: 'project' });
+  assert.equal(createBudget(dir, { seal }).tampered(), null, 'changes through the worker are its own');
+
+  const file = path.join(dir, 'settings.json');
+  const edited = { ...JSON.parse(fs.readFileSync(file, 'utf8')), autonomous: 'computer', neverPaidApi: false };
+  fs.writeFileSync(file, JSON.stringify(edited));
+  const after = createBudget(dir, { seal });
+  assert.deepEqual(after.tampered().sort(), ['allowClaudeAutomation', 'autonomous', 'neverPaidApi']);
+  assert.equal(after.status().autonomous, 'off');
+  assert.equal(after.status().neverPaidApi, true);
+  assert.equal(after.status().allowClaudeAutomation, false, 'every guarded setting goes back to safe');
+  assert.equal(JSON.parse(fs.readFileSync(file, 'utf8')).autonomous, 'off', 'and the file says so too');
+  assert.equal(createBudget(dir, { seal }).tampered(), null, 'once put back, it is sealed again');
+});
