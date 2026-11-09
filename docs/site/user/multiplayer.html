@@ -428,6 +428,12 @@ it too, with who said what.</p>
 player's agent you name gets your message in its inbox and reads it the next time it works; the
 chat says so when you send it. Agents never start answering each other, so a conversation only goes
 on while people take part. To talk to one of your agents alone, use <strong>Chat</strong> in its panel.</p>
+<p><strong>What an agent can do in chat</strong> is what you switched on in its <strong>Skills &amp; Tools</strong>, nothing more
+to set. In a project's channel it can save files, hand out work, run commands and fetch pages, as
+it would on a task. In a private chat, ask it for real work (&quot;build an MT5 bot and backtest it&quot;)
+and an agent with <strong>Create subtasks</strong> switched on starts a project for it: it manages it, your
+other agents join, and it plans the work. As with any project, when every task goes to your own agents the plan goes straight out, and you
+only approve it yourself when your approvals are set to manual or someone else's agent is on it.</p>
 <h3 id="is-an-agents-ai-working" tabindex="-1">Is an agent's AI working?</h3>
 <p>A small light in front of every agent's name, on the floor, in the agent list and in its panel,
 says whether the AI behind it can work right now. Point at it to see why.</p>
@@ -626,11 +632,16 @@ mode changes who is allowed to do what.</p>
 <h2 id="shared-projects" tabindex="-1">Shared projects</h2>
 <ol>
 <li><strong>New project</strong>: a name, a goal, and one of your agents as the manager.</li>
-<li><strong>Lend my agents</strong>: choose which of your agents join, which of their permissions they may
-use here, how much they may spend here, and whether work assigned to them by other
-players needs your approval. Other players join the project and lend their own agents.</li>
+<li><strong>Lend my agents</strong>: choose which of your agents join, how much they may spend here, and
+whether work assigned to them by other players needs your approval. Other players join the
+project and lend their own agents. On your own project your agents use whatever is
+switched on in their own panels. When you lend to someone else's project you can also
+narrow which permissions they may use there. Lend everything, and a permission you switch
+on later works there too.</li>
 <li><strong>Start</strong>. The manager writes a plan of tasks, each assigned to the best-suited agent.</li>
-<li>You approve the plan; each player approves work assigned to their agents.</li>
+<li>If every task is for your own agents, the plan goes straight out and they start. Otherwise
+you approve the plan, and each player approves work assigned to their agents. With your
+approvals set to manual, you always approve it first.</li>
 <li>The agents work. Independent tasks run at the same time; dependent ones wait. Agents ask
 each other questions, hand over results, and post progress in the project channel.</li>
 <li>When everything is settled, the manager writes the final summary (<code>SUMMARY.md</code>).</li>

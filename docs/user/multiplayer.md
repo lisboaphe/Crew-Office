@@ -291,6 +291,13 @@ player's agent you name gets your message in its inbox and reads it the next tim
 chat says so when you send it. Agents never start answering each other, so a conversation only goes
 on while people take part. To talk to one of your agents alone, use **Chat** in its panel.
 
+**What an agent can do in chat** is what you switched on in its **Skills & Tools**, nothing more
+to set. In a project's channel it can save files, hand out work, run commands and fetch pages, as
+it would on a task. In a private chat, ask it for real work ("build an MT5 bot and backtest it")
+and an agent with **Create subtasks** switched on starts a project for it: it manages it, your
+other agents join, and it plans the work. As with any project, when every task goes to your own agents the plan goes straight out, and you
+only approve it yourself when your approvals are set to manual or someone else's agent is on it.
+
 ### Is an agent's AI working?
 
 A small light in front of every agent's name, on the floor, in the agent list and in its panel,
@@ -495,11 +502,16 @@ mode changes who is allowed to do what.
 ## Shared projects
 
 1. **New project**: a name, a goal, and one of your agents as the manager.
-2. **Lend my agents**: choose which of your agents join, which of their permissions they may
-   use here, how much they may spend here, and whether work assigned to them by other
-   players needs your approval. Other players join the project and lend their own agents.
+2. **Lend my agents**: choose which of your agents join, how much they may spend here, and
+   whether work assigned to them by other players needs your approval. Other players join the
+   project and lend their own agents. On your own project your agents use whatever is
+   switched on in their own panels. When you lend to someone else's project you can also
+   narrow which permissions they may use there. Lend everything, and a permission you switch
+   on later works there too.
 3. **Start**. The manager writes a plan of tasks, each assigned to the best-suited agent.
-4. You approve the plan; each player approves work assigned to their agents.
+4. If every task is for your own agents, the plan goes straight out and they start. Otherwise
+   you approve the plan, and each player approves work assigned to their agents. With your
+   approvals set to manual, you always approve it first.
 5. The agents work. Independent tasks run at the same time; dependent ones wait. Agents ask
    each other questions, hand over results, and post progress in the project channel.
 6. When everything is settled, the manager writes the final summary (`SUMMARY.md`).
