@@ -234,6 +234,23 @@ use a different one. Anything a service does not report says **Not reported**.
 Free models can log or learn from what they are sent, so do not use them for private code. Each card
 says what is known for that service.
 
+### Is an agent's AI working?
+
+A small light in front of every agent's name, on the floor, in the agent list and in its panel,
+says whether the AI behind it can work right now. Point at it to see why.
+
+- **Green**: working. An agent's task got an answer from it, or **Test Connection** did.
+- **Amber**: not proven yet, as no task or test has used it, or it is the manual Claude Code route,
+  which waits for its owner to run each task.
+- **Red**: it cannot work, and the light says why: signed out, a plan's usage limit reached, not
+  installed, or no key.
+- **Grey**: its owner's worker is not running, or the agent is on holiday.
+
+Everyone in the office sees the lights, so players know whose agents can take work. A light says
+only working or not and why, never anything about the owner's account. When an AI one of your
+agents runs on stops working, you get a notification saying which agents and what to do, once,
+until you have read it.
+
 ### Backup AIs
 
 In an agent's editor, under **Overview**, the AI behind the agent and its model are saved the

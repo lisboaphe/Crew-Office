@@ -77,7 +77,7 @@ export function createAgentEditor(ctx) {
     if (!a) return;
     head.replaceChildren(
       avatar(a.name, a.color, { ai: true, online: a.available }),
-      h('div.grow', h('h2', a.name), h('div.hint', `${a.role} · ${a.ownerName}${mine() ? ' (you)' : '’s agent'}`)),
+      h('div.grow', h('h2', a.name), h('div.hint', ctx.healthLight(a), ` ${a.role} · ${a.ownerName}${mine() ? ' (you)' : '’s agent'}`)),
       ctx.statusPill(a.status),
       h('button.btn.small', { onclick: () => { expanded = !expanded; el.classList.toggle('expanded', expanded); }, title: 'Make the panel larger or smaller', 'aria-label': 'Expand the panel' }, expanded ? '⤡' : '⤢'),
       h('button.btn.small', { onclick: close, 'aria-label': 'Close the agent editor', title: 'Close (Esc)' }, '✕'));
@@ -122,6 +122,7 @@ export function createAgentEditor(ctx) {
       h('dt', 'Owner'), h('dd', `${a.ownerName}${mine() ? ' (you)' : ''}`),
       h('dt', 'Status'), h('dd', a.available ? 'On the floor' : a.paused ? 'On holiday' : 'Unavailable: the owner’s worker is offline, or the owner is away'),
       h('dt', 'Current task'), h('dd', task ? h('a', { href: '#', onclick: (e) => { e.preventDefault(); ctx.taskDetail(task); } }, task.title) : 'None'),
+      h('dt', 'AI'), h('dd', ctx.healthLight(a), ` ${ctx.agentHealth(a).text}`),
       h('dt', 'Connection'), h('dd', conn ? `${conn.state}: ${conn.reason}` : 'No report from the owner’s worker yet'));
     const actions = h('div.cr-actions', h('button.btn.primary', { onclick: () => ctx.assignTask(a) }, 'Assign a task'),
       mine() ? h('button.btn', { onclick: () => ctx.chatWith(a, detail?.dmChannelId) }, 'Chat') : null,

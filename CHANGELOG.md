@@ -1,5 +1,17 @@
 # Changelog
 
+## See whether each agent's AI is working
+
+### Added
+
+- **A light in front of every agent's name**, on the floor, in the agent list and in its panel: green when its AI is working, amber when it has not been proven yet or is the manual Claude Code route, red when it cannot work, and grey when its owner's worker is not running. Point at it to see why.
+- **A notification when an AI one of your agents runs on stops working**, saying which agents and what to do.
+
+### Changed
+
+- **An agent's task getting an answer counts as a check**, as **Test Connection** does, so a working Claude Code or ChatGPT no longer reads "Set up, but not tested yet". A sign-out or a plan's limit found during a task shows straight away.
+- **Claude Code and Codex signed out on the worker** make the task wait for their owner, as a ChatGPT sign-out does, instead of failing it.
+
 ## A folder per project, and fixes found checking the app
 
 ### Added

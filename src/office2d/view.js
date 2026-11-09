@@ -883,15 +883,29 @@ export function createOffice2D(canvas, input) {
       const name = String(item.bot.name ?? '');
       const label = name.length > 20 ? `${name.slice(0, 19)}…` : name;
       context.font = `${selected ? 700 : 600} ${small}px Inter, system-ui, sans-serif`;
-      const width = context.measureText(label).width + 8 * ratio;
+      // In a crew office, a light at the start of the name says whether this agent's AI can work.
+      const health = window.crewAgentHealth?.(item.id) ?? null;
+      const light = health ? small * 0.62 : 0;
+      const gap = health ? small * 0.4 : 0;
+      const width = context.measureText(label).width + 8 * ratio + light + gap;
       const cx = toScreenX(item.nameX);
       const sy = toScreenY(item.y + 45);
+      const left = Math.round(cx - width / 2);
       context.fillStyle = selected ? 'rgba(47, 116, 104, 0.96)' : 'rgba(46, 28, 18, 0.76)';
-      context.fillRect(Math.round(cx - width / 2), Math.round(sy), Math.round(width), Math.round(small * 1.35));
+      context.fillRect(left, Math.round(sy), Math.round(width), Math.round(small * 1.35));
+      if (health) {
+        context.beginPath();
+        context.arc(left + 4 * ratio + light / 2, sy + small * 0.68, light / 2, 0, Math.PI * 2);
+        context.fillStyle = health.color;
+        context.fill();
+        context.lineWidth = Math.max(1, ratio);
+        context.strokeStyle = 'rgba(0, 0, 0, 0.45)';
+        context.stroke();
+      }
       context.fillStyle = CREAM;
       context.textAlign = 'center';
       context.textBaseline = 'middle';
-      context.fillText(label, cx, sy + small * 0.72);
+      context.fillText(label, cx + (light + gap) / 2, sy + small * 0.72);
     }
 
     for (const room of visible) {

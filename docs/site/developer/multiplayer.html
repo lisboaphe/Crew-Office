@@ -236,6 +236,8 @@ lib/crew-worker/
   local-tools.cjs  sandboxed commands, web fetch, private memory
   git-local.cjs    the agent's own clone of a project repository, and its Git tools
   handoff.cjs      the manual Claude Code route: brief out, RESULT.md or PLAN.json back
+  health.cjs       what real work says about each AI: answered, signed out or at its limit
+  provider-status.cjs  each AI's state for the office, from tests and from health.cjs
   project-folders.cjs  one folder per project on the owner's machine, for clones and hand-offs
   sandbox.cjs      process (Node permission model) or Docker isolation
   vault.cjs        encrypted credential store
