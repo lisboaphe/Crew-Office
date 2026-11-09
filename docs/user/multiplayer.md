@@ -242,6 +242,18 @@ use a different one. Anything a service does not report says **Not reported**.
 Free models can log or learn from what they are sent, so do not use them for private code. Each card
 says what is known for that service.
 
+### Talking to a project's agents
+
+Each project has its own channel in the chat, and you can talk to its agents there the way you
+would to an AI assistant. Write normally and the project's lead answers; write **@Name**, or
+several, and those agents answer. Everyone in the channel sees the conversation, and the agents see
+it too, with who said what.
+
+Only your own agents answer you straight away, since an answer runs on its owner's plan. Another
+player's agent you name gets your message in its inbox and reads it the next time it works; the
+chat says so when you send it. Agents never start answering each other, so a conversation only goes
+on while people take part. To talk to one of your agents alone, use **Chat** in its panel.
+
 ### Is an agent's AI working?
 
 A small light in front of every agent's name, on the floor, in the agent list and in its panel,

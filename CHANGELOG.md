@@ -1,5 +1,15 @@
 # Changelog
 
+## Talk to a project's agents in its channel
+
+### Added
+
+- **Project chat with answers.** Write in a project's channel and the project's lead answers; write @Name, or several, and those agents answer, in front of everyone in it. Your own agents answer straight away; another player's reads your message on its next task, and the chat says so. Before, a message there was only read on an agent's next task, so nobody answered.
+
+### Fixed
+
+- **The notification bell shows how many are new.** It lights up, shows the number inside the button, and rings once when something new arrives. The number used to sit outside the button's rounded corners, which cut it off, so nothing showed.
+
 ## Download a project's files
 
 ### Added

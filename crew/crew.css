@@ -742,3 +742,9 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 /* Whether an agent's AI can work right now: a light beside its name. Its title says why. */
 .cr-health { display: inline-block; width: 9px; height: 9px; border-radius: 50% !important; vertical-align: middle; margin-right: 2px; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35); flex: none; }
 .cr-health.bad { box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35), 0 0 6px 1px rgba(192, 57, 43, 0.75); }
+
+/* The bell with something unread: lit, with how many, and a short ring when something new arrives. */
+#crew-bar .btn.cr-bell.has-news { background: var(--cr-warn) !important; color: #2a1a06 !important; }
+#crew-bar .btn.cr-bell.has-news .cr-count { background: #2a1a06; color: #fff3d6; }
+#crew-bar .btn.cr-bell.ring svg { animation: cr-bell-ring 0.9s ease-in-out 1; transform-origin: 50% 10%; }
+@keyframes cr-bell-ring { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(16deg); } 30% { transform: rotate(-14deg); } 45% { transform: rotate(10deg); } 60% { transform: rotate(-6deg); } 75% { transform: rotate(3deg); } }
