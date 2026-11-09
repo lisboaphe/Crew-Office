@@ -1,4 +1,5 @@
-# Crew Office installer for Windows. Run by CrewOfficeSetup.exe, or by hand:
+# Crew Office installer for Windows. Run by CrewOfficeSetup.exe, by "Install Crew Office.cmd"
+# in a source download (which passes -FromCheckout), or by hand:
 #
 #   powershell -ExecutionPolicy Bypass -File install.ps1 -Source app.zip
 #
@@ -15,7 +16,8 @@ param(
   [switch]$Quiet,
   [int]$WaitPid = 0,        # an update from inside the app: wait for it to stop first
   [switch]$Relaunch,        # ...and start it again afterwards, whether or not this worked
-  [string]$AppArgs = ''
+  [string]$AppArgs = '',
+  [string]$FromCheckout = ''  # a source folder: package it first (installer\build.cjs), then install that
 )
 
 $ErrorActionPreference = 'Stop'
@@ -82,6 +84,15 @@ $nodeDir = Split-Path $node -Parent
 Say "Using Node.js $(& $node --version) at $node"
 
 # --- Files ---------------------------------------------------------------------
+# A source download has no app.zip, so make one from it: the same files the setup program carries.
+if ($FromCheckout) {
+  $FromCheckout = (Resolve-Path $FromCheckout).Path
+  Say 'Packaging Crew Office from this folder...'
+  & $node (Join-Path $FromCheckout 'installer\build.cjs') --zip-only | Out-Host
+  if ($LASTEXITCODE -ne 0) { Fail 'Could not package the app from this folder. Download it again, or use CrewOfficeSetup.exe from the latest release.' }
+  $checkoutVersion = (Get-Content (Join-Path $FromCheckout 'package.json') -Raw | ConvertFrom-Json).version
+  $Source = Join-Path $FromCheckout "dist\CrewOffice-$checkoutVersion.zip"
+}
 if (-not (Test-Path $Source)) { Fail "Cannot find the app package: $Source" }
 Say "Installing to $Target"
 # The new copy is built beside the old one and swapped in at the end, so a failure at any

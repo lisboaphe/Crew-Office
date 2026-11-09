@@ -107,5 +107,7 @@ docker-compose.yml
 .env.example
 CHANGELOG.md
 installer
+Install Crew Office.cmd
+.gitattributes
 # The connectivity service is a separate image, with its own recipe and ignore list.
 deploy

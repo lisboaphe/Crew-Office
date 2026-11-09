@@ -9,6 +9,7 @@
 // no dependencies (the installer runs `npm install --omit=dev` on the user's machine).
 //
 //   npm run installer
+//   node installer/build.cjs --zip-only   just the zip: what "Install Crew Office.cmd" runs
 
 'use strict';
 
@@ -67,6 +68,7 @@ function main() {
   fs.copyFileSync(zip, zipOut);
   console.log(`wrote ${path.relative(ROOT, zipOut)} (${(fs.statSync(zip).size / 1e6).toFixed(1)} MB)`);
 
+  if (process.argv.includes('--zip-only')) { fs.rmSync(work, { recursive: true, force: true }); return; }
   if (process.platform !== 'win32') {
     console.log('CrewOfficeSetup.exe is built on Windows only (IExpress). On macOS/Linux use installer/unix/install.sh with the zip.');
     return;
@@ -95,6 +97,7 @@ function main() {
   fs.writeFileSync(sedFile, sed);
   execFileSync(path.join(process.env.SystemRoot, 'System32', 'iexpress.exe'), ['/N', '/Q', sedFile], { stdio: 'inherit' });
   if (!fs.existsSync(exe)) throw new Error('IExpress did not produce the setup program');
+  console.log('Building CrewOfficeSetup.exe with IExpress (about a minute)...');
   const exeOut = path.join(DIST, 'CrewOfficeSetup.exe');
   fs.copyFileSync(exe, exeOut);
   console.log(`wrote ${path.relative(ROOT, exeOut)} (${(fs.statSync(exe).size / 1e6).toFixed(1)} MB)`);

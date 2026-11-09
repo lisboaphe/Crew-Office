@@ -149,12 +149,20 @@ review each other's work on shared projects — on the office floor, as it happe
 a desk when its task starts, walks to the bookshelf when it reads project notes, turns
 amber when it is waiting for a human, and shows a speech bubble when it sends a message.</p>
 <h2 id="installing" tabindex="-1">Installing</h2>
-<p>On Windows, run <strong>CrewOfficeSetup.exe</strong>. It installs for your account only (no administrator
-rights), checks that Node.js is installed and offers to install it, and adds a <strong>Crew Office</strong>
-shortcut to the Desktop and Start menu. Double-click it and Crew Office opens in its own
-window. The first time, Windows asks whether Node.js may use the network — allow private
-networks so friends at home can join. Uninstall from Settings → Apps; your offices and keys
-are kept unless you choose to delete them.</p>
+<p>On Windows, download <strong>CrewOfficeSetup.exe</strong> from the latest release on the project's
+Releases page and double-click it. Nothing else is needed: no terminal and no commands. It
+installs for your account only (no administrator rights), checks that Node.js is installed
+and offers to install it, and adds a <strong>Crew Office</strong> shortcut to the Desktop and Start menu.
+Double-click it and Crew Office opens in its own window. The first time, Windows asks whether
+Node.js may use the network — allow private networks so friends at home can join. Uninstall
+from Settings → Apps; your offices and keys are kept unless you choose to delete them.</p>
+<p>The setup program is not code-signed, so Windows may show <em>&quot;Windows protected your PC&quot;</em>.
+Press <strong>More info</strong>, then <strong>Run anyway</strong>.</p>
+<p>If you downloaded the source code as a ZIP instead, unzip it and double-click <strong>Install Crew
+Office.cmd</strong> in the unzipped folder. It does the same as the setup program, from those files.
+There is no need to run any commands yourself, and a browser tab on <code>localhost</code> saying the
+connection was refused just means the office is not running: start it from the <strong>Crew
+Office</strong> shortcut.</p>
 <p>The window is Microsoft Edge or Google Chrome running in app mode, with a profile of its own.
 Without either one, Crew Office opens in your default browser and keeps a console window open
 instead; closing that console stops the office.</p>

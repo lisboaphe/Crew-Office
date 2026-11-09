@@ -11,12 +11,22 @@ amber when it is waiting for a human, and shows a speech bubble when it sends a 
 
 ## Installing
 
-On Windows, run **CrewOfficeSetup.exe**. It installs for your account only (no administrator
-rights), checks that Node.js is installed and offers to install it, and adds a **Crew Office**
-shortcut to the Desktop and Start menu. Double-click it and Crew Office opens in its own
-window. The first time, Windows asks whether Node.js may use the network — allow private
-networks so friends at home can join. Uninstall from Settings → Apps; your offices and keys
-are kept unless you choose to delete them.
+On Windows, download **CrewOfficeSetup.exe** from the latest release on the project's
+Releases page and double-click it. Nothing else is needed: no terminal and no commands. It
+installs for your account only (no administrator rights), checks that Node.js is installed
+and offers to install it, and adds a **Crew Office** shortcut to the Desktop and Start menu.
+Double-click it and Crew Office opens in its own window. The first time, Windows asks whether
+Node.js may use the network — allow private networks so friends at home can join. Uninstall
+from Settings → Apps; your offices and keys are kept unless you choose to delete them.
+
+The setup program is not code-signed, so Windows may show *"Windows protected your PC"*.
+Press **More info**, then **Run anyway**.
+
+If you downloaded the source code as a ZIP instead, unzip it and double-click **Install Crew
+Office.cmd** in the unzipped folder. It does the same as the setup program, from those files.
+There is no need to run any commands yourself, and a browser tab on `localhost` saying the
+connection was refused just means the office is not running: start it from the **Crew
+Office** shortcut.
 
 The window is Microsoft Edge or Google Chrome running in app mode, with a profile of its own.
 Without either one, Crew Office opens in your default browser and keeps a console window open
