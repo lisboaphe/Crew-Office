@@ -265,6 +265,13 @@ layout stays where it is and is used until its task ends.</p>
 <p>A connection whose token the office answers with 401 <em>Unknown or revoked worker token</em> is
 forgotten from <code>worker.json</code> and stops, since waiting never makes such a token valid again. Any
 other failure to reach the office is retried every 10 seconds as before.</p>
+<h2 id="downloading-a-project" tabindex="-1">Downloading a project</h2>
+<p><code>GET …/projects/:project/download.zip</code> (<code>lib/crew/api.cjs</code>, built by <code>lib/crew/zip.cjs</code>) puts a
+project's agent-written files under <code>Agents' work/</code> and the newest version of each upload under
+<code>Office files/</code>, for the same people as any other project read. The zip is made in memory, so it
+stops at 200 MB and lists what it left out in <code>NOT INCLUDED.txt</code>. <code>…/folder</code> and <code>…/folder/open</code>
+give the host's path and open it, and only to <code>ownerOfComputer</code>: a request on the host machine,
+not forwarded, holding its machine key. Everybody else gets <code>null</code> and 403.</p>
 <h2 id="security-model" tabindex="-1">Security model</h2>
 <p><strong>Identity.</strong> A player is a name and a colour, per host, created by <code>POST /api/crew/enter</code>
 with no password. The session cookie is the identity and lasts a year. Accounts never kept
@@ -498,6 +505,7 @@ models cost $0.</li>
 <li><a href="#why-these-technologies">Why these technologies</a></li>
 <li><a href="#files">Files</a></li>
 <li><a href="#project-folders-on-the-workers-machine">Project folders on the worker's machine</a></li>
+<li><a href="#downloading-a-project">Downloading a project</a></li>
 <li><a href="#security-model">Security model</a></li>
 <li><a href="#lifecycle">Lifecycle</a></li>
 <li><a href="#worker-protocol">Worker protocol</a></li>

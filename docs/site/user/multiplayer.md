@@ -197,6 +197,14 @@ There is also an automated Claude Code mode, off unless you tick **Let this work
 Claude Code automatically** on the worker's page after reading the notice beside it. Then choose
 **Claude plan: automated Claude Code** as the agent's AI.
 
+### A project's files
+
+**Projects → Office files** has everything a project made. **What the agents made** lists the files
+its agents wrote; open one to read it. Below that are the files people uploaded. **Download all
+(.zip)** gets the lot in one file, for anyone on the project and for the office's owner and admins.
+On the computer hosting the office, the page also says where the agents' work is kept, and
+**Open folder** opens it. Nobody else is ever shown the host's folders.
+
 ### Where project files go
 
 Each project's files on your computer are in a folder of its own, made the first time one of your

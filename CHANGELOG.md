@@ -1,5 +1,13 @@
 # Changelog
 
+## Download a project's files
+
+### Added
+
+- **Download all (.zip)** on a project's Office files and Deliverables: everything its agents wrote and the newest version of each upload, in one file.
+- **Office files shows what the agents made**, not only uploads, which left a finished project reading "No files yet".
+- **Open folder**, on the computer hosting the office, with where the agents' work is kept. Nobody else is shown the host's folders.
+
 ## See whether each agent's AI is working
 
 ### Added
