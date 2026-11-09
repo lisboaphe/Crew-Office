@@ -89,10 +89,50 @@ export function colourPicker(initial) {
   return row;
 }
 
-/** A small “?” that explains something on hover or keyboard focus. */
+/**
+ * A small “?” that explains something on hover or keyboard focus.
+ *
+ * The explanation is shown on the page itself, not inside the “?”: panels clip what overflows them,
+ * and a “?” near a panel's edge opened its box off screen. It is placed from where the “?” is,
+ * below it or else above, and kept inside the window.
+ */
 export function helpTip(title, lines) {
-  return h('span.cr-help', { tabIndex: 0, role: 'button', 'aria-label': `Help: ${title}` }, '?',
-    h('span.cr-help-tip', { role: 'tooltip' }, h('b', title), h('ol', ...lines.map((l) => h('li', l)))));
+  const tip = h('div.cr.cr-help-tip', { role: 'tooltip' }, h('b', title), h('ol', ...lines.map((l) => h('li', l))));
+  const q = h('span.cr-help', { tabIndex: 0, role: 'button', 'aria-label': `Help: ${title}` }, '?');
+  let hideTimer = null;
+  const show = () => {
+    clearTimeout(hideTimer);
+    if (!tip.isConnected) document.body.append(tip);
+    placeTip(tip, q.getBoundingClientRect());
+    tip.classList.add('open');
+  };
+  // A moment's grace, so the pointer can cross from the “?” onto the box to read or select it.
+  const hide = () => { clearTimeout(hideTimer); hideTimer = setTimeout(() => { tip.classList.remove('open'); tip.remove(); }, 120); };
+  q.addEventListener('mouseenter', show);
+  q.addEventListener('mouseleave', hide);
+  q.addEventListener('focus', show);
+  q.addEventListener('blur', hide);
+  q.addEventListener('keydown', (e) => { if (e.key === 'Escape') { tip.classList.remove('open'); tip.remove(); } });
+  tip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+  tip.addEventListener('mouseleave', hide);
+  return q;
+}
+
+/** Put a help box next to the “?” at `at`, wholly inside the window. Exported for its test. */
+export function placeTip(tip, at, view = { width: window.innerWidth, height: window.innerHeight }) {
+  const GAP = 8;
+  const MARGIN = 12;
+  tip.style.maxWidth = `${Math.max(160, view.width - 2 * MARGIN)}px`;
+  const w = tip.offsetWidth || 300;
+  const ht = tip.offsetHeight || 0;
+  // Its right edge under the “?”'s, as before, then pushed back in from whichever side it crosses.
+  const left = Math.min(Math.max(at.right + 6 - w, MARGIN), view.width - MARGIN - w);
+  const below = at.bottom + GAP;
+  const wanted = below + ht <= view.height - MARGIN || at.top - GAP - ht < MARGIN ? below : at.top - GAP - ht;
+  const place = { left: Math.max(MARGIN, left), top: Math.max(MARGIN, Math.min(wanted, view.height - MARGIN - ht)) };
+  tip.style.left = `${place.left}px`;
+  tip.style.top = `${place.top}px`;
+  return place;
 }
 
 const ICONS = {

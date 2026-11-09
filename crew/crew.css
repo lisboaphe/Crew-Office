@@ -164,9 +164,10 @@ body.cr-chat-open .cr-drawer.left { width: min(1040px, max(520px, calc(100vw - 8
 .cr .btn.cr-me { padding: 3px 14px 3px 4px; }
 .cr-update:empty { display: none; }
 .cr-help { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: var(--cr-well); color: var(--cr-ink-2); font-size: 13px; font-weight: 700; cursor: help; flex: none; }
-.cr-help-tip { position: absolute; top: calc(100% + 8px); right: -6px; width: 300px; z-index: 5; padding: 12px 14px; border-radius: 16px; background: var(--cr-solid); color: var(--cr-ink); box-shadow: var(--cr-edge), var(--cr-shadow); font-size: 12.5px; font-weight: 400; line-height: 1.45; cursor: default;
+/* On the page, not in the panel: crew/common.js helpTip places it beside its "?", inside the window. */
+.cr-help-tip { position: fixed; top: 0; left: 0; width: 300px; z-index: 1000; pointer-events: auto; padding: 12px 14px; border-radius: 16px; background: var(--cr-solid); color: var(--cr-ink); box-shadow: var(--cr-edge), var(--cr-shadow); font-size: 12.5px; font-weight: 400; line-height: 1.45; cursor: default;
   opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity 0.15s, transform 0.15s, visibility 0.15s; }
-.cr-help:hover .cr-help-tip, .cr-help:focus .cr-help-tip, .cr-help:focus-within .cr-help-tip { opacity: 1; visibility: visible; transform: none; }
+.cr-help-tip.open { opacity: 1; visibility: visible; transform: none; }
 .cr-help-tip ol { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
 
 /* the How it works tour */
