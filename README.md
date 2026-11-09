@@ -11,11 +11,21 @@ documentation, not all of it rewritten yet, follows below the line.
 
 ## Install
 
-**Windows:** run `CrewOfficeSetup.exe` (build it with `npm run installer`; it lands in `dist/`).
-It installs for your user only, checks for Node.js 22.5+ (offering to install it with
-winget), and adds **Crew Office** to the Desktop and Start menu, plus **Crew Office Worker**
-and an uninstaller (also listed in Settings → Apps). **macOS / Linux:**
-`sh installer/unix/install.sh dist/CrewOffice-<version>.zip`.
+**Windows: [download CrewOfficeSetup.exe](https://github.com/lisboaphe/Crew-Office/releases/latest/download/CrewOfficeSetup.exe)
+and double-click it.** That is all — no terminal, no npm. It installs for your user only,
+checks for Node.js 22.5+ (offering to install it with winget), adds **Crew Office** to the
+Desktop and Start menu, plus **Crew Office Worker** and an uninstaller (also listed in
+Settings → Apps), and starts it. The setup is not code-signed, so Windows may say *"Windows
+protected your PC"*: press **More info → Run anyway**.
+
+Downloaded the source instead (**Code → Download ZIP**)? Unzip it and double-click
+**`Install Crew Office.cmd`** in the folder. It does the same as the setup program, from those
+files.
+
+**macOS / Linux:** `sh installer/unix/install.sh CrewOffice.zip`, with `CrewOffice.zip` from the
+[latest release](https://github.com/lisboaphe/Crew-Office/releases/latest).
+
+To build the setup program yourself, `npm run installer` writes it to `dist/`.
 
 Inside the office, **📘 How it works** opens a short tour; it also opens by itself on your
 first visit.
