@@ -58,6 +58,13 @@
   <div id="handoffs"></div>
   <label class="row"><input type="checkbox" id="claudeAuto"> Let this worker start my own Claude Code automatically (Limited)</label>
   <p class="hint">Off by default. Turning it on is your decision and your responsibility under Anthropic’s terms; if in doubt leave it off, or use a Claude API key, which is billed separately. It runs your installed, unmodified Claude Code with your own sign-in; the app never sees that sign-in.</p>
+  <label class="row">Autonomous agents on this computer:
+    <select id="autonomous">
+      <option value="off">Off</option>
+      <option value="project">In their project’s folder</option>
+      <option value="computer">Anywhere on this computer</option>
+    </select></label>
+  <p class="hint">An autonomous agent is Claude Code working as itself, with its own tools: reading, writing, running commands, unzipping, installing. This is the most it may reach here; an agent set to more gets this. In its project’s folder, Claude Code keeps its file tools inside that folder; commands it runs start there but are not fenced in on Windows. Anywhere lets it do what you could, so use it when you are not sharing the office with people you do not trust.</p>
 </section>
 
 <section>
@@ -84,6 +91,8 @@ document.getElementById('usage').append(usageView(link));
 <script>
 const H = { 'Content-Type': 'application/json', 'X-Crew': '1' };
 const post = (p, b) => fetch(p, { method: 'POST', headers: H, body: JSON.stringify(b ?? {}) }).then((r) => r.json());
+// A setting the worker refuses, such as one locked while an autonomous agent works, says why.
+const setting = async (b) => { const r = await setting(b); if (r.error) alert(r.error); return r; };
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let editing = false;
 
@@ -92,6 +101,7 @@ async function load() {
   const s = await (await fetch('/status')).json();
   document.getElementById('neverPaid').checked = s.budget.neverPaidApi;
   document.getElementById('claudeAuto').checked = s.budget.allowClaudeAutomation;
+  document.getElementById('autonomous').value = s.budget.autonomous ?? 'off';
   if (document.activeElement.id !== 'taskDefault') document.getElementById('taskDefault').value = s.budget.taskDefaultPct ?? '';
   document.getElementById('conns').innerHTML = s.connections.length ? s.connections.map((c) => '<div><b>' + esc(c.room ? c.room.name : c.host) + '</b> — ' + (c.connected ? 'connected' : 'not connected') + ' · running ' + c.running + ' · finished ' + c.completed + (c.lastError ? ' · ' + esc(c.lastError) : '') + '</div>').join('') : 'No office yet. In the office open Dashboard → My Crew → Add a worker, and run the command it shows.';
   document.getElementById('providers').innerHTML = '<tr><th>Connection</th><th>State</th><th>Why</th><th></th></tr>' + Object.entries(s.providers).filter(([k]) => k !== 'scripted').map(([k, p]) => '<tr><td>' + esc(p.label) + '<br><span class="hint">' + esc(p.billing) + '</span></td><td class="state ' + esc(p.state.split(' ')[0]) + '">' + esc(p.state) + '</td><td class="hint">' + esc(p.reason) + '</td><td>' + (k === 'claude-handoff' ? '' : '<button onclick="testConn(\'' + k + '\', this)">Test Connection</button>') + '</td></tr>').join('');
@@ -109,11 +119,15 @@ async function load() {
 
 document.getElementById('neverPaid').onchange = async (e) => {
   if (!e.target.checked && !confirm('Agents set to an API key will then spend money on that key, billed per token by the provider. Turn off “Never use paid API”?')) { e.target.checked = true; return; }
-  await post('/settings', { neverPaidApi: e.target.checked }); load();
+  await setting({ neverPaidApi: e.target.checked }); load();
+};
+document.getElementById('autonomous').onchange = async (e) => {
+  if (e.target.value === 'computer' && !confirm('Let autonomous agents act anywhere on this computer? They can then read, change and delete anything you can. Use this when you are not sharing the office with people you do not trust.')) { load(); return; }
+  await setting({ autonomous: e.target.value }); load();
 };
 document.getElementById('claudeAuto').onchange = async (e) => {
   if (e.target.checked && !confirm('Anthropic does not allow third-party apps to route requests through Claude plan credentials on behalf of users. This runs your own unmodified Claude Code unattended, on your own subscription. Turn it on, on your own responsibility?')) { e.target.checked = false; return; }
-  await post('/settings', { allowClaudeAutomation: e.target.checked }); load();
+  await setting({ allowClaudeAutomation: e.target.checked }); load();
 };
 async function testConn(p, btn) { btn.disabled = true; btn.textContent = 'Testing…'; const r = await post('/test', { provider: p }); alert(r.reason || (r.ok ? 'It answered.' : 'It did not answer.')); load(); }
 async function chatgptIn() {
@@ -127,10 +141,10 @@ async function chatgptOut() { await post('/chatgpt/logout'); load(); }
 async function handoffDone(jobId) { const r = await post('/handoff/done', { jobId }); if (r.error) alert(r.error); load(); }
 async function handoffRemove(jobId) { if (!confirm('Take this task off the list? Its files stay where they are.')) return; const r = await post('/handoff/remove', { jobId }); if (r.error) alert(r.error); load(); }
 async function saveKey(p, f, id) { const el = document.getElementById(id); await post('/keys', { provider: p, [f]: el.value }); el.value = ''; load(); }
-async function saveDefault() { await post('/settings', { taskDefaultPct: document.getElementById('taskDefault').value || null }); load(); }
+async function saveDefault() { await setting({ taskDefaultPct: document.getElementById('taskDefault').value || null }); load(); }
 async function saveBudget(btn) {
   const tr = btn.closest('tr');
-  await post('/settings', { provider: { name: tr.dataset.p, capacity: tr.querySelector('.cap').value || null, window: tr.querySelector('.win').value, reservePct: tr.querySelector('.res').value, maxConcurrent: tr.querySelector('.con').value } });
+  await setting({ provider: { name: tr.dataset.p, capacity: tr.querySelector('.cap').value || null, window: tr.querySelector('.win').value, reservePct: tr.querySelector('.res').value, maxConcurrent: tr.querySelector('.con').value } });
   editing = false; load();
 }
 document.addEventListener('focusin', (e) => { editing = Boolean(e.target.closest('#budgets')); });
