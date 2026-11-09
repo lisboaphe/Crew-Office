@@ -237,6 +237,7 @@ lib/crew-worker/
   git-local.cjs    the agent's own clone of a project repository, and its Git tools
   handoff.cjs      the manual Claude Code route: brief out, RESULT.md or PLAN.json back
   health.cjs       what real work says about each AI: answered, signed out or at its limit
+  native.cjs       an autonomous agent: Claude Code as itself, in its project folder or anywhere
   provider-status.cjs  each AI's state for the office, from tests and from health.cjs
   project-folders.cjs  one folder per project on the owner's machine, for clones and hand-offs
   sandbox.cjs      process (Node permission model) or Docker isolation
@@ -278,6 +279,28 @@ ends in <code>.zip</code> calls <code>crew.work.unpackZip</code>, and <code>POST
 whose path leaves the archive, and any that inflates past the size it declares. Valid UTF-8 without
 NUL bytes, up to the 256 KB file limit, is written as project files under <code>&lt;upload without .zip&gt;/</code>,
 dropping a single top folder such as GitHub's <code>&lt;repo&gt;-main/</code>; the rest is listed in <code>UNPACKED.md</code>.</p>
+<h2 id="autonomous-agents" tabindex="-1">Autonomous agents</h2>
+<p>A limited agent thinks through a model and acts only through the office's tools. An autonomous one
+(<code>lib/crew-worker/native.cjs</code>) is Claude Code run as itself in a folder, given the task as
+<code>.crew/TASK.md</code>, which reports through <code>.crew/RESULT.md</code> or <code>.crew/PLAN.json</code>. <code>importResult</code> in
+<code>handoff.cjs</code>, shared with the manual route, turns that into <code>submit_plan</code>, <code>review_decision</code>,
+<code>repo_sync</code> and <code>request_merge</code>, or <code>complete_task</code>. Without a repository, the project's shared
+files are mirrored into <code>&lt;project folder&gt;/workspace</code> first, and new or changed text files are
+written back afterwards with <code>write_file</code>, so every rule on those tools still applies.</p>
+<p>How far it reaches is <code>reachOf(agent, ceiling)</code>: the smaller of the agent's <code>freedom</code> (in its
+profile, kept by the office's host) and the worker's <code>autonomous</code> setting (<code>off</code>, <code>project</code> or
+<code>computer</code>, in the worker's own settings). The worker's page only accepts changes from a page
+served by this computer, so an office's host can ask for more but never get it. <code>project</code> is
+<code>claude -p --restricted</code> with commands and web tools named and allowed: Claude Code confines its file
+tools to the working folder, which was checked by asking it to write outside and seeing it refused,
+but not what a command touches. <code>computer</code> is <code>--dangerously-skip-permissions</code>.</p>
+<p>No agent may change the settings that bound it. None of the office's tools can (a test lists them).
+On the worker, <code>budget.update(patch, { locked })</code> refuses, with 423, any change <code>widening()</code> names,
+while <code>autonomousWorking()</code> counts a run: an autonomous agent's command could otherwise post to the
+worker's page, which cannot tell a script from the owner. The guarded settings' fingerprint is kept
+in the vault as <code>settingsSeal</code>, so a <code>settings.json</code> edited outside the worker is reset to the
+defaults at start and reported to the owner. An agent with <code>computer</code> reach runs as the owner and
+could defeat both; that is why it is opt-in on both sides.</p>
 <h2 id="security-model" tabindex="-1">Security model</h2>
 <p><strong>Identity.</strong> A player is a name and a colour, per host, created by <code>POST /api/crew/enter</code>
 with no password. The session cookie is the identity and lasts a year. Accounts never kept
@@ -512,6 +535,7 @@ models cost $0.</li>
 <li><a href="#files">Files</a></li>
 <li><a href="#project-folders-on-the-workers-machine">Project folders on the worker's machine</a></li>
 <li><a href="#downloading-a-project">Downloading a project</a></li>
+<li><a href="#autonomous-agents">Autonomous agents</a></li>
 <li><a href="#security-model">Security model</a></li>
 <li><a href="#lifecycle">Lifecycle</a></li>
 <li><a href="#worker-protocol">Worker protocol</a></li>

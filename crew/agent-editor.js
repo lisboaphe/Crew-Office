@@ -169,9 +169,60 @@ export function createAgentEditor(ctx) {
       h('div.row.cr-two', field('Name', name), field('Colour', color)),
       field('Role', role),
       h('div.row.cr-two', field('AI behind this agent', provider), field('Model', model)), known, models,
+      freedomField(a),
       backupList,
       capacity(a),
       h('div.actions', h('button.btn.primary', { onclick: saved(() => saveAgent({ name: name.value, role: role.value, color: color.value, provider: provider.value, model: model.value })) }, 'Save name, role and colour')));
+  }
+
+  /**
+   * How free the agent is: Limited, through the office's tools, which the owner narrows under Skills
+   * & Tools; or Autonomous, Claude Code as itself, in its project's folder or on the whole computer.
+   * The agent's setting only asks. The worker on its owner's computer decides how much it allows
+   * there, and only the app on that computer can raise that, so choosing here on your own computer
+   * sets both, and choosing from elsewhere says what is still needed.
+   */
+  function freedomField(a) {
+    const want = profile?.profile.freedom ?? { mode: 'limited', reach: 'project' };
+    const box = h('div.cr-field', h('label', 'Freedom', helpTip('Freedom', [
+      'Limited: the agent acts only through the office’s tools. Choose which under Skills & Tools.',
+      'Autonomous: Claude Code works as itself, with its own tools, as it does when you run it yourself.',
+      'In its project’s folder, Claude Code keeps its file tools inside that folder. Commands start there but are not fenced in on Windows.',
+      'The whole computer is for when you are not sharing the office with people you do not trust.',
+    ])));
+    const canBe = a.provider === 'claude-cli';
+    const mode = h('select', { disabled: !canBe && want.mode !== 'autonomous' },
+      h('option', { value: 'limited', selected: want.mode !== 'autonomous' }, 'Limited: through the office’s tools'),
+      h('option', { value: 'autonomous', selected: want.mode === 'autonomous' }, 'Autonomous: Claude Code as itself'));
+    const whole = check(want.reach === 'computer', 'Let it use the whole computer, not only its project’s folder', 'For playing alone, or with people you trust.');
+    const note = h('p.hint');
+    const tune = h('button.btn.small', { onclick: () => { tab = 'tools'; draw(); } }, 'Choose what it may do');
+    const local = Boolean(ctx.ui?.ownerOfComputer ?? ctx.ownerOfComputer);
+    const show = () => {
+      const autonomous = mode.value === 'autonomous';
+      whole.hidden = !autonomous;
+      tune.hidden = autonomous;
+      note.textContent = !canBe ? 'Autonomous needs the AI to be Claude plan, automated Claude Code.'
+        : !autonomous ? 'It acts only through the office’s tools.'
+          : local ? `Claude Code works as itself in ${whole.box.checked ? 'any folder on this computer' : 'this project’s folder'}.`
+            : 'Also allow it on the worker page on the computer that runs this agent: Autonomous agents on this computer.';
+    };
+    const save = saved(async () => {
+      const freedom = { mode: mode.value, reach: whole.box.checked ? 'computer' : 'project' };
+      if (freedom.mode === 'autonomous' && freedom.reach === 'computer' && !confirm(`Let ${a.name} act anywhere on this computer? It can then read, change and delete anything you can. Use this when you are not sharing the office with people you do not trust.`)) {
+        whole.box.checked = false;
+        freedom.reach = 'project';
+      }
+      await saveProfile({ freedom });
+      // On the computer that runs it, the worker's ceiling follows, so one choice is enough.
+      if (local && freedom.mode === 'autonomous') await ctx.workerLink().post('/settings', { autonomous: freedom.reach, allowClaudeAutomation: true });
+      show();
+    }, 'Freedom saved');
+    mode.addEventListener('change', save);
+    whole.box.addEventListener('change', save);
+    show();
+    box.append(mode, whole, h('div.row', note, tune));
+    return box;
   }
 
   /** Other AIs this agent may move to at a limit. Paid APIs and the manual handoff are not offered. */

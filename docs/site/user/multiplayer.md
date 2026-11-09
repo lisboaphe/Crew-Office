@@ -197,6 +197,35 @@ There is also an automated Claude Code mode, off unless you tick **Let this work
 Claude Code automatically** on the worker's page after reading the notice beside it. Then choose
 **Claude plan: automated Claude Code** as the agent's AI.
 
+### Limited or autonomous
+
+**Freedom**, in an agent's panel, says how freely it works.
+
+- **Limited** is the office's way: the agent acts only through the office's own tools, and you
+  choose which under **Skills & Tools**, from reading and writing files to running commands, using
+  Git or fetching from the web.
+- **Autonomous** is Claude Code working as itself, with its own tools, as it does when you run it
+  yourself: reading, writing, running commands, unzipping, installing. It works in its project's
+  folder, and what it makes comes back into the project when it finishes, where reviews, tests and
+  approvals still apply. Claude Code keeps its file tools inside that folder. Commands it runs
+  start there but are not fenced in on Windows.
+- **Let it use the whole computer** goes further, for playing alone or with people you trust: it
+  can then read, change and delete anything you can.
+
+Only an agent on automated Claude Code can be autonomous. And the computer that runs the agent has
+the last word: **Autonomous agents on this computer**, on the worker's page, is the most it allows
+there, and an agent set to more gets that. Choosing Autonomous in the app on your own computer sets
+both. From anywhere else, also allow it on that computer's worker page, which nobody else can do
+for you.
+
+**No agent changes the settings.** None of the office's tools can change a setting; an agent can
+only ask you, through an approval. While an autonomous agent is working, the worker refuses any
+change that would let agents do more, such as reaching further, paid APIs or starting Claude Code
+by itself, whoever asks; turning things down always works. Every change to those settings is shown
+to you as a notification. And if the worker's settings file is changed behind its back, the worker
+notices when it starts, puts the safe settings back, and tells you. An agent allowed the whole
+computer can do anything you can, so that switch is for playing alone or with people you trust.
+
 ### A project's files
 
 **Projects → Office files** has everything a project made. **What the agents made** lists the files
