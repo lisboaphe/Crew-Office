@@ -205,7 +205,8 @@ Claude Code automatically** on the worker's page after reading the notice beside
 
 - **Limited** is the office's way: the agent acts only through the office's own tools, and you
   choose which under **Skills & Tools**, from reading and writing files to running commands, using
-  Git or fetching from the web.
+  Git or fetching from the web. A new agent starts with all of them switched on, so it can do the
+  work straight away. Switch off whatever you would rather it did not do.
 - **Autonomous** is Claude Code working as itself, with its own tools, as it does when you run it
   yourself: reading, writing, running commands, unzipping, installing. It works in its project's
   folder, and what it makes comes back into the project when it finishes, where reviews, tests and

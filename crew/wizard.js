@@ -8,14 +8,17 @@
 import { h, api, toast, modal } from './common.js';
 import { statusChip, STATUS, connectForm, verifyForm, modelPicker, GROUPS } from './connections.js';
 
+// Every agent starts able to do everything a player can switch on: files, delegating, running code,
+// the web and Git. Switching one off is the choice; having to find and switch each on was the chore.
+const ALL_TOOLS = ['messaging', 'files.read', 'files.write', 'memory', 'delegate', 'exec', 'web', 'git'];
 const PRESETS = [
-  { id: 'developer', name: 'Developer', role: 'Software Developer', skills: ['code', 'testing', 'git'], tools: ['messaging', 'files.read', 'files.write', 'memory', 'exec', 'git'], blurb: 'Writes and changes code on its own branch.', instructions: 'Work in small, tested steps. Say plainly what you could not finish.' },
-  { id: 'reviewer', name: 'Code Reviewer', role: 'Code Reviewer', skills: ['review', 'security', 'quality'], tools: ['messaging', 'files.read', 'memory', 'git'], orchestrationRole: 'reviewer', blurb: 'Reads changes and approves them or asks for fixes.', instructions: 'Review the diff against the goal. Be specific about file and line, and say what is good as well as what is wrong.' },
-  { id: 'python', name: 'Python Developer', role: 'Python Developer', skills: ['python', 'testing', 'scripting'], tools: ['messaging', 'files.read', 'files.write', 'memory', 'exec', 'git'], blurb: 'Writes Python scripts and tools.', instructions: 'Write clear Python with tests. Note any packages you need.' },
-  { id: 'researcher', name: 'Researcher', role: 'Researcher', skills: ['research', 'analysis', 'writing'], tools: ['messaging', 'files.read', 'files.write', 'memory', 'web'], blurb: 'Finds things out and writes them up with sources.', instructions: 'Cite where each finding came from, and say how sure you are.' },
-  { id: 'qa', name: 'QA Tester', role: 'QA Engineer', skills: ['testing', 'qa', 'bugs'], tools: ['messaging', 'files.read', 'files.write', 'memory', 'exec', 'git'], orchestrationRole: 'tester', blurb: 'Writes and runs tests, and reports what really happened.', instructions: 'Report only results you observed, with the command and the output.' },
-  { id: 'pm', name: 'Project Manager', role: 'Project Manager', skills: ['planning', 'coordination'], tools: ['messaging', 'files.read', 'memory', 'delegate'], isManager: true, orchestrationRole: 'lead', blurb: 'Plans the work and hands it to the team.', instructions: 'Break the goal into small tasks, each with one clear owner and a way to check it is done.' },
-  { id: 'custom', name: 'Custom Agent', role: '', skills: [], tools: ['messaging', 'files.read', 'files.write', 'memory', 'git'], blurb: 'Start from nothing and set it up yourself.', instructions: '' },
+  { id: 'developer', name: 'Developer', role: 'Software Developer', skills: ['code', 'testing', 'git'], tools: ALL_TOOLS, blurb: 'Writes and changes code on its own branch.', instructions: 'Work in small, tested steps. Say plainly what you could not finish.' },
+  { id: 'reviewer', name: 'Code Reviewer', role: 'Code Reviewer', skills: ['review', 'security', 'quality'], tools: ALL_TOOLS, orchestrationRole: 'reviewer', blurb: 'Reads changes and approves them or asks for fixes.', instructions: 'Review the diff against the goal. Be specific about file and line, and say what is good as well as what is wrong.' },
+  { id: 'python', name: 'Python Developer', role: 'Python Developer', skills: ['python', 'testing', 'scripting'], tools: ALL_TOOLS, blurb: 'Writes Python scripts and tools.', instructions: 'Write clear Python with tests. Note any packages you need.' },
+  { id: 'researcher', name: 'Researcher', role: 'Researcher', skills: ['research', 'analysis', 'writing'], tools: ALL_TOOLS, blurb: 'Finds things out and writes them up with sources.', instructions: 'Cite where each finding came from, and say how sure you are.' },
+  { id: 'qa', name: 'QA Tester', role: 'QA Engineer', skills: ['testing', 'qa', 'bugs'], tools: ALL_TOOLS, orchestrationRole: 'tester', blurb: 'Writes and runs tests, and reports what really happened.', instructions: 'Report only results you observed, with the command and the output.' },
+  { id: 'pm', name: 'Project Manager', role: 'Project Manager', skills: ['planning', 'coordination'], tools: ALL_TOOLS, isManager: true, orchestrationRole: 'lead', blurb: 'Plans the work and hands it to the team.', instructions: 'Break the goal into small tasks, each with one clear owner and a way to check it is done.' },
+  { id: 'custom', name: 'Custom Agent', role: '', skills: [], tools: ALL_TOOLS, blurb: 'Start from nothing and set it up yourself.', instructions: '' },
 ];
 const STEPS = ['Worker', 'AI', 'Setup', 'Configure', 'Finish'];
 const check = (checked, label) => { const c = h('input', { type: 'checkbox', checked }); const row = h('label.cr-check', c, h('span', label)); row.box = c; return row; };
