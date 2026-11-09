@@ -1,5 +1,11 @@
 # Changelog
 
+## See what the agents see
+
+### Added
+
+- **Screenshots, under Projects.** What Claude, Codex and your other agents saw while they worked, newest first, with who took each one. Click one to see it full size, keep the ones worth keeping and delete the rest. Claude Code puts the screenshots it takes there by itself; Codex and other agents save into the folder the page shows. They stay on the computer hosting the office: nothing is shared with the office or sent anywhere, and only its owner sees the page.
+
 ## See an update happening
 
 ### Changed

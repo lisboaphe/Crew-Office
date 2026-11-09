@@ -8,6 +8,7 @@
 import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteOffice, updateNotice, BRAND, reportErrors, characterPicker } from './common.js';
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 import { gitTab, filesTab, rulesTab } from './workspace.js';
+import { shotsTab } from './shots.js';
 import { createAgentEditor } from './agent-editor.js';
 import { createOrchestrator } from './orchestrator.js';
 import { addWorkerWizard } from './wizard.js';
@@ -279,6 +280,7 @@ const NAV = [
     { key: 'projects', label: 'Projects', icon: 'folder' },
     { key: 'board', label: 'Task Board', icon: 'board' },
     { key: 'files', label: 'Files', icon: 'file' },
+    { key: 'shots', label: 'Screenshots', icon: 'camera', hint: 'What the agents saw while they worked, kept on this computer' },
     { key: 'git', label: 'Git & Sync', icon: 'git' },
   ] },
   { key: 'ai', label: 'AI Management', icon: 'ai', items: [
@@ -358,7 +360,7 @@ const SECTIONS = [
   { key: 'prefs', label: 'Preferences', tabs: [['prefs', 'Preferences']] },
   { key: 'agents', label: 'Agents', tabs: [['agents', 'Directory'], ['crew', 'My Crew']] },
   { key: 'orchestrator', label: 'Orchestrator', tabs: [['playbooks', 'Playbooks'], ['runs', 'Runs']] },
-  { key: 'projects', label: 'Projects', tabs: [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['deliverables', 'Deliverables']] },
+  { key: 'projects', label: 'Projects', tabs: [['projects', 'Projects'], ['board', 'Task board'], ['git', 'Git / Sync'], ['files', 'Office files'], ['shots', 'Screenshots'], ['deliverables', 'Deliverables']] },
   { key: 'knowledge', label: 'Memory & Knowledge', tabs: [['memory', 'Memory'], ['graph', 'Code graph'], ['plugins', 'Plugins']] },
   { key: 'connections', label: 'Connections', tabs: [['connections', 'AI connections']] },
   { key: 'usage', label: 'Usage', tabs: [['usage', 'Plan usage'], ['costs', 'Task costs']] },
@@ -382,7 +384,7 @@ function renderDash() {
   const wsCtx = { S, roomId, ui, render, taskDetail, viewFile };
   const section = sectionOf(ui.tab);
   (ui.lastTab ??= {})[section.key] = ui.tab;
-  ({ memory: (b) => b.append(ui.knowledge.showMemory()), graph: (b) => { b.classList.add('cr-fill'); b.append(ui.knowledge.showGraph()); }, plugins: (b) => b.append(ui.knowledge.showPlugins()), friends: dashFriends, prefs: dashPrefs, git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()), security: (b) => b.append(ui.security.show()) })[ui.tab](body);
+  ({ memory: (b) => b.append(ui.knowledge.showMemory()), graph: (b) => { b.classList.add('cr-fill'); b.append(ui.knowledge.showGraph()); }, plugins: (b) => b.append(ui.knowledge.showPlugins()), friends: dashFriends, prefs: dashPrefs, git: (b) => gitTab(b, wsCtx), files: (b) => filesTab(b, wsCtx), shots: (b) => shotsTab(b, wsCtx), rules: (b) => rulesTab(b, wsCtx), projects: dashProjects, board: dashBoard, agents: dashAgents, teams: dashTeams, feed: dashFeed, deliverables: dashDeliverables, approvals: dashApprovals, costs: dashCosts, crew: dashCrew, notifications: dashNotifications, room: dashRoom, connections: dashConnections, usage: dashUsage, playbooks: (b) => b.append(ui.orchestrator.showEditor()), runs: (b) => b.append(ui.orchestrator.showRuns()), security: (b) => b.append(ui.security.show()) })[ui.tab](body);
   // Only a real change of place animates: the office repaints this on every event.
   if (ui.drawnTab !== ui.tab) { body.classList.add('cr-fade'); ui.drawnTab = ui.tab; }
   const scroll = ui.dash.querySelector('.body')?.scrollTop ?? 0;

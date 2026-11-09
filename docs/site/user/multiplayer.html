@@ -406,6 +406,24 @@ to you to run in Claude Code, under <strong>handoffs</strong>.</p>
 <p>To clear away an old project, delete its folder. The office keeps the project's board, chat,
 shared files and repository, so you lose only work your agents had not handed back yet. The
 worker's page shows where the folder is.</p>
+<h3 id="screenshots" tabindex="-1">Screenshots</h3>
+<p><strong>Projects → Screenshots</strong> shows what your coding agents saw while they worked: a game they are
+building, a page they are changing, newest first, with who took each one and when. Click one to see
+it full size. <strong>Keep</strong> marks the ones worth keeping, <strong>Delete</strong> removes one from your computer, and
+<strong>Delete all not kept</strong> clears the rest in one go. New ones turn up on their own within a few seconds.</p>
+<p>They come from one folder on the computer hosting the office, and they stay there. Nothing in it is
+shared with the office, sent to the other players or uploaded anywhere, and only you see this page,
+on that computer.</p>
+<ul>
+<li><strong>Claude Code</strong> puts the screenshots it takes there by itself, once its plugin is installed and the
+office is running. To stop that, set <code>ROVING_OFFICE_SCREENSHOTS=0</code>, or add <code>&quot;screenshots&quot;: &quot;off&quot;</code>
+to <code>settings.json</code> in the <code>.roving-office</code> folder in your home folder.</li>
+<li><strong>Codex, or any other agent</strong>, saves a screenshot there when you ask it to. <strong>How screenshots get
+here</strong>, at the bottom of the page, shows the folder with a <strong>Copy</strong> button. Paste it into your
+request, or into the project's instructions for agents, for example: <em>save a screenshot of the game
+into this folder after each change</em>. A file name that starts with <code>codex-</code> is labelled as Codex's.</li>
+</ul>
+<p>PNG, JPEG, WebP and GIF images are shown.</p>
 <p>Connections groups everything by what it costs you:</p>
 <ul>
 <li><strong>My subscriptions</strong>: ChatGPT, Codex, Claude Code and Kiro, on your own plan.</li>
@@ -702,6 +720,7 @@ choose a real provider for real work.</p>
 <li><a href="#limited-or-autonomous">Limited or autonomous</a></li>
 <li><a href="#a-projects-files">A project's files</a></li>
 <li><a href="#where-project-files-go">Where project files go</a></li>
+<li><a href="#screenshots">Screenshots</a></li>
 <li><a href="#talking-to-a-projects-agents">Talking to a project's agents</a></li>
 <li><a href="#is-an-agents-ai-working">Is an agent's AI working?</a></li>
 <li><a href="#backup-ais">Backup AIs</a></li>

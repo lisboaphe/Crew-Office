@@ -44,6 +44,7 @@ const {
   deriveProject, resolveEndpoint, wireSession,
   resolveRedaction,
 } = core;
+const { captureScreenshots } = require('./lib/shot-capture.cjs');
 
 // --- budgets ---------------------------------------------------------------
 
@@ -377,6 +378,14 @@ async function main() {
 
   const event = args.event ?? firstString(payload.hook_event_name, payload.event, payload.type) ?? 'unknown';
   recordShape(args.harness, event, payload);
+
+  // A screenshot the agent took goes into the folder Crew Office shows, on this computer and
+  // nowhere else: the picture is written to disk and is never put in an event. See shot-capture.
+  captureScreenshots({
+    harness: args.harness, event, payload,
+    folder: path.join(process.env.CREW_DATA_DIR || path.join(DIR, 'crew'), 'shots'),
+    settings: readJson(SETTINGS_FILE, null) ?? {},
+  });
 
   let mapper;
   try { mapper = require(`./mappers/${args.harness}.cjs`); } catch { process.exit(0); }

@@ -110,6 +110,7 @@ const RUNTIME = [
   'bin/aop-node.sh',              // finds a Node a GUI-launched hook can actually reach
   'bin/aop-send.cjs',             // the adapter proper
   'bin/lib/aop-core.cjs',         // endpoint, project, redaction — the shared decisions
+  'bin/lib/shot-capture.cjs',     // keeps the screenshots an agent takes, on this computer
   'bin/mappers/lib/tool-classes.cjs',
   'bin/mappers/lib/todo-steps.cjs',
   'bin/mappers/lib/event-shape.cjs',
