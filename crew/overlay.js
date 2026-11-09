@@ -170,6 +170,13 @@ function buildChrome() {
     .map((m) => ({ id: m.userId, name: m.displayName, character: m.userId === S.me?.id ? S.me.character ?? m.character : m.character }));
   // Every agent in the office, including those whose worker is not running yet: they have a desk too.
   window.crewAgents = () => S.agents.map((a) => ({ id: a.id, name: a.name, color: a.color, ownerId: a.ownerId, ownerName: a.ownerName }));
+  // For the light beside each agent's name on the floor: by the character's id, as the office knows it.
+  window.crewAgentHealth = (charId) => {
+    const a = S.agents.find((x) => String(charId).endsWith(`#crew:${x.id}`));
+    if (!a) return null;
+    const hl = agentHealth(a);
+    return { ...hl, color: HEALTH_COLOR[hl.level] };
+  };
   window.crewChooseCharacter = (userId) => {
     if (userId !== S.me?.id) return false;
     chooseCharacter();
@@ -385,6 +392,29 @@ function renderDash() {
 const agentById = (id) => S.agents.find((a) => a.id === id);
 const userById = (id) => S.members.find((m) => m.userId === id);
 const STATUS_COLOR = { IDLE: '#8d99ae', ASSIGNED: '#3d85c6', PLANNING: '#9b5de5', WORKING: '#2a8a4a', WAITING: '#c27c0e', REVIEW: '#00a3b4', COMPLETED: '#2a8a4a', FAILED: '#c0392b', PAUSED: '#8d99ae', BLOCKED: '#c0392b', OFFLINE: '#b9bfcb', CANCELLED: '#8d99ae' };
+/**
+ * Whether an agent's AI can work right now, as its owner's worker last reported it: a level for the
+ * light and a sentence for whoever points at it. Everyone sees this for every agent; it says only
+ * working or not and why, never anything about the owner's account.
+ */
+function agentHealth(a) {
+  const label = S.providers?.[a.provider]?.label ?? a.provider;
+  if (a.paused) return { level: 'off', text: `${a.name} is on holiday.` };
+  if (!a.available) return { level: 'off', text: `${label}: its owner’s worker is not running, so ${a.name} cannot work until it is.` };
+  const conn = S.providers_?.[a.ownerId]?.[a.provider];
+  if (!conn) return { level: 'unknown', text: `${label}: no report from its owner’s worker yet.` };
+  if (conn.state === 'Working') return { level: 'ok', text: `${label} is working. ${conn.reason}` };
+  if (conn.state === 'Connected') return { level: 'unknown', text: `${label} is set up, but no task or test has used it yet.` };
+  if (conn.state === 'Limited' && a.provider === 'claude-handoff') return { level: 'manual', text: `${label}: each task waits for its owner to run it in Claude Code.` };
+  if (a.provider === 'scripted') return { level: 'manual', text: `${label}: a test provider with fixed scripts, not an AI.` };
+  return { level: 'bad', text: `${label} cannot work: ${conn.reason}` };
+}
+const HEALTH_COLOR = { ok: '#2a8a4a', unknown: '#c9a227', manual: '#c9a227', bad: '#c0392b', off: '#8d99ae' };
+const healthLight = (a) => {
+  const hl = agentHealth(a);
+  return h('span.cr-health', { class: hl.level, title: hl.text, role: 'img', 'aria-label': hl.text, style: { background: HEALTH_COLOR[hl.level] } });
+};
+
 const statusPill = (s) => h('span.pill', { style: { color: STATUS_COLOR[s] ?? 'inherit' } }, h('span.dot', { style: { background: STATUS_COLOR[s] ?? '#999' } }), s === 'PAUSED' ? 'ON HOLIDAY' : s);
 
 // The same two actions wherever an agent appears. Holiday keeps its tasks for when it is back;
@@ -441,7 +471,7 @@ function dashAgents(body) {
   const search = h('input', { type: 'search', placeholder: 'Search agents, roles or owners', 'aria-label': 'Search agents', value: ui.agentQuery ?? '' });
   const rows = S.agents.map((a) => {
     const row = h('div.cr-item.click.row', { onclick: () => openAgent(a.id), onkeydown: (e) => { if (e.key === 'Enter') openAgent(a.id); }, tabIndex: 0, role: 'button' },
-      avatar(a.name, a.color, { ai: true, online: a.available }), h('div.grow', h('b', a.name), ' ', h('span.muted', a.role), h('div.hint', `${a.ownerName}${a.ownerId === S.me.id ? ' (you)' : ''} · ${S.providers[a.provider]?.label ?? a.provider}`), agentUsage(a)),
+      avatar(a.name, a.color, { ai: true, online: a.available }), h('div.grow', h('b', a.name), ' ', h('span.muted', a.role), h('div.hint', healthLight(a), ` ${a.ownerName}${a.ownerId === S.me.id ? ' (you)' : ''} · ${S.providers[a.provider]?.label ?? a.provider}`), agentUsage(a)),
       statusPill(a.status));
     row.dataset.search = `${a.name} ${a.role} ${a.ownerName} ${a.skills.join(' ')}`.toLowerCase();
     return row;
@@ -663,7 +693,7 @@ function openAgent(id) { ui.editor.open(id).catch((e) => toast(e.message)); }
 /** What the editor, the wizard and the Orchestrator need from the office. */
 function editorContext() {
   return {
-    stopButton, S, roomId, ui, ownerOfComputer: ui.ownerOfComputer, statusPill, taskDetail, jobLogs, assignTask, holidayButton, fireButton, messageView, viewFile, openAgent,
+    stopButton, S, roomId, ui, ownerOfComputer: ui.ownerOfComputer, statusPill, agentHealth, healthLight, taskDetail, jobLogs, assignTask, holidayButton, fireButton, messageView, viewFile, openAgent,
     refreshState: refresh,
     workerLink: localWorker,
     chatWith: (a, channelId) => { if (!channelId) return; ui.channelId = channelId; if (!S.channels.find((c) => c.id === channelId)) S.channels.push({ id: channelId, kind: 'dm', name: 'dm', dmAgentId: a.id }); openSide('chat'); },

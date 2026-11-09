@@ -738,3 +738,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 :root[data-top-fit="2"] #crew-bar .cr-update .cr-says-more { display: inline; }
 :root[data-top-fit="3"] #crew-bar .cr-says-more { display: inline; }
 :root[data-top-fit="3"] #title-bar h1 { font-size: 0; gap: 0; }
+
+/* Whether an agent's AI can work right now: a light beside its name. Its title says why. */
+.cr-health { display: inline-block; width: 9px; height: 9px; border-radius: 50% !important; vertical-align: middle; margin-right: 2px; box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35); flex: none; }
+.cr-health.bad { box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.35), 0 0 6px 1px rgba(192, 57, 43, 0.75); }
