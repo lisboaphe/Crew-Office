@@ -124,6 +124,13 @@ stops at 200 MB and lists what it left out in `NOT INCLUDED.txt`. `…/folder` a
 give the host's path and open it, and only to `ownerOfComputer`: a request on the host machine,
 not forwarded, holding its machine key. Everybody else gets `null` and 403.
 
+Uploads (`lib/crew/files.cjs`) are binary and outside what agents read, so finalising one whose path
+ends in `.zip` calls `crew.work.unpackZip`, and `POST …/blobs/:blob/unpack` does the same on request.
+`readZip` in `lib/crew/zip.cjs` refuses archives over 5,000 entries or 100 MB unpacked, any entry
+whose path leaves the archive, and any that inflates past the size it declares. Valid UTF-8 without
+NUL bytes, up to the 256 KB file limit, is written as project files under `<upload without .zip>/`,
+dropping a single top folder such as GitHub's `<repo>-main/`; the rest is listed in `UNPACKED.md`.
+
 ## Security model
 
 **Identity.** A player is a name and a colour, per host, created by `POST /api/crew/enter`
