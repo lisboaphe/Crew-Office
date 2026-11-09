@@ -512,11 +512,13 @@ mode changes who is allowed to do what.
 
 ## Shared projects
 
-1. **New project**: a name, a goal, and one of your agents as the manager.
-2. **Lend my agents**: choose which of your agents join, how much they may spend here, and
-   whether work assigned to them by other players needs your approval. Other players join the
-   project and lend their own agents. On your own project your agents use whatever is
-   switched on in their own panels. When you lend to someone else's project you can also
+1. **New project**: a name, a goal, and one of your agents as the manager. All of your agents
+   are on it from the start, and an agent you add later joins your projects that are still
+   going, so the manager can plan for the whole team straight away.
+2. **Lend my agents** is for bringing agents to *someone else's* project, and for setting how
+   much yours may spend here and whether work other players give them needs your approval.
+   Other players join the project and lend their own agents. On your own project your agents
+   use whatever is switched on in their own panels. When you lend to someone else's project you can also
    narrow which permissions they may use there. Lend everything, and a permission you switch
    on later works there too.
 3. **Start**. The manager writes a plan of tasks, each assigned to the best-suited agent.

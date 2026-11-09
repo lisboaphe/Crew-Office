@@ -199,6 +199,12 @@ minus whatever is switched off. The tools a job is issued are recomputed on ever
 that a player switches a tool on once, in the agent's panel, and it works everywhere that is
 theirs: a per-project copy that silently stayed behind read to players as a broken switch.
 
+**Own team.** A project has all of its creator's own agents on it: `createProject` lends them
+(`work.lendOwnTeam`), a new agent joins its owner's projects that are not completed
+(`work.joinOwnProjects`), and a migration did the same once for projects made before. A
+manager whose team list held only itself, with the same player's developer working in the
+room, was the reason. Grants remain the only way another player's agent gets onto a project.
+
 **Chat jobs.** A chat in a project channel is issued the agent's tools on that project, minus
 the ones that act on a task (`complete_task`, `submit_plan`, merges). A direct chat with no
 project gets the tools that need none, plus `start_project` with `delegate`: it creates a
