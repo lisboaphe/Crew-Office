@@ -47,6 +47,16 @@ wrinkle, since third-party marketplaces have auto-update off by default. See
 - `artifact.change` on a file write or a commit.
 - `permission.resolve` when you say no — Codex cannot report this.
 - `context.compact` when history is squeezed.
+- **Screenshots, to disk rather than to the office.** On `PostToolUse`, `bin/lib/shot-capture.cjs`
+  looks for an image block in `tool_response` from a tool that *took* a screenshot — by its name,
+  or a computer/browser tool's `action: "screenshot"` — and writes it, with a `.json` note, into
+  `<CREW_DATA_DIR or ~/.roving-office/crew>/shots`, which Crew Office's Screenshots tab reads
+  (`lib/crew/shots.cjs`, served only to the owner of the computer). The bytes are sniffed, so a
+  payload that calls something an image does not make it one, and the image is never put in an
+  event. `Read` on a `.png` returns an image too and is deliberately not captured. The hook's
+  250 ms stdin budget is the limit on how large a screenshot can arrive whole; one that is cut
+  short fails to parse and is simply not kept. Off with `ROVING_OFFICE_SCREENSHOTS=0` or
+  `"screenshots": "off"` in `settings.json`. Tests: `test/crew-shots.test.cjs`.
 - **Real subagents.** `SubagentStart` carries `agent_id`, `agent_type` and
   `parent_tool_use_id`, so a fan-out arrives as actual child sessions bound to the exact
   `Job` call that spawned them. Nothing is inferred from tool arguments and nothing is

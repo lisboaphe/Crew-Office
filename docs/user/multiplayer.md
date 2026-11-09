@@ -264,6 +264,27 @@ To clear away an old project, delete its folder. The office keeps the project's 
 shared files and repository, so you lose only work your agents had not handed back yet. The
 worker's page shows where the folder is.
 
+### Screenshots
+
+**Projects → Screenshots** shows what your coding agents saw while they worked: a game they are
+building, a page they are changing, newest first, with who took each one and when. Click one to see
+it full size. **Keep** marks the ones worth keeping, **Delete** removes one from your computer, and
+**Delete all not kept** clears the rest in one go. New ones turn up on their own within a few seconds.
+
+They come from one folder on the computer hosting the office, and they stay there. Nothing in it is
+shared with the office, sent to the other players or uploaded anywhere, and only you see this page,
+on that computer.
+
+- **Claude Code** puts the screenshots it takes there by itself, once its plugin is installed and the
+  office is running. To stop that, set `ROVING_OFFICE_SCREENSHOTS=0`, or add `"screenshots": "off"`
+  to `settings.json` in the `.roving-office` folder in your home folder.
+- **Codex, or any other agent**, saves a screenshot there when you ask it to. **How screenshots get
+  here**, at the bottom of the page, shows the folder with a **Copy** button. Paste it into your
+  request, or into the project's instructions for agents, for example: *save a screenshot of the game
+  into this folder after each change*. A file name that starts with `codex-` is labelled as Codex's.
+
+PNG, JPEG, WebP and GIF images are shown.
+
 Connections groups everything by what it costs you:
 
 - **My subscriptions**: ChatGPT, Codex, Claude Code and Kiro, on your own plan.

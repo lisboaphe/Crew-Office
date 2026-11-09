@@ -163,6 +163,7 @@ const ICONS = {
   send: '<path d="M4 12l16-8-6 16-2.5-6.5z"/>',
   search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>',
   graph: '<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="17" cy="18" r="2.5"/><circle cx="6" cy="17" r="2.5"/><path d="M8.5 7h7M7.5 9l8 7.5M6 9.5v5M8.5 17h6"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
 };
 
 export function icon(name) {

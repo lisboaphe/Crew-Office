@@ -73,6 +73,8 @@ Everything the other harnesses give, plus things they cannot:
 - **File and commit events**, when something is written.
 - **Permission events**, when you say no.
 - **Context compaction**, when history is squeezed.
+- **Screenshots it takes**, kept on your computer for Crew Office's Screenshots page and never
+  sent anywhere. [Multiplayer](../multiplayer.md#screenshots) says how to turn that off.
 - **Real subagents.** A fan-out arrives as actual child sessions bound to the exact call
   that spawned them. The room does not draw them yet — a fan-out looks like one busy person
   — but the feed is there and waiting on the scene.

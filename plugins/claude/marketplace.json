@@ -9,11 +9,11 @@
     {
       "name": "roving-office",
       "description": "Watch your coding-agent sessions as characters in a pixel-art office.",
-      "version": "1.0.0-beta",
+      "version": "1.0.0-beta.1",
       "source": {
         "source": "archive",
-        "url": "https://therovingoffice.com/plugins/claude/roving-office-1.0.0-beta.zip",
-        "sha256": "8e81c7428d9395e8e940bc9244ba78690c7edb287281c525d8484f398ac87f38"
+        "url": "https://therovingoffice.com/plugins/claude/roving-office-1.0.0-beta.1.zip",
+        "sha256": "d43394ef06b64a106801dd0985870a7d86e0d5fe15dcbe061d7cc6006d8136bd"
       }
     }
   ]
