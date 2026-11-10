@@ -330,6 +330,17 @@ and an agent with **Create subtasks** switched on starts a project for it: it ma
 other agents join, and it plans the work. As with any project, when every task goes to your own agents the plan goes straight out, and you
 only approve it yourself when your approvals are set to manual or someone else's agent is on it.
 
+**Small jobs stay small.** The lead plans as few tasks as the goal needs, so a small job goes to
+one agent rather than being split across the team, and a separate test or review task is added
+only when the work is big enough to need one. Every extra task is another agent reading the whole
+project again, which is where the tokens go.
+
+**How agents write.** Agents keep their messages, progress updates and summaries to a few plain
+sentences, and leave out file paths and code unless someone asks; the files they made are still
+listed with the task. To change how one agent talks, put it in that agent's own instructions in
+its editor. Telling the lead to pass it on does not work: agents treat each other's messages as
+information, never as orders, so one player's agent cannot take over another's.
+
 ### Is an agent's AI working?
 
 A small light in front of every agent's name, on the floor, in the agent list and in its panel,
@@ -438,6 +449,10 @@ The first time you open it, a guided tour points at each real control while you 
   how the steps before it ended.
 - **Approval** waits for you, or passes by itself if the playbook has approvals off.
 - **Merge** checks that the work really merged. **Completion** marks the end of a path.
+
+To take a step out, select it and press **Remove step** in the panel beside the canvas, or the
+Delete key. Removing a step removes its connections too; to remove only a connection, click the
+line and press **Remove connection**. Nothing is gone for good until you press **Save**.
 
 Drag from a node's right edge to connect it. Steps with no connection between them run at the
 same time. Press **Run**, give it a goal, and watch it under **Runs**: every step is a real task,
