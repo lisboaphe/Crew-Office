@@ -337,7 +337,9 @@ project again, which is where the tokens go.
 
 **How agents write.** Agents keep their messages, progress updates and summaries to a few plain
 sentences, and leave out file paths and code unless someone asks; the files they made are still
-listed with the task. To change how one agent talks, put it in that agent's own instructions in
+listed with the task. When an agent finishes a task, the chat shows only the task's name and the
+first one or two sentences of its report; **Full report** on that message opens the task with the
+whole report and its files. To change how one agent talks, put it in that agent's own instructions in
 its editor. Telling the lead to pass it on does not work: agents treat each other's messages as
 information, never as orders, so one player's agent cannot take over another's.
 

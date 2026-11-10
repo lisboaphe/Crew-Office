@@ -775,6 +775,13 @@ function renderSide() {
   if (hadFocus) { input.focus(); if (caret !== null) input.setSelectionRange(caret, caret); }
 }
 
+// A message about a task opens that task, where the full report is. A task this player cannot
+// see stays the plain label it always was.
+function taskLink(id) {
+  const t = S.tasks.find((x) => x.id === id);
+  return t ? h('button.cr-linkish', { onclick: () => taskDetail(t), title: 'Open the task and its full report' }, 'Full report') : h('span.hint', 'task-linked');
+}
+
 function messageView(m) {
   const isAgent = m.senderType === 'agent';
   const mine = m.senderType === 'human' && m.senderId === S.me.id;
@@ -783,7 +790,7 @@ function messageView(m) {
     h('div.grow',
       h('div.meta', h('b', m.senderName), isAgent ? h('span.pill.ai', 'AI') : m.senderType === 'human' ? h('span.pill.human', 'human') : null,
         m.toAgentName ? h('span', `→ ${m.toAgentName}`) : null, m.kind !== 'chat' && m.kind !== 'system' ? h('span.pill', m.kind.replace('_', ' ')) : null,
-        m.taskId ? h('span.hint', 'task-linked') : null, h('span', ago(m.createdAt))),
+        m.taskId ? taskLink(m.taskId) : null, h('span', ago(m.createdAt))),
       h('div.text', m.body)));
 }
 
