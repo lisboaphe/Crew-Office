@@ -76,7 +76,7 @@ function createCanvas({ graph, readOnly = false, onSelect = () => {}, onChange =
       const path = svg('path', { d: curve(at[e.from], at[e.to]), class: `cr-edge${selected === `e:${e.from}>${e.to}` ? ' on' : ''}` });
       if (!readOnly) {
         const hit = svg('path', { d: curve(at[e.from], at[e.to]), class: 'cr-edge-hit' });
-        hit.addEventListener('click', (ev) => { ev.stopPropagation(); selected = `e:${e.from}>${e.to}`; onSelect(null); draw(); el.focus(); });
+        hit.addEventListener('click', (ev) => { ev.stopPropagation(); selected = `e:${e.from}>${e.to}`; onSelect(null, { edge: true }); draw(); el.focus(); });
         edgesSvg.append(hit);
       }
       edgesSvg.append(path);
@@ -98,7 +98,9 @@ function createCanvas({ graph, readOnly = false, onSelect = () => {}, onChange =
         box.append(input, output);
       }
       box.addEventListener('pointerdown', (e) => startDrag(e, n));
-      box.addEventListener('click', (e) => { e.stopPropagation(); selected = n.id; onSelect(n); draw(); });
+      // draw() replaces the clicked box, which takes keyboard focus with it, so hand focus back to the
+      // canvas or the Delete key goes nowhere.
+      box.addEventListener('click', (e) => { e.stopPropagation(); selected = n.id; onSelect(n); draw(); if (!readOnly) el.focus(); });
       box.addEventListener('keydown', (e) => { if (e.key === 'Enter') { selected = n.id; onSelect(n); draw(); } });
       return box;
     }));
@@ -140,15 +142,21 @@ function createCanvas({ graph, readOnly = false, onSelect = () => {}, onChange =
     window.addEventListener('pointerup', up);
   });
   el.addEventListener('wheel', (e) => { e.preventDefault(); const r = el.getBoundingClientRect(); zoomBy(e.deltaY < 0 ? 1.1 : 1 / 1.1, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+  /** Remove the selected step (with its connections) or connection. The Delete key and the inspector's button both come here. */
+  function removeSelected() {
+    if (readOnly || !selected) return;
+    if (selected.startsWith('e:')) { const [from, to] = selected.slice(2).split('>'); graph.edges = graph.edges.filter((x) => !(x.from === from && x.to === to)); } else {
+      graph.nodes = graph.nodes.filter((x) => x.id !== selected);
+      graph.edges = graph.edges.filter((x) => x.from !== selected && x.to !== selected);
+    }
+    selected = null; onSelect(null); onChange(); draw();
+  }
   if (!readOnly) {
+    // The key only reaches here while the canvas has focus, which clicking into the inspector
+    // takes away: that is why the inspector has a button for the same thing.
     el.addEventListener('keydown', (e) => {
       if (!['Delete', 'Backspace'].includes(e.key) || !selected || e.target.matches('input,textarea,select')) return;
-      if (selected.startsWith('e:')) { const [from, to] = selected.slice(2).split('>'); graph.edges = graph.edges.filter((x) => !(x.from === from && x.to === to)); } else {
-        graph.nodes = graph.nodes.filter((x) => x.id !== selected);
-        graph.edges = graph.edges.filter((x) => x.from !== selected && x.to !== selected);
-        onSelect(null);
-      }
-      selected = null; onChange(); draw();
+      removeSelected();
     });
     el.addEventListener('dragover', (e) => e.preventDefault());
     el.addEventListener('drop', (e) => { e.preventDefault(); const type = e.dataTransfer.getData('text/crew-node'); if (type) addNode(type, toWorld(e)); });
@@ -163,7 +171,7 @@ function createCanvas({ graph, readOnly = false, onSelect = () => {}, onChange =
   }
   apply(); draw();
   const replace = (g) => { graph = g; selected = null; draw(); fitAll(); };
-  return { el, draw, addNode, fitAll, replace, get graph() { return graph; } };
+  return { el, draw, addNode, removeSelected, fitAll, replace, get graph() { return graph; } };
 }
 
 /** Everything the Orchestrator keeps between visits. */
@@ -214,7 +222,7 @@ export function createOrchestrator(ctx) {
     const saveBtn = h('button.btn.primary', { onclick: save }, 'Save');
     const name = h('input.cr-title-input', { value: current.name, 'aria-label': 'Playbook name', oninput: () => { current.name = name.value; markDirty(); } });
     const markDirty = () => { dirty = true; saveBtn.textContent = 'Save*'; };
-    const canvas = createCanvas({ graph: current.graph, onChange: markDirty, onSelect: (n) => drawInspector(inspector, n, canvas, markDirty) });
+    const canvas = createCanvas({ graph: current.graph, onChange: markDirty, onSelect: (n, how) => drawInspector(inspector, n, canvas, markDirty, how) });
     async function save() {
       try {
         const { playbook } = await api('PUT', `${R}/playbooks/${current.id}`, { name: current.name, graph: canvas.graph, policy: current.policy });
@@ -237,13 +245,18 @@ export function createOrchestrator(ctx) {
     try { await api('DELETE', `${R}/playbooks/${current.id}`); current = null; dirty = false; await load(); drawEditor(); } catch (e) { toast(e.message, 6000); }
   }
 
-  function drawInspector(box, n, canvas, markDirty) {
+  function drawInspector(box, n, canvas, markDirty, how = {}) {
+    if (!n && how.edge) {
+      box.replaceChildren(h('h3', 'Connection'), h('p.hint', 'The step it leads to waits for the one it comes from.'),
+        h('button.btn.small.danger', { onclick: () => canvas.removeSelected() }, 'Remove connection'));
+      return;
+    }
     if (!n) {
       const budget = h('input', { type: 'number', min: 1, max: 100, value: current.policy.taskBudgetPct ?? '', placeholder: 'none', style: { width: '80px' }, onchange: () => { current.policy.taskBudgetPct = budget.value === '' ? null : Number(budget.value); markDirty(); } });
       box.replaceChildren(h('h3', 'Rules for this playbook'),
         ...POLICY.map(([k, label, hint]) => { const c = h('input', { type: 'checkbox', checked: Boolean(current.policy[k]), onchange: () => { current.policy[k] = c.checked; markDirty(); } }); return h('label.cr-check', c, h('span', label, hint ? h('span.hint', ` ${hint}`) : null)); }),
         h('div.cr-field', h('label', 'Per-task usage share'), h('div.row', budget, h('span.hint', '% of your own estimate')), h('p.hint', 'Only applies if you set a capacity on your worker. It is an estimate, not a hard limit from the provider.')),
-        h('p.hint', 'Drag from a node’s right edge to another node to connect them. Steps with no connection between them run at the same time. Select something and press Delete to remove it.'));
+        h('p.hint', 'Drag from a node’s right edge to another node to connect them. Steps with no connection between them run at the same time. Select a step or connection to remove it, with its button or the Delete key.'));
       return;
     }
     const def = NODE[n.type];
@@ -268,6 +281,7 @@ export function createOrchestrator(ctx) {
       const when = h('select', { onchange: () => set('when', when.value) }, h('option', { value: 'all_succeeded', selected: n.config.when !== 'any_failed' }, 'Continue if everything before succeeded'), h('option', { value: 'any_failed', selected: n.config.when === 'any_failed' }, 'Continue only if something before failed'));
       parts.push(h('div.cr-field', h('label', 'When'), when));
     }
+    parts.push(h('div.actions', h('button.btn.small.danger', { onclick: () => canvas.removeSelected() }, 'Remove step')));
     box.replaceChildren(...parts);
   }
 
@@ -322,7 +336,7 @@ export function createOrchestrator(ctx) {
           'Drag from a step’s right edge to another step: the second waits for the first.',
           'Steps with no connection between them run at the same time. That is how you get parallel work.',
           'Connect a Worker to a Task to give it that task. With none connected, you can name a role and the best agent for it is picked.',
-          'Select anything and press Delete to remove it. Scroll to zoom, drag the background to move.',
+          'Select a step or connection and press Remove, or the Delete key, to take it out. Scroll to zoom, drag the background to move.',
         ] },
         { title: 'Choose who does it', spot: here('.cr-inspector'), away: 'Open a playbook to see this panel.', lines: [
           'Click a step and this panel shows its settings: which agent, or what to do.',
