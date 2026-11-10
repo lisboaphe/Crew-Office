@@ -183,6 +183,13 @@ however far the files have drifted.</strong></p>
 <code>bin/aop-plugin-hook.sh</code>, <code>bin/mappers/</code>, <code>.claude-plugin/</code> or <code>.codex-plugin/</code> has to bump
 the shared version in both plugin manifests <em>and</em> <code>package.json</code>.
 <code>connect:claude:status</code> is the check that tells you which update command you need.</p>
+<p><code>connect:claude</code> installs the <strong>packed</strong> plugin, <code>plugins/claude/roving-office-&lt;version&gt;.zip</code>,
+unpacked into <code>~/.roving-office/claude-plugin</code> — never the checkout, whose <code>.worktrees/</code>
+junctions break the copy on Windows. So after an edit, <code>npm run pack:plugins</code> comes before
+the install; the installer says so if you forget. On Windows it finds the CLI with
+<code>where claude</code> and runs the <code>claude.cmd</code> npm installs through <code>cmd.exe</code>; elsewhere it is
+<code>command -v claude</code>, as before. <code>--status</code> skips the GUI-session check on Windows, where
+there is no launchd. See <a href="../plugin-distribution.html">publishing the plugins</a>.</p>
 <p>This is why the <strong>settings</strong> route exists. It points at the checkout rather than a copy, so
 a mapper edit applies to the very next tool call — which is what you want while you are
 actually working on one. <code>--project</code> scopes it to one repo by writing

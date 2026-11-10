@@ -42,6 +42,8 @@ const {
 } = require('./lib/local-config.cjs');
 const { readJson } = require('./lib/aop-core.cjs');
 const { flags } = require('./lib/cli-flags.cjs');
+const { unzip } = require('./lib/zip.cjs');
+const { archiveName } = require('./aop-plugin-pack.cjs');
 
 const HARNESS = 'claude-code';
 const MARKER = 'aop-send.cjs';
@@ -103,20 +105,63 @@ function loadSettings(file) {
 
 // --- the plugin route ------------------------------------------------------
 
-// `command -v` is a shell builtin, so it has to be the script `sh` runs — not the
-// file it execs. Passing it as `execFileSync('command', ['-v', 'claude'], {shell})`
-// makes Node hand `-v` and `claude` to `sh -c` as *positional parameters*, so the
-// shell runs a bare `command`, prints nothing and exits 0 — indistinguishable from
-// "not installed". That silently disabled the whole plugin route on every machine.
-function claudeCli() {
+// Where the plugin is staged before `claude plugin install` copies it. See
+// stageMarketplace() for why the checkout itself is never the marketplace.
+const STAGE_DIR = path.join(os.homedir(), '.roving-office', 'claude-plugin');
+
+/**
+ * The `claude` executable, as an absolute path, or null.
+ *
+ * POSIX: `command -v` is a shell builtin, so it has to be the script `sh` runs — not
+ * the file it execs. Passing it as `execFileSync('command', ['-v', 'claude'], {shell})`
+ * makes Node hand `-v` and `claude` to `sh -c` as *positional parameters*, so the
+ * shell runs a bare `command`, prints nothing and exits 0 — indistinguishable from
+ * "not installed". That silently disabled the whole plugin route on every machine.
+ *
+ * Windows has no `/bin/sh`, and an npm install of Claude Code is `claude.cmd` beside
+ * an extensionless `claude` that is a shell script for Git Bash. `where` lists both,
+ * extensionless first, and only the one with a PATHEXT extension is something
+ * Windows can start — so that is the one taken.
+ */
+function claudeCli({ platform = process.platform, exec = execFileSync } = {}) {
   try {
-    return execFileSync('/bin/sh', ['-c', 'command -v claude'], { encoding: 'utf8' }).trim() || null;
+    if (platform === 'win32') {
+      const found = exec('where.exe', ['claude'], {
+        encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+      }).split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      return found.find((file) => /\.(exe|cmd|bat|com)$/i.test(file)) ?? null;
+    }
+    return exec('/bin/sh', ['-c', 'command -v claude'], { encoding: 'utf8' }).trim() || null;
   } catch { return null; }
 }
 
+/** Quote one argument for cmd.exe. Windows paths cannot contain `"`, so wrapping is enough. */
+function cmdQuote(value) {
+  return /^[A-Za-z0-9_./:@\\=-]+$/.test(value) ? value : `"${value}"`;
+}
+
+/**
+ * How to start `cli` with `args`: a file and an argv for execFileSync.
+ *
+ * A `.cmd` or `.bat` is a cmd.exe script, and Node refuses to exec one without a
+ * shell (EINVAL, since the fix for CVE-2024-27980). Handing `shell: true` the args
+ * would join them unquoted, and the staged marketplace lives under the home folder,
+ * which is allowed a space. So the command line is built here, quoted, and passed
+ * verbatim to `cmd /d /s /c "…"` — `/s` strips exactly the outer pair of quotes.
+ */
+function claudeInvocation(cli, args, { comspec = process.env.ComSpec || 'cmd.exe' } = {}) {
+  if (!/\.(cmd|bat)$/i.test(cli)) return { file: cli, args, options: {} };
+  const line = [cli, ...args].map(cmdQuote).join(' ');
+  return { file: comspec, args: ['/d', '/s', '/c', `"${line}"`], options: { windowsVerbatimArguments: true } };
+}
+
+let CLI = null;
+
 function claude(args) {
+  CLI ??= claudeCli() ?? 'claude';
+  const { file, args: argv, options } = claudeInvocation(CLI, args);
   try {
-    const out = execFileSync('claude', args, { cwd: REPO, encoding: 'utf8', timeout: 60000 });
+    const out = execFileSync(file, argv, { cwd: REPO, encoding: 'utf8', timeout: 60000, ...options });
     return { ok: true, out: out.trim() };
   } catch (err) {
     return { ok: false, out: `${err.stdout ?? ''}${err.stderr ?? ''}`.trim() || err.message };
@@ -188,22 +233,117 @@ function snapshotStale(state) {
   });
 }
 
+/** The packaged plugin `npm run pack:plugins` committed for this checkout's version. */
+function packagedArchive(version = manifestVersion()) {
+  return path.join(REPO, 'plugins', 'claude', archiveName(version));
+}
+
+/**
+ * Lay out a local marketplace holding the packaged plugin, and return its root.
+ *
+ *   <target>/.claude-plugin/marketplace.json   "source": "./plugin"
+ *   <target>/plugin/                           the archive, unpacked
+ *
+ * The checkout is never the marketplace, because `claude plugin install` copies the
+ * plugin's *whole directory* — and a checkout's directory holds every linked
+ * worktree under `.worktrees/`, each with its `node_modules` link. On Windows those
+ * are junctions, the copy tries to recreate them as symlinks, and the install dies on
+ * EPERM; everywhere else it merely copies a tree that has nothing to do with the
+ * plugin. The archive is the opposite: a listed set of files, byte-identical to the
+ * checkout (`npm test` holds it to that), and exactly what a stranger installs from
+ * the site. The Codex installer stages for its own version of the same reason.
+ *
+ * Derived from `.claude-plugin/marketplace.json`, as the published one is, so the
+ * name, description and owner cannot drift between the three.
+ */
+function stageMarketplace({ archive = packagedArchive(), target = STAGE_DIR, version = manifestVersion() } = {}) {
+  const source = readJson(path.join(REPO, '.claude-plugin', 'marketplace.json'), null);
+  const entry = source?.plugins?.[0];
+  if (!entry) throw new Error('.claude-plugin/marketplace.json lists no plugins');
+
+  const pluginDir = path.join(target, 'plugin');
+  const entries = unzip(fs.readFileSync(archive));
+  fs.rmSync(pluginDir, { recursive: true, force: true });
+  for (const member of entries) {
+    const at = path.resolve(pluginDir, member.path);
+    if (!at.startsWith(path.resolve(pluginDir) + path.sep)) {
+      throw new Error(`the archive escapes its target: ${member.path}`);
+    }
+    fs.mkdirSync(path.dirname(at), { recursive: true });
+    fs.writeFileSync(at, member.data);
+    if (process.platform !== 'win32') fs.chmodSync(at, member.mode || 0o644);
+  }
+
+  const marketplace = {
+    ...source,
+    plugins: [{ name: entry.name, description: entry.description, version, source: './plugin' }],
+  };
+  fs.mkdirSync(path.join(target, '.claude-plugin'), { recursive: true });
+  fs.writeFileSync(path.join(target, '.claude-plugin', 'marketplace.json'), `${JSON.stringify(marketplace, null, 2)}\n`);
+  return target;
+}
+
+/** Checkout files the staged plugin disagrees with: an archive older than the edits. */
+function stagedDrift(target = STAGE_DIR) {
+  return SNAPSHOT_FILES.filter((rel) => {
+    try {
+      return fs.readFileSync(path.join(REPO, rel), 'utf8')
+        !== fs.readFileSync(path.join(target, 'plugin', rel), 'utf8');
+    } catch { return true; }
+  });
+}
+
+function samePath(a, b) {
+  if (!a || !b) return false;
+  const norm = (p) => path.resolve(p).replace(/[\\/]+$/, '');
+  return process.platform === 'win32'
+    ? norm(a).toLowerCase() === norm(b).toLowerCase()
+    : norm(a) === norm(b);
+}
+
 function installPlugin({ dryRun }) {
-  console.log('Route: plugin (a snapshot of this checkout, copied into ~/.claude/plugins/cache)');
-  console.log(`  marketplace  add ${REPO}`);
+  const archive = packagedArchive();
+  console.log('Route: plugin (the packaged plugin, copied into ~/.claude/plugins/cache)');
+  console.log(`  stage        ${path.relative(REPO, archive)} → ${STAGE_DIR}`);
+  console.log(`  marketplace  add ${STAGE_DIR}`);
   console.log(`  plugin       install ${PLUGIN_ID}`);
   if (dryRun) { console.log('\n(dry run: nothing written)'); return true; }
 
-  if (!claudeCli()) {
+  CLI = claudeCli();
+  if (!CLI) {
     console.error('\nThe `claude` command is not on PATH, so the plugin route cannot run.');
     console.error('Either install Claude Code first, or use the live route instead:');
     console.error('  npm run connect:claude:settings');
     return false;
   }
 
+  if (!fs.existsSync(archive)) {
+    console.error(`\nNo packaged plugin for v${manifestVersion()}: ${path.relative(REPO, archive)} is missing.`);
+    console.error('Build it first:  npm run pack:plugins');
+    return false;
+  }
+  try { stageMarketplace({ archive }); } catch (err) {
+    console.error(`\nCould not stage the plugin in ${STAGE_DIR}:\n${err.message}`);
+    return false;
+  }
+  const drift = stagedDrift();
+  if (drift.length) {
+    console.log('\n⚠ the packaged plugin is older than this checkout, so the install will not');
+    console.log(`  carry your edits to ${drift.join(', ')}.`);
+    console.log('  Rebuild it with  npm run pack:plugins  and run this again.');
+  }
+
+  // A marketplace of the same name added from somewhere else — the checkout, as
+  // this script used to — is not replaced by `add`, so it goes first.
+  const known = pluginState().marketplacePath;
+  if (known && !samePath(known, STAGE_DIR)) {
+    const removed = claude(['plugin', 'marketplace', 'remove', PLUGIN]);
+    if (removed.ok) console.log(`\nReplaced the ${PLUGIN} marketplace at ${known}`);
+  }
+
   // `marketplace add` is idempotent, and `update` is what picks up a manifest
   // that changed since it was added.
-  const added = claude(['plugin', 'marketplace', 'add', './']);
+  const added = claude(['plugin', 'marketplace', 'add', STAGE_DIR]);
   if (!added.ok) { console.error(`\nmarketplace add failed:\n${added.out}`); return false; }
   console.log(`\n${added.out}`);
   const updated = claude(['plugin', 'marketplace', 'update', PLUGIN]);
@@ -231,6 +371,10 @@ function uninstallPlugin({ dryRun }) {
   console.log(`  ${out.out.split('\n').pop()}`);
   const market = claude(['plugin', 'marketplace', 'remove', PLUGIN]);
   if (market.ok) console.log(`  ${market.out.split('\n').pop()}`);
+  // The staged marketplace is ours alone, and with the marketplace gone nothing reads it.
+  if (out.ok && market.ok && samePath(state.marketplacePath, STAGE_DIR)) {
+    fs.rmSync(STAGE_DIR, { recursive: true, force: true });
+  }
   return out.ok;
 }
 
@@ -433,9 +577,14 @@ function reportStatus(settingsPath) {
 
   // Terminal sessions almost always work, so a status that only proves the
   // terminal case proves the easy half. This is the half that broke.
-  const node = guiNode();
+  // launchd and the PATH it hands out are macOS's, and the launcher is a shell script
+  // Windows cannot exec directly — so not checked there, rather than a warning that
+  // would be wrong.
+  const node = process.platform === 'win32' ? undefined : guiNode();
   console.log('\nGUI sessions (Claude Desktop / Cowork)');
-  if (node) {
+  if (node === undefined) {
+    console.log('  not checked on Windows');
+  } else if (node) {
     console.log(`  node ${node}`);
   } else {
     console.log('  ⚠ no node is reachable from launchd\'s PATH, so Cowork sessions will');
@@ -579,4 +728,9 @@ function main() {
   console.log('office to see it. Then run the office:  npm start');
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = {
+  claudeCli, claudeInvocation, cmdQuote, packagedArchive, stageMarketplace, stagedDrift, samePath,
+  SNAPSHOT_FILES, STAGE_DIR,
+};

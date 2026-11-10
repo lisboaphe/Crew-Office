@@ -168,10 +168,19 @@
 <p><em>How the Claude Code and Codex plugins reach somebody who has never cloned this
 repository — and what is still missing before they do.</em></p>
 <p>Every route in <a href="protocol/aop-harness-adapters.html">Adapter notes</a> installs out of a
-checkout. <code>npm run connect:claude</code> adds <code>./</code> as a Claude marketplace;
-<code>npm run connect:codex</code> stages a copy of the checkout and adds <em>that</em>. Both are right
-while you are editing a mapper, and neither is any use to a person who has an office URL
-and nothing else.</p>
+checkout. <code>npm run connect:claude</code> unpacks the committed archive described below into
+<code>~/.roving-office/claude-plugin</code> and adds <em>that</em> as a Claude marketplace;
+<code>npm run connect:codex</code> stages a copy of the checkout and adds <em>that</em>. Neither is any
+use to a person who has an office URL and nothing else.</p>
+<p>Neither adds the checkout itself, and for Claude that is a measured failure rather than
+taste. <code>claude plugin install</code> copies the plugin's whole directory, and a checkout's
+directory holds every linked worktree under <code>.worktrees/</code> with its <code>node_modules</code> link.
+On Windows those links are junctions, the copy tries to recreate them as symlinks, and the
+install dies on <code>EPERM: operation not permitted, symlink</code>. The staged copy is the archive's
+listed files and nothing else, with a marketplace JSON beside it saying
+<code>&quot;source&quot;: &quot;./plugin&quot;</code>. Because it is the archive, <code>connect:claude</code> installs what was last
+<strong>packed</strong>, not what is in your editor: run <code>npm run pack:plugins</code> first after editing a
+mapper, and the installer warns, naming the files, when the two disagree.</p>
 <p><code>npm run pack:plugins</code> builds what that person installs. It is <code>bin/aop-plugin-pack.cjs</code>,
 and it deliberately follows the shape of
 <a href="adapters/openclaw.html"><code>bin/aop-openclaw-pack.cjs</code></a>: an explicit staging

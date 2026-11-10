@@ -24,6 +24,14 @@ So any change under `hooks/`, `bin/aop-send.cjs`, `bin/aop-node.sh`,
 the shared version in both plugin manifests *and* `package.json`.
 `connect:claude:status` is the check that tells you which update command you need.
 
+`connect:claude` installs the **packed** plugin, `plugins/claude/roving-office-<version>.zip`,
+unpacked into `~/.roving-office/claude-plugin` — never the checkout, whose `.worktrees/`
+junctions break the copy on Windows. So after an edit, `npm run pack:plugins` comes before
+the install; the installer says so if you forget. On Windows it finds the CLI with
+`where claude` and runs the `claude.cmd` npm installs through `cmd.exe`; elsewhere it is
+`command -v claude`, as before. `--status` skips the GUI-session check on Windows, where
+there is no launchd. See [publishing the plugins](../plugin-distribution.md).
+
 This is why the **settings** route exists. It points at the checkout rather than a copy, so
 a mapper edit applies to the very next tool call — which is what you want while you are
 actually working on one. `--project` scopes it to one repo by writing

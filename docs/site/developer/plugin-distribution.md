@@ -4,10 +4,20 @@
 repository — and what is still missing before they do.*
 
 Every route in [Adapter notes](protocol/aop-harness-adapters.md) installs out of a
-checkout. `npm run connect:claude` adds `./` as a Claude marketplace;
-`npm run connect:codex` stages a copy of the checkout and adds *that*. Both are right
-while you are editing a mapper, and neither is any use to a person who has an office URL
-and nothing else.
+checkout. `npm run connect:claude` unpacks the committed archive described below into
+`~/.roving-office/claude-plugin` and adds *that* as a Claude marketplace;
+`npm run connect:codex` stages a copy of the checkout and adds *that*. Neither is any
+use to a person who has an office URL and nothing else.
+
+Neither adds the checkout itself, and for Claude that is a measured failure rather than
+taste. `claude plugin install` copies the plugin's whole directory, and a checkout's
+directory holds every linked worktree under `.worktrees/` with its `node_modules` link.
+On Windows those links are junctions, the copy tries to recreate them as symlinks, and the
+install dies on `EPERM: operation not permitted, symlink`. The staged copy is the archive's
+listed files and nothing else, with a marketplace JSON beside it saying
+`"source": "./plugin"`. Because it is the archive, `connect:claude` installs what was last
+**packed**, not what is in your editor: run `npm run pack:plugins` first after editing a
+mapper, and the installer warns, naming the files, when the two disagree.
 
 `npm run pack:plugins` builds what that person installs. It is `bin/aop-plugin-pack.cjs`,
 and it deliberately follows the shape of

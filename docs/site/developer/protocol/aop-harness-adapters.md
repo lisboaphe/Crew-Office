@@ -248,7 +248,7 @@ So there are three install routes, and they are not redundant:
 | Route | Command | Trade |
 | --- | --- | --- |
 | marketplace | `/plugin marketplace add https://therovingoffice.com/plugins/claude/marketplace.json` | Needs no checkout, no Git and no npm — a zip pinned to its SHA-256. But a snapshot, and third-party marketplaces have auto-update off by default |
-| plugin | `npm run connect:claude` | One command, path-independent — but a snapshot, and it only exists on machines with a checkout |
+| plugin | `npm run connect:claude` | One command, path-independent — but a snapshot of the *packed* archive, staged in `~/.roving-office/claude-plugin`, and it only exists on machines with a checkout |
 | settings | `npm run connect:claude:settings` | Live: an edited mapper applies to the next tool call — but the absolute path is stored verbatim, so moving the checkout breaks it |
 
 `--project` writes `.claude/settings.local.json` rather than `settings.json`: the command holds an absolute path to one machine's checkout, which is precisely what must not be committed for a teammate to inherit.
