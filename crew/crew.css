@@ -780,3 +780,7 @@ body.cr-lobby { margin: 0; min-height: 100vh; background-attachment: fixed; back
 .cr-shot-full { display: block; max-width: 100%; max-height: 72vh; margin: 0 auto; border-radius: var(--cr-radius-inner); }
 .cr-shots-how { margin-top: 16px; }
 .cr-shots-how code { overflow-wrap: anywhere; }
+
+/* The "Full report" link on a chat message about a task. */
+.cr-linkish { background: none; border: 0; padding: 0; font: inherit; font-size: 0.85em; color: inherit; opacity: 0.75; text-decoration: underline; cursor: pointer; }
+.cr-linkish:hover { opacity: 1; }
