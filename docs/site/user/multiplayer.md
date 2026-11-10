@@ -450,6 +450,10 @@ The first time you open it, a guided tour points at each real control while you 
 - **Approval** waits for you, or passes by itself if the playbook has approvals off.
 - **Merge** checks that the work really merged. **Completion** marks the end of a path.
 
+To take a step out, select it and press **Remove step** in the panel beside the canvas, or the
+Delete key. Removing a step removes its connections too; to remove only a connection, click the
+line and press **Remove connection**. Nothing is gone for good until you press **Save**.
+
 Drag from a node's right edge to connect it. Steps with no connection between them run at the
 same time. Press **Run**, give it a goal, and watch it under **Runs**: every step is a real task,
 so clicking one opens its real logs and files, and clicking an agent opens its editor.
