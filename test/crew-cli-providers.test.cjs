@@ -9,7 +9,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { claudeCliAdapter, codexCliAdapter, parseReply } = require('../lib/crew-worker/cli-providers.cjs');
+const { claudeCliAdapter, codexCliAdapter, parseReply, endClaudeSession } = require('../lib/crew-worker/cli-providers.cjs');
 
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'crew-fakecli-'));
 
@@ -49,11 +49,57 @@ function main(prompt) {
   assert.deepStrictEqual(argv.slice(7), ['--model', 'sonnet']);
   assert.strictEqual(r1.toolCalls[0].name, 'read_file');
   assert.deepStrictEqual(r1.toolCalls[0].input, { path: 'a.txt' });
-  assert.deepStrictEqual(r1.usage, { in: 120, out: 30 });
+  assert.deepStrictEqual(r1.usage, { in: 120, out: 30, cached: 0 });
   transcript.push({ role: 'assistant', text: r1.text, toolCalls: r1.toolCalls }, { role: 'tool', results: [{ id: r1.toolCalls[0].id, name: 'read_file', content: '{"content":"hi"}' }] });
   const r2 = await ad.complete({ system: 'You are Ada.', transcript, tools: ['read_file'], model: 'default' });
   assert.strictEqual(r2.toolCalls.length, 0);
   assert.strictEqual(r2.text, 'All finished.');
+});
+
+test('Claude Code adapter: a job resumes its session and sends only what is new', async () => {
+  const calls = path.join(dir, 'CALLS');
+  fs.writeFileSync(calls, '');
+  // Remembers the sessions it started, like the real CLI, and can be told to forget them.
+  process.env.CREW_CLAUDE_CLI = fake('claude-session', `${COMMON}
+function main(prompt) {
+  const argv = process.argv.slice(2);
+  const known = ${JSON.stringify(path.join(dir, 'SESSIONS'))};
+  const ids = fs.existsSync(known) ? fs.readFileSync(known, 'utf8').split('\\n') : [];
+  fs.appendFileSync(${JSON.stringify(calls)}, JSON.stringify({ argv, prompt }) + '\\n');
+  const r = argv.indexOf('--resume');
+  if (r >= 0 && !ids.includes(argv[r + 1])) { console.log(JSON.stringify({ type: 'result', is_error: true, result: 'No conversation found with session ID' })); process.exit(1); }
+  const s = argv.indexOf('--session-id');
+  if (s >= 0) fs.appendFileSync(known, argv[s + 1] + '\\n');
+  const reply = prompt.includes('### Tool results') ? { say: 'Done.', tool_calls: [] } : { say: '', tool_calls: [{ name: 'read_file', input: { path: 'a.txt' } }] };
+  console.log(JSON.stringify({ type: 'result', is_error: false, result: JSON.stringify(reply), usage: { input_tokens: 10, cache_read_input_tokens: 90, output_tokens: 5 } }));
+}`);
+  const read = () => fs.readFileSync(calls, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+  const ad = claudeCliAdapter();
+  const transcript = [{ role: 'user', text: 'Do the task' }];
+  const r1 = await ad.complete({ system: 'You are Ada.', transcript, tools: ['read_file'], model: 'default', session: 'job-1' });
+  const [first] = read();
+  const id = first.argv[first.argv.indexOf('--session-id') + 1];
+  assert.match(id, /^[0-9a-f-]{36}$/, 'the first step names a new session');
+  assert.ok(first.prompt.includes('You are Ada.'), 'the first step sends the brief');
+  assert.deepStrictEqual(r1.usage, { in: 100, out: 5, cached: 90 }, 'cache reads are counted, and said separately');
+
+  transcript.push({ role: 'assistant', text: r1.text, toolCalls: r1.toolCalls }, { role: 'tool', results: [{ id: 'x', name: 'read_file', content: 'NEW RESULT' }] });
+  const r2 = await ad.complete({ system: 'You are Ada.', transcript, tools: ['read_file'], model: 'default', session: 'job-1' });
+  const second = read()[1];
+  assert.strictEqual(second.argv[second.argv.indexOf('--resume') + 1], id, 'the next step resumes the same session');
+  assert.ok(!second.prompt.includes('You are Ada.') && !second.prompt.includes('Do the task'), 'nothing already sent goes again');
+  assert.ok(second.prompt.includes('NEW RESULT'));
+  assert.strictEqual(r2.text, 'Done.');
+
+  // The CLI has lost the session: the step is sent whole in a fresh one rather than failing.
+  fs.writeFileSync(path.join(dir, 'SESSIONS'), '');
+  transcript.push({ role: 'assistant', text: r2.text, toolCalls: [] }, { role: 'user', text: 'One more thing' }, { role: 'tool', results: [{ id: 'y', name: 'read_file', content: 'LATER' }] });
+  const r3 = await ad.complete({ system: 'You are Ada.', transcript, tools: ['read_file'], model: 'default', session: 'job-1' });
+  const [, , lost, retry] = read();
+  assert.ok(lost.argv.includes('--resume'));
+  assert.ok(retry.argv.includes('--session-id') && retry.prompt.includes('You are Ada.') && retry.prompt.includes('LATER'), 'falls back to sending everything');
+  assert.strictEqual(r3.text, 'Done.');
+  endClaudeSession('job-1');
 });
 
 test('Claude Code adapter: a signed-out CLI says how to sign in', async () => {

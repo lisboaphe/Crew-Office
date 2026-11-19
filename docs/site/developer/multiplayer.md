@@ -298,7 +298,13 @@ reconnection, the sandbox and crash logs.
 
 `claude-cli` and `codex-cli` run the owner's own Claude Code (`claude -p --output-format json
 --tools "" --strict-mcp-config`) or Codex (`codex exec --json --sandbox read-only` in an empty
-temp folder) once per turn, statelessly, with the transcript on stdin. Built-in tools are off
+temp folder) once per turn, with the prompt on stdin. Codex is run statelessly and gets the whole
+transcript each turn. Claude Code keeps a session per job: the first turn starts one with
+`--session-id` in a folder kept for the job, and later turns `--resume` it and send only the
+transcript entries since its last reply, so the history comes from the prompt cache instead of
+being paid for again. A session it cannot resume is replaced by a fresh one sent everything,
+and a session ends with its job, so a resumed checkpoint starts fresh. The job log's usage lines
+say how much input was cached. Built-in tools are off
 (Claude Code) or have nothing to act on (Codex); the office's tools are described in the
 prompt and the model answers with one JSON object of tool calls, which the runner executes
 like any provider's. Cost is reported as $0 (the plan's limits apply). `CREW_CLAUDE_CLI` /
