@@ -1,5 +1,15 @@
 # Changelog
 
+## Watch what an agent sees
+
+### Added
+
+- **The newest screenshot, live in the office.** While an agent works, its latest screenshot shows in a small card in the corner of the office and in its panel, with its name and when it was taken. Click it for full size. It is hidden when there is nothing recent, and only the owner of the computer hosting the office sees it.
+
+### Changed
+
+- **A task's screenshots are deleted when it ends**, so they no longer pile up. The ones marked Keep on Projects → Screenshots stay, and a worker that stopped mid-task clears what that task left when it starts again. Screenshots taken outside a task are left alone.
+
 ## Shorter task prompts
 
 ### Changed
