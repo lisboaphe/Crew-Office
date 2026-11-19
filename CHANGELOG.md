@@ -1,5 +1,11 @@
 # Changelog
 
+## Shorter task prompts
+
+### Changed
+
+- **A task no longer carries the whole project.** It lists up to 40 files, with the ones it must make or build on first, and says how many more there are. Results of earlier work it depends on are cut at 1,500 characters, and shared notes at 300, each saying how to read the rest.
+
 ## Agents cost fewer tokens
 
 ### Changed
