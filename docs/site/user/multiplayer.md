@@ -258,6 +258,15 @@ in a folder named after the zip, where every agent on the project can read it. I
 other binary files stay in the zip, and **UNPACKED.md** in that folder lists them. A zip uploaded
 before this, or one you want unpacked afresh, has **Unpack for the agents** beside it.
 
+A **Word document (.docx)** works the same way: its text is copied beside it as a Markdown file of
+the same name, so `Rules.docx` gives `Rules.md`, with headings, lists and tables kept. Pictures
+and formatting are left out, so describe in words anything a picture shows. An old **.doc** has to
+be saved as .docx in Word first. A Word file uploaded before this has **Copy text for the agents**
+beside it.
+
+Agents that are not Autonomous cannot reach folders on your computer, so a path such as
+`C:Users…` in a task does not show them anything there. Upload the file instead.
+
 ### Where project files go
 
 Each project's files on your computer are in a folder of its own, made the first time one of your

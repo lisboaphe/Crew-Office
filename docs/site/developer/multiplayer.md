@@ -132,6 +132,12 @@ whose path leaves the archive, and any that inflates past the size it declares. 
 NUL bytes, up to the 256 KB file limit, is written as project files under `<upload without .zip>/`,
 dropping a single top folder such as GitHub's `<repo>-main/`; the rest is listed in `UNPACKED.md`.
 
+A `.docx` goes the same way, through `crew.work.docxText`: `docxToMarkdown` in
+`lib/crew/docx.cjs` reads `word/document.xml` with `readZip` and writes headings (by style ID,
+including localised ones such as `Ttulo1`), numbered and bulleted items, tables, tabs and breaks
+as Markdown, to `<upload without .docx>.md`, cut at the 256 KB file limit. The finalize response's
+`unpacked` is then `{ file, chars, cut }` instead of `{ folder, unpacked, left }`.
+
 ## Autonomous agents
 
 A limited agent thinks through a model and acts only through the office's tools. An autonomous one
