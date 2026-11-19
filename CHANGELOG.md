@@ -6,6 +6,7 @@
 
 - **Agents answer tersely.** Every agent is told to skip greetings, filler and restating the task. Code and files stay complete.
 - **No more presets.** Adding an agent no longer starts with picking a role: you choose its AI, then tell it who it is in its first prompt, such as *You are the lead developer*. Its team role (worker, lead, reviewer or tester) is a separate choice on the same page.
+- **Claude Code agents stop re-sending the whole task every step.** A task keeps one Claude Code conversation open and each step sends only what is new, so the rest comes from the prompt cache. A task's log shows how much input was cached.
 
 ## See what the agents see
 

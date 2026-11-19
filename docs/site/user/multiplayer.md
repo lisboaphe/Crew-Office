@@ -381,6 +381,10 @@ read are never touched. It is on by default, with a switch on the **Usage** page
 shows how many characters it has kept out. That is measured; what it saves in tokens or money
 depends on the provider and is not estimated.
 
+An agent on Claude Code also keeps one conversation open for the whole of a task, so each step
+sends only what is new rather than everything again. A task's log shows how much of each step's
+input was cached, which costs far less than sending it fresh.
+
 ### Usage
 
 **Usage** shows how much of an allowance is used only when the provider reported it: Codex,

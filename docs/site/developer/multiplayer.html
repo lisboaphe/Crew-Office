@@ -446,7 +446,13 @@ offline. Other <code>test/crew-*.test.cjs</code> files cover permissions, the bu
 reconnection, the sandbox and crash logs.</p>
 <h2 id="subscription-providers" tabindex="-1">Subscription providers</h2>
 <p><code>claude-cli</code> and <code>codex-cli</code> run the owner's own Claude Code (<code>claude -p --output-format json --tools &quot;&quot; --strict-mcp-config</code>) or Codex (<code>codex exec --json --sandbox read-only</code> in an empty
-temp folder) once per turn, statelessly, with the transcript on stdin. Built-in tools are off
+temp folder) once per turn, with the prompt on stdin. Codex is run statelessly and gets the whole
+transcript each turn. Claude Code keeps a session per job: the first turn starts one with
+<code>--session-id</code> in a folder kept for the job, and later turns <code>--resume</code> it and send only the
+transcript entries since its last reply, so the history comes from the prompt cache instead of
+being paid for again. A session it cannot resume is replaced by a fresh one sent everything,
+and a session ends with its job, so a resumed checkpoint starts fresh. The job log's usage lines
+say how much input was cached. Built-in tools are off
 (Claude Code) or have nothing to act on (Codex); the office's tools are described in the
 prompt and the model answers with one JSON object of tool calls, which the runner executes
 like any provider's. Cost is reported as $0 (the plan's limits apply). <code>CREW_CLAUDE_CLI</code> /
