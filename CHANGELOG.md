@@ -1,5 +1,12 @@
 # Changelog
 
+## Agents can read Word documents
+
+### Added
+
+- **An uploaded Word document (.docx) gets a text copy for the agents**, beside it with the same name and .md, keeping headings, lists and tables. Agents could not open Word files, so rules uploaded as one were invisible to them and their task failed. **Copy text for the agents** does it for a Word file already uploaded.
+- **Agents are told** that folders on people's computers are out of their reach, and to ask for an upload instead.
+
 ## Shorter task prompts
 
 ### Changed
