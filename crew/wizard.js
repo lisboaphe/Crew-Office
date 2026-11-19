@@ -1,4 +1,4 @@
-// Add Worker: Choose the worker → Choose the AI → Official sign-in → Configure → Start working.
+// Add Worker: Choose the AI → Official sign-in → Configure → Start working.
 //
 // A person's password never comes near this. Sign-in happens on the provider's own page or in
 // its own tool; this watches the worker on this computer for the answer. Someone on another
@@ -11,23 +11,17 @@ import { statusChip, STATUS, connectForm, verifyForm, modelPicker, GROUPS } from
 // Every agent starts able to do everything a player can switch on: files, delegating, running code,
 // the web and Git. Switching one off is the choice; having to find and switch each on was the chore.
 const ALL_TOOLS = ['messaging', 'files.read', 'files.write', 'memory', 'delegate', 'exec', 'web', 'git'];
-const PRESETS = [
-  { id: 'developer', name: 'Developer', role: 'Software Developer', skills: ['code', 'testing', 'git'], tools: ALL_TOOLS, blurb: 'Writes and changes code on its own branch.', instructions: 'Work in small, tested steps. Say plainly what you could not finish.' },
-  { id: 'reviewer', name: 'Code Reviewer', role: 'Code Reviewer', skills: ['review', 'security', 'quality'], tools: ALL_TOOLS, orchestrationRole: 'reviewer', blurb: 'Reads changes and approves them or asks for fixes.', instructions: 'Review the diff against the goal. Be specific about file and line, and say what is good as well as what is wrong.' },
-  { id: 'python', name: 'Python Developer', role: 'Python Developer', skills: ['python', 'testing', 'scripting'], tools: ALL_TOOLS, blurb: 'Writes Python scripts and tools.', instructions: 'Write clear Python with tests. Note any packages you need.' },
-  { id: 'researcher', name: 'Researcher', role: 'Researcher', skills: ['research', 'analysis', 'writing'], tools: ALL_TOOLS, blurb: 'Finds things out and writes them up with sources.', instructions: 'Cite where each finding came from, and say how sure you are.' },
-  { id: 'qa', name: 'QA Tester', role: 'QA Engineer', skills: ['testing', 'qa', 'bugs'], tools: ALL_TOOLS, orchestrationRole: 'tester', blurb: 'Writes and runs tests, and reports what really happened.', instructions: 'Report only results you observed, with the command and the output.' },
-  { id: 'pm', name: 'Project Manager', role: 'Project Manager', skills: ['planning', 'coordination'], tools: ALL_TOOLS, isManager: true, orchestrationRole: 'lead', blurb: 'Plans the work and hands it to the team.', instructions: 'Break the goal into small tasks, each with one clear owner and a way to check it is done.' },
-  { id: 'custom', name: 'Custom Agent', role: '', skills: [], tools: ALL_TOOLS, blurb: 'Start from nothing and set it up yourself.', instructions: '' },
-];
-const STEPS = ['Worker', 'AI', 'Setup', 'Configure', 'Finish'];
+// There are no presets. An agent is whatever its first prompt says it is: you create it and tell
+// it who it is. A menu of roles only ever pre-filled that box, and made it look like more than text.
+const FIRST_PROMPT_HINT = 'Tell them who they are and how to work. For example: You are the lead developer. Plan the work, keep changes small and tested, and say plainly what you could not finish.';
+const STEPS = ['AI', 'Setup', 'Configure', 'Finish'];
 const check = (checked, label) => { const c = h('input', { type: 'checkbox', checked }); const row = h('label.cr-check', c, h('span', label)); row.box = c; return row; };
 
 export function addWorkerWizard(ctx) {
   const { S, roomId, ownerOfComputer } = ctx;
   const R = `/api/crew/rooms/${roomId}`;
   const link = ctx.workerLink();
-  const state = { step: 0, preset: null, card: null, cards: null, neverPaid: true };
+  const state = { step: 0, card: null, cards: null, neverPaid: true };
 
   return modal('Add an agent', (close) => {
     const stepper = h('ol.cr-stepper');
@@ -37,16 +31,11 @@ export function addWorkerWizard(ctx) {
     const go = (n) => { state.step = n; render(); };
     function render() {
       stepper.replaceChildren(...STEPS.map((s, i) => h('li', { class: i === state.step ? 'on' : i < state.step ? 'done' : '' }, h('span', i + 1), s)));
-      page.replaceChildren(h('div.cr-fade', [choosePreset, chooseAi, setup, configure, finish][state.step]()));
+      page.replaceChildren(h('div.cr-fade', [chooseAi, setup, configure, finish][state.step]()));
     }
     const nav = (back, next) => h('div.actions', back ? h('button.btn', { onclick: () => go(state.step - 1) }, 'Back') : h('button.btn', { onclick: () => close() }, 'Cancel'), next);
 
-    // --- 1. which worker ------------------------------------------------------------------
-    function choosePreset() {
-      return h('div', h('h3', 'What should it do?'), h('div.cr-preset-grid', ...PRESETS.map((p) => h('button.cr-preset', { class: state.preset?.id === p.id ? 'on' : '', onclick: () => { state.preset = p; go(1); } }, h('b', p.name), h('span.hint', p.blurb)))), nav(false));
-    }
-
-    // --- 2. which AI ----------------------------------------------------------------------
+    // --- 1. which AI ----------------------------------------------------------------------
     /** Make sure a worker exists here. On the host's computer that takes no terminal. */
     async function ensureWorker() {
       try { await link.get('/status'); } catch {
@@ -70,14 +59,14 @@ export function addWorkerWizard(ctx) {
           const data = await link.get('/setup/connections');
           state.cards = data.cards;
           state.neverPaid = data.neverPaidApi;
-          const pick = (c) => h('button.cr-preset.cr-ai', { class: c.status === 'working' ? 'ready' : '', onclick: () => { state.card = c; go(2); } }, h('div.row', h('b.grow', c.name), statusChip(c)), h('span.hint', c.method));
+          const pick = (c) => h('button.cr-preset.cr-ai', { class: c.status === 'working' ? 'ready' : '', onclick: () => { state.card = c; go(1); } }, h('div.row', h('b.grow', c.name), statusChip(c)), h('span.hint', c.method));
           const group = (g) => data.cards.filter((c) => c.group === g).map(pick);
           box.replaceChildren(
             ...GROUPS.flatMap(([g, title]) => (group(g).length ? [h('h4', title), h('div.cr-preset-grid', ...group(g))] : [])),
             h('details', h('summary', 'Advanced: paid APIs'), h('p.hint', 'Billed per token, separately from any subscription. Nothing ever falls back to these.'), h('div.cr-preset-grid', ...group('paid'))));
         } catch (e) { box.replaceChildren(h('p.error', e.message), h('button.btn', { onclick: render }, 'Try again')); }
       })();
-      return h('div', h('h3', 'Which AI should it use?'), box, nav(true));
+      return h('div', h('h3', 'Which AI should it use?'), box, nav(false));
     }
 
     /** Joined from another computer: set up the AI on that computer's own worker page. */
@@ -88,15 +77,15 @@ export function addWorkerWizard(ctx) {
         h('p', 'Your agents run on your own computer, so sign-ins happen there, not through this office.'),
         h('ol.hint', h('li', 'Install Crew Office on your computer, and open ', h('b', 'Crew Office Worker'), ' from the Start menu.'), h('li', 'Open ', h('a', { href: 'http://127.0.0.1:8790', target: '_blank', rel: 'noopener' }, 'your worker’s page'), ' and sign in to your AI there.'), h('li', 'Connect it to this office under My Crew → Run on another computer.')),
         h('label', 'The AI you will use'), pick,
-        h('div.actions', h('button.btn.primary', { onclick: () => { state.card = { provider: pick.value, name: providers[pick.value].label, status: 'untested', remote: true }; go(3); } }, 'Continue')));
+        h('div.actions', h('button.btn.primary', { onclick: () => { state.card = { provider: pick.value, name: providers[pick.value].label, status: 'untested', remote: true }; go(2); } }, 'Continue')));
     }
 
-    // --- 3. detect and set up --------------------------------------------------------------
+    // --- 2. detect and set up --------------------------------------------------------------
     function setup() {
       const box = h('div');
       let timer = null;
       const stop = () => { clearInterval(timer); };
-      const continueBtn = h('button.btn.primary', { disabled: true, onclick: () => { stop(); go(3); } }, 'Continue');
+      const continueBtn = h('button.btn.primary', { disabled: true, onclick: () => { stop(); go(2); } }, 'Continue');
       const row = (ok, label, detail) => h('li', { class: ok === true ? 'ok' : ok === false ? 'bad' : '' }, h('span.cr-mark', ok === true ? '✓' : ok === false ? '✕' : '•'), h('span', h('b', label), detail ? h('span.hint', ` ${detail}`) : null));
 
       const draw = (c) => {
@@ -159,14 +148,16 @@ export function addWorkerWizard(ctx) {
       return box;
     }
 
-    // --- 4. configure ----------------------------------------------------------------------
+    // --- 3. configure ----------------------------------------------------------------------
     function configure() {
-      const p = state.preset;
-      const name = h('input', { value: p.id === 'custom' ? '' : p.name, placeholder: 'What should they be called?', maxLength: 40 });
+      const name = h('input', { placeholder: 'What should they be called?', maxLength: 40 });
       const color = h('input', { type: 'color', value: ['#3d85c6', '#9b5de5', '#2a9d8f', '#e07a5f', '#f15bb5'][Math.floor(Math.random() * 5)] });
-      const role = h('input', { value: p.role, placeholder: 'e.g. Backend Developer' });
-      const instructions = h('textarea', { value: p.instructions, rows: 3, placeholder: 'How they should work. Only you can see this.' });
-      const tools = Object.entries(S.permissions).map(([k, label]) => { const r = check(p.tools.includes(k), `${k}: ${label}`); r.k = k; return r; });
+      const instructions = h('textarea', { rows: 4, placeholder: FIRST_PROMPT_HINT });
+      const role = h('input', { placeholder: 'e.g. Lead Developer', maxLength: 60 });
+      // What it does in a project, which the first prompt cannot say: only these change who the
+      // office hands planning, reviews and tests to. Changeable later in the agent's profile.
+      const team = h('select', ...[['worker', 'Worker: does the tasks given to it'], ['lead', 'Lead: plans projects and hands out the work'], ['reviewer', 'Reviewer: preferred when a review is needed'], ['tester', 'Tester: runs and reports tests']].map(([v, l]) => h('option', { value: v }, l)));
+      const tools = Object.entries(S.permissions).map(([k, label]) => { const r = check(ALL_TOOLS.includes(k), `${k}: ${label}`); r.k = k; return r; });
       const tests = check(true, 'Run suitable tests before marking work done');
       const review = check(true, 'Have another agent review before merging');
       const approval = h('select', ...[['balanced', 'Balanced: ask me before merges'], ['manual', 'Manual: ask me for every risky step'], ['autonomous', 'Autonomous: ask only for deletes and rollbacks']].map(([v, l]) => h('option', { value: v }, l)));
@@ -176,18 +167,19 @@ export function addWorkerWizard(ctx) {
         err.textContent = '';
         try {
           const model = state.model ?? state.card.chosenModel ?? S.providers[state.card.provider]?.defaultModel;
-          const { agent } = await api('POST', `${R}/agents`, { name: name.value, role: role.value, skills: p.skills, instructions: instructions.value, provider: state.card.provider, model, color: color.value, tools: tools.filter((t) => t.box.checked).map((t) => t.k), isManager: Boolean(p.isManager) });
-          if (p.orchestrationRole) await api('PUT', `${R}/agents/${agent.id}/profile`, { orchestrationRole: p.orchestrationRole });
+          const { agent } = await api('POST', `${R}/agents`, { name: name.value, role: role.value, skills: [], instructions: instructions.value, provider: state.card.provider, model, color: color.value, tools: tools.filter((t) => t.box.checked).map((t) => t.k), isManager: team.value === 'lead' });
+          if (team.value !== 'worker') await api('PUT', `${R}/agents/${agent.id}/profile`, { orchestrationRole: team.value });
           await api('PUT', `${R}/rules/agent/${agent.id}`, { rules: { approvalMode: approval.value, testsBeforeDone: tests.box.checked, requireReview: review.box.checked } });
           if (playbook.value) await ctx.addToPlaybook(playbook.value, agent);
           await ctx.refreshState();
           state.agent = agent;
-          go(4);
+          go(3);
         } catch (e) { err.textContent = e.message; }
       };
       return h('div', h('h3', 'Set them up'),
         h('div.row.cr-two', h('div.cr-field.grow', h('label', 'Name'), name), h('div.cr-field', h('label', 'Colour'), color)),
-        h('div.cr-field', h('label', 'Role'), role), h('div.cr-field', h('label', 'Instructions'), instructions),
+        h('div.cr-field', h('label', 'Who are they?'), instructions, h('p.hint', 'Their first prompt. Only you can see it.')),
+        h('div.row.cr-two', h('div.cr-field.grow', h('label', 'Job title'), role, h('p.hint', 'What other players see.')), h('div.cr-field.grow', h('label', 'Team role'), team)),
         h('div.cr-field', h('label', 'Approval policy'), approval), tests, review,
         h('div.cr-field', h('label', 'Git workspace'), h('p.hint', 'Automatic. Each task gets its own clone and branch on your worker, and merges through review.')),
         h('div.cr-field', h('label', 'Playbook'), playbook),
@@ -195,7 +187,7 @@ export function addWorkerWizard(ctx) {
         err, nav(true, h('button.btn.primary', { onclick: create }, 'Create')));
     }
 
-    // --- 5. finish -------------------------------------------------------------------------
+    // --- 4. finish -------------------------------------------------------------------------
     function finish() {
       const a = S.agents.find((x) => x.id === state.agent.id) ?? state.agent;
       return h('div.cr-wizard-done', h('div.cr-done-mark', '✓'), h('h3', `${a.name} is on the team`),

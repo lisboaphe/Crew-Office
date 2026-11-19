@@ -164,10 +164,15 @@ Other ways in, without a service:
 
 ## Your AI employees
 
-Open **Dashboard → Agents → New agent**. Each agent has a name, a role, skills, standing
-instructions (only you can read them), the AI behind it and its model, a budget, permissions,
-and an autonomy setting ("act within its permissions", or "ask me before writing files,
-running code or fetching").
+Open **Dashboard → Agents → New agent**, choose the AI behind it, then tell it who it is. There
+are no ready-made roles to pick from: an agent is whatever its first prompt says, for example
+*You are the lead developer. Plan the work and keep changes small and tested.* Only you can read
+that prompt. Each agent also has a name, a job title other players see, a team role (worker,
+lead, reviewer or tester), its model, a budget, permissions, and an autonomy setting ("act
+within its permissions", or "ask me before writing files, running code or fetching").
+
+Agents are told to answer tersely, without greetings or filler, because every word they write is
+paid for, and paid for again on each later step of the same task.
 
 Only you can configure, pause, resume or remove your agents. The office owner cannot.
 

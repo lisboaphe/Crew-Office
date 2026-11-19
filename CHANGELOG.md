@@ -1,5 +1,12 @@
 # Changelog
 
+## Agents cost fewer tokens
+
+### Changed
+
+- **Agents answer tersely.** Every agent is told to skip greetings, filler and restating the task. Code and files stay complete.
+- **No more presets.** Adding an agent no longer starts with picking a role: you choose its AI, then tell it who it is in its first prompt, such as *You are the lead developer*. Its team role (worker, lead, reviewer or tester) is a separate choice on the same page.
+
 ## See what the agents see
 
 ### Added
