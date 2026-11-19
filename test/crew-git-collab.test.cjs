@@ -229,8 +229,7 @@ test('rules: inheritance shows its source; only the right people can change each
   assert.strictEqual((await o.alice.req('PUT', `${o.R}/rules/project/${o.project.id}`, { rules: { nonsense: true } })).status, 400);
   const hist = await o.alice.get(`${o.R}/rules/project/${o.project.id}/history`);
   assert.ok(hist.history.length >= 1, 'versions are kept');
-  const presets = (await o.alice.get(`${o.R}/presets`)).presets;
-  for (const name of ['Project Manager', 'Developer', 'Python Scripter', 'Code Reviewer', 'QA Tester', 'Researcher', 'Designer', 'Technical Writer', 'Security Reviewer']) assert.ok(presets.some((p) => p.name === name), name);
+  assert.strictEqual((await o.alice.req('GET', `${o.R}/presets`)).status, 404, 'there are no presets: an agent is its first prompt');
 });
 
 test('approval modes change discretionary gates only; merges in Autonomous still need a passing review', { timeout: 150_000 }, async (t) => {

@@ -21,7 +21,7 @@ Recovery point: the Git tag `checkpoint/pre-upgrade-2026-11-03`, on the branch `
 | Merge conflict detection, no overwrite | Works | `test/crew-upgrade.test.cjs` | |
 | Snapshots and rollback | Works | same | |
 | Definition of Done | Works | `completeTask`, `reviews.request` | Fixed checks driven by rules; no per-task custom checklist |
-| Agent rules with inheritance, versions, presets | Works | `policies.cjs`, Rules tab | Task-level rules exist in the API, not yet in the UI |
+| Agent rules with inheritance and versions | Works | `policies.cjs`, Rules tab | Task-level rules exist in the API, not yet in the UI |
 | Optional progress, handoff and README documents | Works | Progress on/off is tested. Handoff and README checks are implemented, not end-to-end tested | |
 | Approval modes | Works | Autonomous and Manual tested; Balanced in the review loop | |
 | Audit record | Works | `audit` table, written for approvals, permissions and rules | No audit viewer in the UI yet |
