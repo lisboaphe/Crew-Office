@@ -127,7 +127,9 @@ export function createAgentEditor(ctx) {
     const actions = h('div.cr-actions', h('button.btn.primary', { onclick: () => ctx.assignTask(a) }, 'Assign a task'),
       mine() ? h('button.btn', { onclick: () => ctx.chatWith(a, detail?.dmChannelId) }, 'Chat') : null,
       mine() ? ctx.holidayButton(a) : null, mine() ? ctx.fireButton(a) : null);
-    if (!mine()) return h('div', facts, h('p.hint', 'Only its owner can see or change how this agent is set up.'), actions);
+    // Its newest screenshot while it works, for the owner of this computer only (shot-card.js).
+    const sees = ctx.ui?.shotWatch?.agentCard(a.id) ?? null;
+    if (!mine()) return h('div', facts, sees, h('p.hint', 'Only its owner can see or change how this agent is set up.'), actions);
 
     const name = h('input', { value: a.name, maxLength: 40 });
     const role = h('input', { value: a.role });
@@ -165,7 +167,7 @@ export function createAgentEditor(ctx) {
     provider.addEventListener('change', () => { model.value = S.providers[provider.value].defaultModel; showModels(); saveAi(); });
     model.addEventListener('change', saveAi);
     showModels();
-    return h('div', facts, actions,
+    return h('div', facts, sees, actions,
       h('div.row.cr-two', field('Name', name), field('Colour', color)),
       field('Role', role),
       h('div.row.cr-two', field('AI behind this agent', provider), field('Model', model)), known, models,

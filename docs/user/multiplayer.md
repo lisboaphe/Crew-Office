@@ -290,6 +290,18 @@ on that computer.
 
 PNG, JPEG, WebP and GIF images are shown.
 
+**While an agent works**, its newest screenshot also shows in a small card in the bottom-left
+corner of the office, with the agent's name and how long ago it was taken, and in that agent's panel
+under **What it sees**. It changes within a few seconds of each new screenshot. Click it to see it
+full size, or **✕** to hide it until the next one. Only you see it, on the computer hosting the
+office, and it is hidden when there is nothing from the last hour that you have not kept.
+
+**When an autonomous agent's task ends** — finished, failed, stopped or paused to wait — the
+screenshots it took during it are deleted, so they do not pile up. The ones you marked **Keep**
+stay. If the worker stopped in the middle of a task, it deletes what that task left the next time it
+starts. Screenshots you or your own agents took outside a Crew Office task are never deleted by
+this; delete those on the page.
+
 Connections groups everything by what it costs you:
 
 - **My subscriptions**: ChatGPT, Codex, Claude Code and Kiro, on your own plan.

@@ -55,10 +55,10 @@ export function shotsTab(body, ctx) {
   }
 
   body.append(h('div.cr-shots', ...shown.map((s) => h('figure.cr-shot', { class: s.kept ? 'kept' : '' },
-    h('button.cr-shot-img', { type: 'button', title: 'Open it', onclick: () => view(s, ctx, load) },
+    h('button.cr-shot-img', { type: 'button', title: 'Open it', onclick: () => openShot(s, load) },
       h('img', { src: src(s), alt: s.title ?? `Screenshot by ${s.by}`, loading: 'lazy' })),
     h('figcaption',
-      h('div.row', h('b.grow', s.by), s.kept ? h('span.pill', 'Kept') : null),
+      h('div.row', h('b.grow', s.agent ?? s.by), s.kept ? h('span.pill', 'Kept') : null),
       h('div.hint', [s.title, ago(s.createdAt)].filter(Boolean).join(' · ')),
       h('div.row', actions(s, load)))))));
   if (d.total > d.shots.length) body.append(h('p.hint', `Showing the newest ${d.shots.length} of ${d.total}.`));
@@ -77,10 +77,11 @@ function actions(s, load) {
   ];
 }
 
-function view(s, ctx, load) {
+/** One screenshot full size, with Keep and Delete. The office's screenshot card opens it too. */
+export function openShot(s, load) {
   modal(s.title ?? `Screenshot by ${s.by}`, (close) => h('div',
     h('img.cr-shot-full', { src: src(s), alt: s.title ?? `Screenshot by ${s.by}` }),
-    h('p.hint', `${s.by} · ${new Date(s.createdAt).toLocaleString()}${s.project ? ` · ${s.project}` : ''}`),
+    h('p.hint', `${s.agent ?? s.by} · ${new Date(s.createdAt).toLocaleString()}${s.project ? ` · ${s.project}` : ''}`),
     h('div.row', h('span.grow'), ...actions(s, () => { close(); load(); }), h('button.btn.small', { onclick: () => close() }, 'Close'))));
 }
 

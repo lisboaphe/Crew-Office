@@ -64,7 +64,10 @@ wrinkle, since third-party marketplaces have auto-update off by default. See
   event. `Read` on a `.png` returns an image too and is deliberately not captured. The hook's
   250 ms stdin budget is the limit on how large a screenshot can arrive whole; one that is cut
   short fails to parse and is simply not kept. Off with `ROVING_OFFICE_SCREENSHOTS=0` or
-  `"screenshots": "off"` in `settings.json`. Tests: `test/crew-shots.test.cjs`.
+  `"screenshots": "off"` in `settings.json`. A run a Crew Office worker started also has
+  `job`, `agentId` and `agent` in the note, from its environment, so the worker can delete a task's
+  screenshots when it ends (→ [Autonomous agents](../multiplayer.md#autonomous-agents)). Tests:
+  `test/crew-shots.test.cjs`, `test/crew-shot-cleanup.test.cjs`.
 - **Real subagents.** `SubagentStart` carries `agent_id`, `agent_type` and
   `parent_tool_use_id`, so a fan-out arrives as actual child sessions bound to the exact
   `Job` call that spawned them. Nothing is inferred from tool arguments and nothing is

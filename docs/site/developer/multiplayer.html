@@ -301,6 +301,23 @@ worker's page, which cannot tell a script from the owner. The guarded settings' 
 in the vault as <code>settingsSeal</code>, so a <code>settings.json</code> edited outside the worker is reset to the
 defaults at start and reported to the owner. An agent with <code>computer</code> reach runs as the owner and
 could defeat both; that is why it is opt-in on both sides.</p>
+<p><strong>Its screenshots last as long as its session.</strong> <code>shotTags(ctx)</code> puts <code>ROVING_OFFICE_JOB</code>,
+<code>ROVING_OFFICE_AGENT_ID</code> and <code>ROVING_OFFICE_AGENT</code> in the Claude Code run's environment; the office
+hook inherits them and <code>bin/lib/shot-capture.cjs</code> writes them into each screenshot's <code>.json</code> note as
+<code>job</code>, <code>agentId</code> and <code>agent</code> (a value that is not a plain id is dropped). When <code>runJob</code> returns, in
+the <code>finally</code> around <code>runNative</code> and in the provider loop's own, <code>forgetJobShots(jobId)</code>
+(<code>lib/crew-worker/shot-cleanup.cjs</code>) calls <code>shots.clearJob</code>, which removes that job's screenshots
+except those marked <code>kept</code>. The worker's start calls <code>sweepOrphanShots()</code>, which removes every
+unkept screenshot carrying a job, since none is running yet. A screenshot with no <code>job</code> — taken in
+the owner's own sessions — is never touched. The worker looks in the folder the hook writes to,
+<code>&lt;CREW_DATA_DIR or ~/.roving-office/crew&gt;/shots</code>, so this only reaches the office's Screenshots page
+when the worker runs on the computer hosting it, which is the usual case. Tests:
+<code>test/crew-shot-cleanup.test.cjs</code>.</p>
+<p>The office shows the newest one live in <code>crew/shot-card.js</code>: a floating card and an agent panel's
+<strong>What it sees</strong>, both fed by one poll of <code>GET /api/crew/shots</code> every five seconds while the page is
+visible and the viewer owns the computer (<code>ui.ownerOfComputer</code>; the route answers nobody else). It
+shows the newest unkept screenshot from the last hour, and in a panel the newest whose <code>agentId</code> is
+that agent's.</p>
 <h2 id="security-model" tabindex="-1">Security model</h2>
 <p><strong>Identity.</strong> A player is a name and a colour, per host, created by <code>POST /api/crew/enter</code>
 with no password. The session cookie is the identity and lasts a year. Accounts never kept

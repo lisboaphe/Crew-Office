@@ -93,6 +93,7 @@ function captureScreenshots({ harness, event, payload, folder, settings = {}, en
         by, createdAt: now.getTime(),
         title: describe(toolName),
         project: cwd ? path.basename(cwd).slice(0, 120) : null,
+        ...jobOf(env),
       }), { mode: 0o600 });
       written.push(name);
     }
@@ -100,6 +101,19 @@ function captureScreenshots({ harness, event, payload, folder, settings = {}, en
   } catch {
     return [];
   }
+}
+
+// Which office job took it, when a Crew Office worker started the agent (lib/crew-worker/native.cjs
+// puts these in its environment, and a hook inherits them). That is what lets the worker delete a
+// job's screenshots when the job ends, and the office say which agent took one.
+const TAG = /^[A-Za-z0-9_-]{1,80}$/;
+function jobOf(env) {
+  const out = {};
+  if (TAG.test(String(env.ROVING_OFFICE_JOB ?? ''))) out.job = env.ROVING_OFFICE_JOB;
+  if (TAG.test(String(env.ROVING_OFFICE_AGENT_ID ?? ''))) out.agentId = env.ROVING_OFFICE_AGENT_ID;
+  const name = String(env.ROVING_OFFICE_AGENT ?? '').replace(/\p{Cc}/gu, '').trim().slice(0, 40);
+  if (name && out.job) out.agent = name;
+  return out;
 }
 
 /** A few plain words for the tool, rather than its identifier. */
