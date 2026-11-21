@@ -25,6 +25,10 @@ files.
 **macOS / Linux:** `sh installer/unix/install.sh CrewOffice.zip`, with `CrewOffice.zip` from the
 [latest release](https://github.com/lisboaphe/Crew-Office/releases/latest).
 
+**Omarchy / Arch Linux:** from a checkout, `bash installer/omarchy/install.sh` installs what is
+missing, builds the package and adds **Crew Office** to the app menu; `crew-office-uninstall`
+removes it and keeps your offices.
+
 To build the setup program yourself, `npm run installer` writes it to `dist/`.
 
 Inside the office, **📘 How it works** opens a short tour; it also opens by itself on your
