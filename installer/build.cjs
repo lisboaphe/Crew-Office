@@ -28,7 +28,7 @@ const INCLUDE = [
   'LICENSE', 'LICENSING.md', 'LICENSES', 'NOTICE', 'THIRD_PARTY_NOTICES.txt', 'README.md', '.env.example',
   'assets', 'crew', 'lib', 'src', 'vendor', 'admin', 'agent-setup', 'docs/images', 'docs/site', 'docs/examples',
   'bin/crew-app.cjs', 'bin/crew-host.cjs', 'bin/crew-worker.cjs', 'bin/crew-relay.cjs', 'bin/crew-demo.cjs', 'bin/crew-demo-bot.cjs', 'bin/lib/cli-flags.cjs',
-  'installer/windows/install.ps1', 'installer/windows/uninstall.ps1', 'installer/windows/register-protocol.ps1', 'installer/windows/open-invitation.vbs', 'installer/unix/install.sh',
+  'installer/windows/install.ps1', 'installer/windows/uninstall.ps1', 'installer/windows/register-protocol.ps1', 'installer/windows/open-invitation.vbs', 'installer/unix/install.sh', 'installer/omarchy/install.sh',
 ];
 for (const f of fs.readdirSync(path.join(ROOT, 'docs'))) if (f.endsWith('.html')) INCLUDE.push(`docs/${f}`);
 
@@ -62,8 +62,12 @@ function main() {
   fs.writeFileSync(path.join(stage, 'build.json'), `${JSON.stringify(buildStamp(), null, 2)}\n`);
 
   const zip = path.join(work, 'app.zip');
-  // bsdtar ships with Windows 10+ and every Unix; -a picks the zip format from the name.
-  execFileSync(process.platform === 'win32' ? path.join(process.env.SystemRoot, 'System32', 'tar.exe') : 'tar', ['-a', '-cf', zip, '-C', stage, '.'], { stdio: 'inherit' });
+  // bsdtar ships with Windows 10+ and macOS as `tar`; -a picks the zip format from the name. On
+  // Linux `tar` is usually GNU tar, which ignores a .zip name and writes a tar file that unzip
+  // refuses, so ask for bsdtar by its own name there.
+  const archiver = process.platform === 'win32' ? path.join(process.env.SystemRoot, 'System32', 'tar.exe')
+    : process.platform === 'darwin' ? 'tar' : 'bsdtar';
+  execFileSync(archiver, ['-a', '-cf', zip, '-C', stage, '.'], { stdio: 'inherit' });
   const zipOut = path.join(DIST, `CrewOffice-${version}.zip`);
   fs.copyFileSync(zip, zipOut);
   console.log(`wrote ${path.relative(ROOT, zipOut)} (${(fs.statSync(zip).size / 1e6).toFixed(1)} MB)`);
@@ -71,6 +75,7 @@ function main() {
   if (process.argv.includes('--zip-only')) { fs.rmSync(work, { recursive: true, force: true }); return; }
   if (process.platform !== 'win32') {
     console.log('CrewOfficeSetup.exe is built on Windows only (IExpress). On macOS/Linux use installer/unix/install.sh with the zip.');
+    fs.rmSync(work, { recursive: true, force: true });
     return;
   }
 
