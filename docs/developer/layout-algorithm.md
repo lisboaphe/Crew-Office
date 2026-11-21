@@ -8,8 +8,8 @@ positions — whether somebody dragged it into place or a seed produced it. This
 about the half that produces them.
 
 What a seed *decides*, and the adjacency rules it decides it with, is
-[generated offices](../user/generated-offices.md); what a layout *is*, as a file you can
-save and send, is [layouts](../user/layouts.md). Read whichever of those you need first —
+generated offices; what a layout *is*, as a file you can
+save and send, is layouts. Read whichever of those you need first —
 this page assumes both.
 
 ## The plan drawings, and drawing anything else
@@ -293,8 +293,8 @@ forwards, backwards, or half of it, and the same position wins.
 
 - **It does not touch the room's shape.** 26 by 20, two walls and two open edges,
   one door, three windows: the nav grid, the obstacle map and every approach point
-  are derived from those, and they are [deliberately not
-  themeable](../user/buildings.md#what-is-deliberately-not-themeable). A
+  are derived from those, and they are deliberately not
+  themeable. A
   generated office is a *layout*, which is the editor's domain — not a new
   building.
 - **It does not write teams into the blob.** A team is expressed the way an office
@@ -302,7 +302,7 @@ forwards, backwards, or half of it, and the same position wins.
   The grouping is in the geometry and in the reason sentence; nothing downstream
   needs to be told.
 - **It does not put up walls or meeting rooms.** There is no kit for either. What
-  the room has instead is the [zoning](../user/generated-offices.md#the-adjacencies-which-are-the-argument) —
+  the room has instead is the zoning —
   a quiet end, a break end and a goods end — done with furniture, which is what
   Bürolandschaft did with filing cabinets and potted plants for the same reason.
 - **It does not pick your feeds.** A generated scene is filled with Test Data,
@@ -341,6 +341,6 @@ generator you cannot run in a shell is a generator nobody sweeps.
   measured reasons a single number is *not* enough
 - [Thirty offices, thirty seeds](../office-variety.html) — thirty consecutive seeds,
   scrollable, each with the name and the reasons it gave itself
-- [Generated offices](../user/generated-offices.md) — the brief, the adjacencies, the naming
+- Generated offices — the brief, the adjacencies, the naming
 - [The furniture editor](editor.md) — whose `floorFault` and `reachFault` are the judge here
 - [Extending the office](extending.md) — adding a prop the generator can then place

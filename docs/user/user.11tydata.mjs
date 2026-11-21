@@ -13,7 +13,7 @@ import { titleFor } from '../_nav.mjs';
 export default {
   layout: 'doc.njk',
   section: 'user',
-  tagline: 'Watch your agents work in an isometric office.',
+  tagline: 'Watch your agents work in a pixel-art office.',
   eleventyComputed: {
     // A flat `.html` file per page rather than Eleventy's default pretty directory. The
     // office already serves `/docs/character-movements.html`, so this matches what is

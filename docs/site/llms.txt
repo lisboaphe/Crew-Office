@@ -34,22 +34,16 @@ which is the working agreement for an agent session in this codebase.
 You have the app and a browser.
 
 - [What this is](https://therovingoffice.com/docs/user/index.md): An office full of characters, and the characters are your AI agents.
-- [Watching the office](https://therovingoffice.com/docs/user/watching.md): The office is now 2D, seen from one fixed angle.
+- [Watching the office](https://therovingoffice.com/docs/user/watching.md): For anyone looking at the room.
 - [Install and run it](https://therovingoffice.com/docs/user/install.md): Five minutes, and the room fills itself with people.
-- [Keys and panels](https://therovingoffice.com/docs/user/keys.md): The office is now 2D, seen from one fixed angle.
+- [Keys and panels](https://therovingoffice.com/docs/user/keys.md): Everything the keyboard does.
 - [Offices, keycards and scenes](https://therovingoffice.com/docs/user/offices-and-keycards.md): How an office is named, shared, and — if you are careless — lost.
 - [Connect your agents](https://therovingoffice.com/docs/user/connect-your-agents.md): One command per harness, then your real sessions walk in through the door.
-- [Rearranging the furniture](https://therovingoffice.com/docs/user/rearranging-furniture.md): Not available right now.
-- [Layouts](https://therovingoffice.com/docs/user/layouts.md): An arrangement of furniture is a thing in its own right: it is kept, it can be named, and it can be handed to somebody else as a file.
 - [Sharing an office](https://therovingoffice.com/docs/user/sharing-an-office.md): Put the sessions running on your laptop into a room somebody else can open.
 - [Multiplayer: host, join, bring your AI team](https://therovingoffice.com/docs/user/multiplayer.md): Crew Office turns the office into a shared, multiplayer workspace.
 - [Jobs: the one idea](https://therovingoffice.com/docs/user/concepts.md): What the office thinks work is, and why it needed its own word for it.
-- [Post, parcels and the bin](https://therovingoffice.com/docs/user/work-and-post.md): How work gets into the room, and how it leaves.
-- [The room, prop by prop](https://therovingoffice.com/docs/user/the-room.md): Every prop is somewhere an agent goes.
+- [The room](https://therovingoffice.com/docs/user/the-room.md): Desks, a break area and a door: what is in the office, and what the people in it do there.
 - [Agent names](https://therovingoffice.com/docs/user/agent-names.md): Why somebody is called Chen Palette-Tidier, and why their surname keeps changing.
-- [Buildings and themes](https://therovingoffice.com/docs/user/buildings.md): Eight buildings.
-- [Solar geometry](https://therovingoffice.com/docs/user/solar-geometry.md): Where the sun is, what season it is, and which way the room faces.
-- [Generated offices](https://therovingoffice.com/docs/user/generated-offices.md): A seed is a room.
 - [Test Data](https://therovingoffice.com/docs/user/sources/test-data.md): The simulation, and the default.
 - [Rovo CLI](https://therovingoffice.com/docs/user/sources/rovo-cli.md): Atlassian's terminal agent.
 - [Claude Code](https://therovingoffice.com/docs/user/sources/claude-code.md): The richest feed there is: explicit turn boundaries and real subagents.

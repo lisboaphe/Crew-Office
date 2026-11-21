@@ -1,7 +1,7 @@
 # The furniture editor
 
 *The seams, the algorithms and the file format. How to **use** it is
-[rearranging the furniture](../user/rearranging-furniture.md), which this page assumes you
+rearranging the furniture, which this page assumes you
 have read.*
 
 ## Why it is only a few hundred lines
@@ -208,7 +208,7 @@ because the thing being chosen is a colour and "Plum" is a word you have to pict
 starts as. `COLORS.rugSage` and `COLORS.couch` are both part of the theme and the projects
 repaint them, so a room nobody has asked goes on following its scene and its season. What
 that means for the reader is in
-[rearranging the furniture](../user/rearranging-furniture.md#six-rugs-and-six-sofas).
+rearranging the furniture.
 
 **What is not chosen is derived.** A rug's border is its body a shade darker. A sofa's
 seat cushions are its body lifted toward white, and the cushion at your back is the
@@ -287,7 +287,7 @@ five was never a limit at all, only what the room was authored with.
 
 Both are now written down in the kind tables in `src/layout.js`, because the editor has
 to be able to ask. The limits themselves are tabulated in
-[rearranging the furniture](../user/rearranging-furniture.md#how-many-of-a-thing-the-room-may-have).
+rearranging the furniture.
 
 ### The minimum is a job, not a kind
 
@@ -301,7 +301,7 @@ maximum problem above, one layer down.
 
 So a station kind declares what it is *for*, and the room keeps whatever it needs to be
 able to do those jobs. Which four are required, and which two are optional, is
-[tabulated for the reader](../user/rearranging-furniture.md#the-minimum-is-a-job-not-a-kind).
+tabulated for the reader.
 
 What that changes in practice:
 
@@ -609,7 +609,7 @@ per drop.
 ## What is not here
 
 The list is in
-[rearranging the furniture](../user/rearranging-furniture.md#what-is-not-here).
+rearranging the furniture.
 
 One entry that used to be on it is no longer true, and is worth naming here because the
 sentence outlived the feature that removed it: a layout **is** persisted per scene, on the

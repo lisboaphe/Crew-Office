@@ -49,7 +49,7 @@ These rules hold that chain together.
 
 **The set moves without the room moving.** `feeds.sync()` takes a new choice of sources and shifts only the difference: feeds still chosen are left running untouched, feeds that went are stopped and dropped, and feeds that arrived are built and started on the spot. Removing a source is not the same as removing its people, so it hands the removed definitions back and `AgentManager.showOut()` walks those characters out of the building on the ordinary path — desk given back, coat off the stand, lift, door. The office used to answer this by rebuilding the world, which took the building, the furniture and every *other* feed's agents with it.
 
-**Observation beats the feed where the room can see for itself.** The [mid-job coffee run](../user/the-room.md#the-mid-job-coffee-run) is timed by `AgentManager` counting seated working time, not sent by any harness, so it works for every source including ones that could never report it.
+**Observation beats the feed where the room can see for itself.** The mid-job coffee run is timed by `AgentManager` counting seated working time, not sent by any harness, so it works for every source including ones that could never report it.
 
 **Appearance changes preserve the running office.** `world.changeAppearance()` replaces
 the shell, outlook and lights while retaining the world root, furniture handles,

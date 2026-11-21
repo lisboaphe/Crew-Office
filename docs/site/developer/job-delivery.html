@@ -168,7 +168,7 @@
 <p><em>The mailbox machinery: how a request gets from a harness into an agent's hands, how
 finished work leaves again, and what happens to work that fails or is never collected.</em></p>
 <p>What a reader sees of all this — the plane, the courier, the flag, the bin — is
-<a href="../user/work-and-post.html">post, parcels and the bin</a>. This page is the model underneath
+post, parcels and the bin. This page is the model underneath
 it.</p>
 <p>The <strong>mailbox</strong> is both the in-tray and the out-tray: letters land in the slot, parcels stack on the floor beside it, and finished work is walked back and dropped in. Its red flag means <em>there is work waiting</em>, whichever shape that work is in. The <strong>inbox</strong> — the stack of cardboard boxes — is the fallback source of material when no post is waiting. The <strong>bin</strong> takes work that errored. Every one of those is a station in <code>src/layout.js</code>, and the behaviour that walks to them lives in <code>src/agents/AgentManager.js</code>.</p>
 <p>The ownership rules are deliberately separate, in <code>src/agents/post.js</code>, with no Three.js in them.</p>
@@ -289,7 +289,7 @@ it.</p>
 </table>
 <p>The way out is the same route reversed, which is where a speed belonging to a <em>leg</em> rather than a point earns its keep: reversing the points alone would take the flight at the pavement's walk and the doorway at a run, so each point inherits the speed of the point that followed it (<code>Route.reversed</code>).</p>
 <p>Legs run at a constant speed rather than easing across the whole trip, because the speeds <em>are</em> the performance — a run up the flight between a walk along the pavement and a step through the door. Easing the lot flattens the three back into one. Leg swing is driven by distance covered, so a faster pace is more steps a second rather than a longer stride.</p>
-<p>Where the steps are is <strong>not</strong> the courier's to decide: <code>scene/approach.js</code> works out both the stoop and the flight once and hands the same descriptors to the builder, to the courier and to the agent layer (see <a href="../user/buildings.html#the-way-in-is-part-of-the-building">buildings-and-themes.md</a>).</p>
+<p>Where the steps are is <strong>not</strong> the courier's to decide: <code>scene/approach.js</code> works out both the stoop and the flight once and hands the same descriptors to the builder, to the courier and to the agent layer (see buildings-and-themes.md).</p>
 <p>The stoop route is the one that changed most. The courier used to appear on open pavement past the end of the stoop, in plain view — a delivery man popping into existence mid-street. He now comes round the <strong>outside corner of the building</strong>, where the two standing walls meet: from the diorama's camera that corner is the one piece of the exterior the building hides from itself, so he walks out from behind it and the arrival has somewhere to have come from. He walks it at pavement height and steps up onto the landing, rather than gliding in a metre above the kerb as he did before.</p>
 <p>The door needed nothing new — it has had a hinged leaf and <code>requestOpen</code> since agents started walking through it (<code>environment.js</code>) — but the hold did. How long the courier is inside now depends on a throw whose length depends on the room, so instead of booking a duration up front he renews a short hold every frame from <code>DOOR_LEAD</code> before the doorway until he is back out through it. A lift's landing doors answer the very same call, since <code>handles.door</code> and <code>handles.elevator</code> are one object, and asking a lift to open also summons it — which is exactly what is wanted while standing on its floor.</p>
 <p>The throw is timed and shaped from the distance it actually has to cover. Both used to be constants tuned for a parcel launched from the threshold; from inside the room the throw is a good deal shorter, and the old numbers made it a slow, towering lob over four units.</p>
@@ -486,7 +486,7 @@ for (let i = 0; i &lt; orphaned; i++) this.props.mailbox?.collect();
 <p>And one route gives up on an envelope that was never in the box to begin with. <strong>The recipient waited and nothing came.</strong> If <code>MAIL_WAIT</code> expires, <code>_collectMail</code> finds nothing to take and calls <code>post.abandon(id)</code>, which clears every expectation standing for that agent. This matters more than it looks: <code>hasOwn</code> is what sends an agent to the box, so an expectation left standing after a failed trip would send them back on the very next frame, and the frame after that, forever. Giving up is safe against a plane that lands late, because <code>land</code> puts a late envelope in the box regardless and one waiting there is enough to bring its recipient back.</p>
 <h2 id="read-next" tabindex="-1">Read next</h2>
 <ul>
-<li><a href="../user/work-and-post.html">Post, parcels and the bin</a> — the same system, as a reader meets it</li>
+<li>Post, parcels and the bin — the same system, as a reader meets it</li>
 <li><a href="architecture.html">Architecture</a> — where this sits in the pipeline</li>
 <li><a href="physics.html">The physics of the office</a> — why a destination is a place and not a point</li>
 </ul>

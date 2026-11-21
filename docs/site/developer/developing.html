@@ -242,7 +242,7 @@ npm run portrait                     # the lot, which regenerates the gallery
 npm run map -- --list           # which theme keys there are
 npm run map -- --theme=tower    # just one, while you're working on it
 </code></pre>
-<p>The frame is fitted to whatever the theme actually built (the same reasoning as <code>prop-portrait.html</code>'s subject-fitted framing, applied to a whole exterior), rather than to the room: a skyscraper's neighbouring towers run to roughly 150 units across, a street to roughly 80, and hand-carrying both numbers — and a third the day a fifth theme wants something else — is exactly the kind of thing worth deriving instead. The one thing excluded by hand is the 220x220 backdrop ground plane <code>buildExterior()</code> always lays down so there's never a visible void under the scene: real content tops out at a few dozen units in any one mesh, so anything wider <em>and</em> deeper than 100 units is that plane, not something to frame. The settings are captioned in <a href="../user/buildings.html#the-cities-from-above">buildings and themes → user docs</a>.</p>
+<p>The frame is fitted to whatever the theme actually built (the same reasoning as <code>prop-portrait.html</code>'s subject-fitted framing, applied to a whole exterior), rather than to the room: a skyscraper's neighbouring towers run to roughly 150 units across, a street to roughly 80, and hand-carrying both numbers — and a third the day a fifth theme wants something else — is exactly the kind of thing worth deriving instead. The one thing excluded by hand is the 220x220 backdrop ground plane <code>buildExterior()</code> always lays down so there's never a visible void under the scene: real content tops out at a few dozen units in any one mesh, so anything wider <em>and</em> deeper than 100 units is that plane, not something to frame. The settings are captioned in buildings and themes → user docs.</p>
 <h2 id="where-to-make-a-change" tabindex="-1">Where to make a change</h2>
 <p>Reception, the app and the documentation share <code>assets/ui-theme.css</code>: warm cream
 surfaces, dark brown ink, teal actions and semantic status colours. Eleventy copies that
@@ -334,7 +334,7 @@ sky and lamps continue to follow the selected time.</p>
 </tr>
 <tr>
 <td>Add a theme or a building</td>
-<td><code>src/projects.js</code>, then <a href="../user/buildings.html">buildings and themes</a></td>
+<td><code>src/projects.js</code>, then buildings and themes</td>
 </tr>
 <tr>
 <td>Add a source</td>
@@ -370,7 +370,7 @@ through the same shortcut action; its label carries the precondition in the help
 <p>All of these have cost someone an afternoon:</p>
 <ul>
 <li><strong>Two surfaces on one plane.</strong> The single most common visual bug in this project. Run the probe.</li>
-<li><strong>Nothing may destructure <code>COLORS</code> at import time.</strong> It is a mutable singleton that <code>applyPalette()</code> rewrites in place — see <a href="../user/buildings.html">buildings and themes</a>.</li>
+<li><strong>Nothing may destructure <code>COLORS</code> at import time.</strong> It is a mutable singleton that <code>applyPalette()</code> rewrites in place — see buildings and themes.</li>
 <li><strong>Tear down before you build.</strong> The material cache in <code>scene/build.js</code> is keyed on colour and shares materials by reference, so building the new world first leaves it holding materials that teardown then disposes.</li>
 <li><strong>Walls must be rotated into their face, and everything sits at or in front of it.</strong> These walls are solid boxes with nothing punched through them, so a &quot;recessed&quot; element is an invisible one.</li>
 <li><strong>A changed mapper needs a version bump</strong> to reach Claude or Codex, which run copied plugin snapshots of this repo. See <a href="adapters/claude-code.html#changing-the-plugin-means-bumping-the-version">Claude Code</a> and <a href="adapters/codex.html">Codex</a>.</li>

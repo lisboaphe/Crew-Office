@@ -67,8 +67,6 @@ export const NAV = {
         { url: '/user/keys.html', title: 'Keys and panels' },
         { url: '/user/offices-and-keycards.html', title: 'Offices, keycards and scenes' },
         { url: '/user/connect-your-agents.html', title: 'Connect your agents' },
-        { url: '/user/rearranging-furniture.html', title: 'Rearranging the furniture' },
-        { url: '/user/layouts.html', title: 'Layouts' },
         { url: '/user/sharing-an-office.html', title: 'Sharing an office' },
         { url: '/user/multiplayer.html', title: 'Multiplayer: host, join, bring your AI team' },
       ],
@@ -77,12 +75,8 @@ export const NAV = {
       label: 'What you are looking at',
       pages: [
         { url: '/user/concepts.html', title: 'Jobs: the one idea' },
-        { url: '/user/work-and-post.html', title: 'Post, parcels and the bin' },
-        { url: '/user/the-room.html', title: 'The room, prop by prop' },
+        { url: '/user/the-room.html', title: 'The room' },
         { url: '/user/agent-names.html', title: 'Agent names' },
-        { url: '/user/buildings.html', title: 'Buildings and themes' },
-        { url: '/user/solar-geometry.html', title: 'Solar geometry' },
-        { url: '/user/generated-offices.html', title: 'Generated offices' },
       ],
     },
     {
