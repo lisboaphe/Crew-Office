@@ -51,8 +51,8 @@ printed nothing — and the adapter does not guess from error-looking text. A fa
 therefore pass unremarked.
 
 **Web searches.** Codex does not report its hosted web search as a tool, so that one
-activity can be invisible even while the rest of a turn is live. Nobody walks to the
-telescope for it.
+activity can be invisible even while the rest of a turn is live. The office
+cannot show it.
 
 It also cannot say how a permission request was *resolved* — only that one was asked.
 

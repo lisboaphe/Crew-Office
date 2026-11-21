@@ -41,10 +41,9 @@ notice is a screensaver.
 
 - [Keys and panels](keys.md) — every shortcut, and every panel they open
 - [Offices, keycards and scenes](offices-and-keycards.md) — how an office is named, shared and lost
-- [Rearranging the furniture](rearranging-furniture.md) — drag the desks about; the paths re-route as you go
 - [Sharing an office](sharing-an-office.md) — put your sessions in a room somebody else can open
 - [Jobs: the one idea](concepts.md) — the thinking behind the whole thing
-- [The room, prop by prop](the-room.md) · [Agent names](agent-names.md) · [Buildings and themes](buildings.md) · [Solar geometry](solar-geometry.md) · [Generated offices](generated-offices.md) · [Layouts](layouts.md)
+- [The room](the-room.md): rooms, desks, the break area and its door · [Agent names](agent-names.md)
 
 Want to change how it works rather than use it? That is the
 [developer documentation](../developer/index.md), which assumes you have the code.

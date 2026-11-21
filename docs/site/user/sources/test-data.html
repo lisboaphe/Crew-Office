@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Test Data — Crew Office</title>
-  <meta name="description" content="Watch your agents work in an isometric office." />
+  <meta name="description" content="Watch your agents work in a pixel-art office." />
   
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
   <link rel="icon" type="image/png" href="/assets/icon-192.png" sizes="192x192" />
@@ -53,12 +53,6 @@
           <a href="/docs/user/connect-your-agents.html">Connect your agents</a>
         </li>
         <li>
-          <a href="/docs/user/rearranging-furniture.html">Rearranging the furniture</a>
-        </li>
-        <li>
-          <a href="/docs/user/layouts.html">Layouts</a>
-        </li>
-        <li>
           <a href="/docs/user/sharing-an-office.html">Sharing an office</a>
         </li>
         <li>
@@ -71,22 +65,10 @@
           <a href="/docs/user/concepts.html">Jobs: the one idea</a>
         </li>
         <li>
-          <a href="/docs/user/work-and-post.html">Post, parcels and the bin</a>
-        </li>
-        <li>
-          <a href="/docs/user/the-room.html">The room, prop by prop</a>
+          <a href="/docs/user/the-room.html">The room</a>
         </li>
         <li>
           <a href="/docs/user/agent-names.html">Agent names</a>
-        </li>
-        <li>
-          <a href="/docs/user/buildings.html">Buildings and themes</a>
-        </li>
-        <li>
-          <a href="/docs/user/solar-geometry.html">Solar geometry</a>
-        </li>
-        <li>
-          <a href="/docs/user/generated-offices.html">Generated offices</a>
         </li>
       </ul>
       <h2>Connecting a harness</h2>
@@ -145,8 +127,7 @@
 <p>A fresh office opens onto a busy room with nothing installed, nothing running and no
 adapter configured — because <strong>a room with nobody in it is indistinguishable from a room
 that is broken.</strong></p>
-<p>It is also how everything visual gets checked, so all four
-<a href="../buildings.html">authored offices</a> use it.</p>
+<p>It is also how everything visual gets checked.</p>
 <h2 id="what-a-simulated-shift-looks-like" tabindex="-1">What a simulated shift looks like</h2>
 <table>
 <thead>
@@ -158,15 +139,15 @@ that is broken.</strong></p>
 <tbody>
 <tr>
 <td><strong>arrive</strong></td>
-<td>climb the stairs, hang a coat, settle in — not available for work until they are actually in</td>
+<td>come in through the break room's door, the first time you see them</td>
 </tr>
 <tr>
 <td><strong>intake</strong></td>
-<td>a request lands addressed to them; they fetch it from the box and take it to their desk</td>
+<td>a request lands addressed to them</td>
 </tr>
 <tr>
 <td><strong>look up</strong></td>
-<td>sometimes: the bookshelf for what the company knows, the globe or telescope for what the web knows</td>
+<td>sometimes: researching what the company or the web knows</td>
 </tr>
 <tr>
 <td><strong>wait</strong></td>
@@ -174,11 +155,11 @@ that is broken.</strong></p>
 </tr>
 <tr>
 <td><strong>fail</strong></td>
-<td>occasionally: the work is binned, and that is the end of it</td>
+<td>occasionally: the work ends in an error, and that is the end of it</td>
 </tr>
 <tr>
-<td><strong>post</strong></td>
-<td>the finished work goes in the mailbox</td>
+<td><strong>deliver</strong></td>
+<td>the finished work is delivered</td>
 </tr>
 <tr>
 <td><strong>break</strong></td>
@@ -186,15 +167,14 @@ that is broken.</strong></p>
 </tr>
 <tr>
 <td><strong>clock off</strong></td>
-<td>after a handful of requests, out the door</td>
+<td>after a handful of requests, they leave</td>
 </tr>
 </tbody>
 </table>
-<p>Roughly, per request: half involve a look-up, a fifth a wait, an eighth fail, a fifth
-arrive unaddressed, and three in ten are big enough to come by courier.</p>
-<p><strong>The post is what drives it.</strong> A request is posted to somebody who is <em>free</em>, and what
-they spend the next minute on is whatever was inside that envelope — so the plane you
-watched land is the work you can then follow across the floor.</p>
+<p>Roughly, per request: half involve a look-up, a fifth a wait, an eighth fail, and a fifth
+arrive unaddressed.</p>
+<p><strong>Requests drive it.</strong> A request goes to somebody who is <em>free</em>, and what they spend the
+next minute on is whatever it asked for.</p>
 <h2 id="the-room-fills-and-empties-like-a-real-one" tabindex="-1">The room fills and empties like a real one</h2>
 <p>The headcount is the shape of a day rather than a number. The office <strong>opens with its
 regulars</strong>, fills up <strong>slowly</strong> over the next couple of minutes as the extras drift in,

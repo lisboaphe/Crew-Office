@@ -4,7 +4,7 @@
 rules keep the facades still, and the measurements behind the things that look arbitrary.*
 
 The reader-facing tours are [the room, prop by prop](../user/the-room.md) and
-[buildings and themes](../user/buildings.md). This is everything those two pages
+buildings and themes. This is everything those two pages
 deliberately leave out.
 
 ## Where things are declared

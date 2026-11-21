@@ -166,7 +166,7 @@
     <main id="doc" class="doc">
       <h1 id="the-furniture-editor" tabindex="-1">The furniture editor</h1>
 <p><em>The seams, the algorithms and the file format. How to <strong>use</strong> it is
-<a href="../user/rearranging-furniture.html">rearranging the furniture</a>, which this page assumes you
+rearranging the furniture, which this page assumes you
 have read.</em></p>
 <h2 id="why-it-is-only-a-few-hundred-lines" tabindex="-1">Why it is only a few hundred lines</h2>
 <p>Because the room was already built to be moved. The layout lives in exactly one place
@@ -334,7 +334,7 @@ because the thing being chosen is a colour and &quot;Plum&quot; is a word you ha
 starts as. <code>COLORS.rugSage</code> and <code>COLORS.couch</code> are both part of the theme and the projects
 repaint them, so a room nobody has asked goes on following its scene and its season. What
 that means for the reader is in
-<a href="../user/rearranging-furniture.html#six-rugs-and-six-sofas">rearranging the furniture</a>.</p>
+rearranging the furniture.</p>
 <p><strong>What is not chosen is derived.</strong> A rug's border is its body a shade darker. A sofa's
 seat cushions are its body lifted toward white, and the cushion at your back is the
 accent named beside that colour in <code>SOFA_COLORS</code> — moss wants ochre and navy wants clay,
@@ -398,7 +398,7 @@ entry per kind, so &quot;one mailbox&quot; was not a rule but a consequence of a
 five was never a limit at all, only what the room was authored with.</p>
 <p>Both are now written down in the kind tables in <code>src/layout.js</code>, because the editor has
 to be able to ask. The limits themselves are tabulated in
-<a href="../user/rearranging-furniture.html#how-many-of-a-thing-the-room-may-have">rearranging the furniture</a>.</p>
+rearranging the furniture.</p>
 <h3 id="the-minimum-is-a-job-not-a-kind" tabindex="-1">The minimum is a job, not a kind</h3>
 <p>The maximum is a question about props. The minimum is a question about <strong>work</strong>, and
 it was asked the wrong way for a long time:
@@ -409,7 +409,7 @@ of each kind it happens to own&quot;, which is nobody's decision. It is the same
 maximum problem above, one layer down.</p>
 <p>So a station kind declares what it is <em>for</em>, and the room keeps whatever it needs to be
 able to do those jobs. Which four are required, and which two are optional, is
-<a href="../user/rearranging-furniture.html#the-minimum-is-a-job-not-a-kind">tabulated for the reader</a>.</p>
+tabulated for the reader.</p>
 <p>What that changes in practice:</p>
 <ul>
 <li><strong>The bin, the machines and the inbox can all be deleted</strong>, none of which was true
@@ -698,7 +698,7 @@ nothing. That is what lets the room keep running instead of demanding a world re
 per drop.</p>
 <h2 id="what-is-not-here" tabindex="-1">What is not here</h2>
 <p>The list is in
-<a href="../user/rearranging-furniture.html#what-is-not-here">rearranging the furniture</a>.</p>
+rearranging the furniture.</p>
 <p>One entry that used to be on it is no longer true, and is worth naming here because the
 sentence outlived the feature that removed it: a layout <strong>is</strong> persisted per scene, on the
 server, exactly as <em>Where a layout lives</em> above describes. What is per-browser is the shelf

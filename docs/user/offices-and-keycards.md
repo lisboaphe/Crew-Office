@@ -61,8 +61,8 @@ yours to decide about the room:
 
 **Passcode and Close need the browser that opened the office.** There are no accounts
 here, so there is nothing to sign in to: the office remembered itself in the browser that
-cut its keycard. Open the same office somewhere else and you can watch it, rearrange it
-and connect agents to it, but the passcode and the close button are greyed out with a line
+cut its keycard. Open the same office somewhere else and you can watch it and connect
+agents to it, but the passcode and the close button are greyed out with a line
 saying why. That is the trade for having no sign-up step — see
 [what you give up](sharing-an-office.md#no-accounts-ever).
 
@@ -91,27 +91,24 @@ office loads — because you left it open last time — the hint does not appear
 Dismissing it is for that visit only; open the office again with nothing showing and
 it says hello again.
 
-Each visit opens the demo in a **random building and season**, at your local time.
-Every browser runs its **own simulated agents**. Furniture, building, season and
-lighting experiments affect only your view. Refresh to start fresh with another
-random look. The shared starting rooms cannot be renamed, deleted or repointed at
+Each visit opens the demo at your local time, and every browser runs its **own
+simulated agents**. Refresh to start fresh. The shared starting rooms cannot be renamed, deleted or repointed at
 live agents.
 
 Choose **Open your own office** in the scene menu, or visit the
 [keycard page](https://therovingoffice.com/offices) for the offices this browser
-remembers. Use a personal office to connect real agents and save an arrangement.
+remembers. Use a personal office to connect real agents.
 When you open one with a new keycard, **Choose sources** appears automatically so
 you can select your agents' sources and follow the plugin connection instructions.
 It opens once for the new office; press `D` to bring it back later.
 
 ## Scenes: one office, several rooms
 
-An office is a set of **scenes**, and a scene is one room: a building, a season, and the
-sources filling it. A new office starts with exactly one, its look rolled at random and
-its agents simulated, so there is something to look at before you have decided anything.
+An office is a set of **scenes**, and a scene is one office floor with the sources filling
+it. A new office starts with exactly one, its agents simulated, so there is something to
+look at before you have decided anything.
 
-**New scene** at the foot of the dropdown adds another — again a random building and
-season, again full of invented agents. Press `D` or click the pill to point any scene at a
+**New scene** at the foot of the dropdown adds another, again full of invented agents. Press `D` or click the pill to point any scene at a
 live harness instead.
 
 Hover a scene and you get a pencil and a trash can:
@@ -136,7 +133,7 @@ is how you watch two of them at once.
 
 Three Rovo CLI terminals open on the same repository are three characters in **one** room.
 A Claude Code session in that repository joins them. The harness an agent came from is a
-*costume* — a coat colour and a glyph on the name tag — not a building.
+*costume*, not a room of its own.
 
 Worktrees and branches of one repository collapse into the same room too, because what
 identifies a room is the remote. Which branch somebody is on shows up as a detail on that

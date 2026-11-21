@@ -6,28 +6,26 @@ A fresh office opens onto a busy room with nothing installed, nothing running an
 adapter configured — because **a room with nobody in it is indistinguishable from a room
 that is broken.**
 
-It is also how everything visual gets checked, so all four
-[authored offices](../buildings.md) use it.
+It is also how everything visual gets checked.
 
 ## What a simulated shift looks like
 
 | | |
 |---|---|
-| **arrive** | climb the stairs, hang a coat, settle in — not available for work until they are actually in |
-| **intake** | a request lands addressed to them; they fetch it from the box and take it to their desk |
-| **look up** | sometimes: the bookshelf for what the company knows, the globe or telescope for what the web knows |
+| **arrive** | come in through the break room's door, the first time you see them |
+| **intake** | a request lands addressed to them |
+| **look up** | sometimes: researching what the company or the web knows |
 | **wait** | sometimes: blocked on you |
-| **fail** | occasionally: the work is binned, and that is the end of it |
-| **post** | the finished work goes in the mailbox |
+| **fail** | occasionally: the work ends in an error, and that is the end of it |
+| **deliver** | the finished work is delivered |
 | **break** | a drink or a sit down, then the next request |
-| **clock off** | after a handful of requests, out the door |
+| **clock off** | after a handful of requests, they leave |
 
-Roughly, per request: half involve a look-up, a fifth a wait, an eighth fail, a fifth
-arrive unaddressed, and three in ten are big enough to come by courier.
+Roughly, per request: half involve a look-up, a fifth a wait, an eighth fail, and a fifth
+arrive unaddressed.
 
-**The post is what drives it.** A request is posted to somebody who is *free*, and what
-they spend the next minute on is whatever was inside that envelope — so the plane you
-watched land is the work you can then follow across the floor.
+**Requests drive it.** A request goes to somebody who is *free*, and what they spend the
+next minute on is whatever it asked for.
 
 ## The room fills and empties like a real one
 

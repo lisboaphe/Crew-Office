@@ -81,6 +81,35 @@ It opens on simulated agents, so it is busy before anything is connected. Start 
 session after connecting it. [Connect your agents](docs/user/connect-your-agents.md) covers
 each one.
 
+## Where things are
+
+One Node program, `server.cjs`, serves the office to your browser and hosts the multiplayer
+office. The rest, by what it is for:
+
+| Where | What is in it |
+| --- | --- |
+| `crew/` | The multiplayer interface in the browser: the lobby, the dashboard, chat, menus and the tutorial. |
+| `lib/crew/` | The host: accounts, rooms, projects, jobs and the message bus. `api.cjs` is its HTTP API and `db.cjs` its SQLite store. |
+| `lib/crew-worker/` | The worker that runs each agent's jobs on its owner's computer. `runner.cjs` is the model-and-tools loop. |
+| `lib/relay/`, `deploy/relay/` | The relay, for hosting an office beyond your own network. |
+| `src/office2d/` | The office you see: 2D pixel art. `view.js` draws it, `floor-plan.js` says where everything stands, `ambient.js` is what people do between jobs. |
+| `src/main.js`, `index.html`, `styles.css`, `src/ui/` | The office page, its panels and its top bar. `main.js` starts it. |
+| `src/agents/`, `src/data/` | The agents, and the feeds of events that set their status. |
+| `src/scene/`, `src/plan/`, `src/editor/`, `src/office/`, `src/layout.js` | The original 3D office. It is no longer drawn, but the agents still run inside it, so it stays until that is untangled. |
+| `lib/*.cjs` | The office server's own parts: offices and keycards, and the receiver for the Agent Office Protocol, which is how outside agents report what they are doing. |
+| `hooks/`, `.claude-plugin/`, `.codex-plugin/`, `openclaw-plugin/`, `plugins/` | The plugins that report Claude Code, Codex and OpenClaw sessions to the office. |
+| `bin/` | Command-line programs. `crew-*` start the app, host, worker and relay; `aop-*` connect your agents; most of the rest are tools for the original 3D office. |
+| `assets/` | Art, icons and fonts. `assets/pixel-art/office/` has the office's sprites and how they are made. |
+| `installer/` | The installers for Windows, macOS and Linux, and Omarchy, and the build of the package they install. |
+| `admin/`, `agent-setup/` | The office statistics page, and the page an agent reads to set itself up. |
+| `docs/` | The user and developer documentation. `docs/site/` is the same, built into a website. |
+| `test/` | The tests: `npm test` runs them all. |
+| `third-party/`, `vendor/`, `LICENSES/` | Bundled libraries, and the licences they and this project come under. |
+
+Some technical names still say `roving-office`: the plugin, the data folder
+`~/.roving-office` and the `ROVING_OFFICE_*` settings. They are kept on purpose, because
+existing installs depend on them.
+
 ## Documentation
 
 | | |

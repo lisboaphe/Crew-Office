@@ -4,7 +4,7 @@
 finished work leaves again, and what happens to work that fails or is never collected.*
 
 What a reader sees of all this — the plane, the courier, the flag, the bin — is
-[post, parcels and the bin](../user/work-and-post.md). This page is the model underneath
+post, parcels and the bin. This page is the model underneath
 it.
 
 The **mailbox** is both the in-tray and the out-tray: letters land in the slot, parcels stack on the floor beside it, and finished work is walked back and dropped in. Its red flag means *there is work waiting*, whichever shape that work is in. The **inbox** — the stack of cardboard boxes — is the fallback source of material when no post is waiting. The **bin** takes work that errored. Every one of those is a station in `src/layout.js`, and the behaviour that walks to them lives in `src/agents/AgentManager.js`.
@@ -116,7 +116,7 @@ The way out is the same route reversed, which is where a speed belonging to a *l
 
 Legs run at a constant speed rather than easing across the whole trip, because the speeds *are* the performance — a run up the flight between a walk along the pavement and a step through the door. Easing the lot flattens the three back into one. Leg swing is driven by distance covered, so a faster pace is more steps a second rather than a longer stride.
 
-Where the steps are is **not** the courier's to decide: `scene/approach.js` works out both the stoop and the flight once and hands the same descriptors to the builder, to the courier and to the agent layer (see [buildings-and-themes.md](../user/buildings.md#the-way-in-is-part-of-the-building)).
+Where the steps are is **not** the courier's to decide: `scene/approach.js` works out both the stoop and the flight once and hands the same descriptors to the builder, to the courier and to the agent layer (see buildings-and-themes.md).
 
 The stoop route is the one that changed most. The courier used to appear on open pavement past the end of the stoop, in plain view — a delivery man popping into existence mid-street. He now comes round the **outside corner of the building**, where the two standing walls meet: from the diorama's camera that corner is the one piece of the exterior the building hides from itself, so he walks out from behind it and the arrival has somewhere to have come from. He walks it at pavement height and steps up onto the landing, rather than gliding in a metre above the kerb as he did before.
 
@@ -342,6 +342,6 @@ And one route gives up on an envelope that was never in the box to begin with. *
 
 ## Read next
 
-- [Post, parcels and the bin](../user/work-and-post.md) — the same system, as a reader meets it
+- Post, parcels and the bin — the same system, as a reader meets it
 - [Architecture](architecture.md) — where this sits in the pipeline
 - [The physics of the office](physics.md) — why a destination is a place and not a point

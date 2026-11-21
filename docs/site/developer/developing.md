@@ -110,7 +110,7 @@ npm run map -- --list           # which theme keys there are
 npm run map -- --theme=tower    # just one, while you're working on it
 ```
 
-The frame is fitted to whatever the theme actually built (the same reasoning as `prop-portrait.html`'s subject-fitted framing, applied to a whole exterior), rather than to the room: a skyscraper's neighbouring towers run to roughly 150 units across, a street to roughly 80, and hand-carrying both numbers — and a third the day a fifth theme wants something else — is exactly the kind of thing worth deriving instead. The one thing excluded by hand is the 220x220 backdrop ground plane `buildExterior()` always lays down so there's never a visible void under the scene: real content tops out at a few dozen units in any one mesh, so anything wider *and* deeper than 100 units is that plane, not something to frame. The settings are captioned in [buildings and themes → user docs](../user/buildings.md#the-cities-from-above).
+The frame is fitted to whatever the theme actually built (the same reasoning as `prop-portrait.html`'s subject-fitted framing, applied to a whole exterior), rather than to the room: a skyscraper's neighbouring towers run to roughly 150 units across, a street to roughly 80, and hand-carrying both numbers — and a third the day a fifth theme wants something else — is exactly the kind of thing worth deriving instead. The one thing excluded by hand is the 220x220 backdrop ground plane `buildExterior()` always lays down so there's never a visible void under the scene: real content tops out at a few dozen units in any one mesh, so anything wider *and* deeper than 100 units is that plane, not something to frame. The settings are captioned in buildings and themes → user docs.
 
 ## Where to make a change
 
@@ -184,7 +184,7 @@ sky and lamps continue to follow the selected time.
 | Change how they move | `src/agents/pathfinding.js` and [physics.md](physics.md) |
 | Add a prop ([full recipe](extending.md#add-a-prop)) | one file in `src/scene/props/` (builder + any custom mounting), one line in `props/index.js`, one entry in the layout's kind table — the registry fails loudly if any of the three is missing. Then a `scene/catalogue.js` entry so it appears in the [Item Library](../item-movements.html) |
 | Add an outlook ([full recipe](extending.md#add-a-building-or-an-outlook)) | one module in `src/scene/outlooks/` exporting its definition, one line in `outlooks/index.js`, one mode string in `projects.js` — the registry fails loudly if any is missing |
-| Add a theme or a building | `src/projects.js`, then [buildings and themes](../user/buildings.md) |
+| Add a theme or a building | `src/projects.js`, then buildings and themes |
 | Add a source | `src/data/AgentSource.js` for the interface, `sources.js` to declare it |
 | Change how several sources share a room | `src/data/feeds.js` — fan-in, id namespacing, and the state the pill summarises |
 | Change what a harness reports | `bin/mappers/` for a hook harness, `openclaw-plugin/lib/map.mjs` for OpenClaw — and bump the version, see below |
@@ -203,7 +203,7 @@ through the same shortcut action; its label carries the precondition in the help
 All of these have cost someone an afternoon:
 
 - **Two surfaces on one plane.** The single most common visual bug in this project. Run the probe.
-- **Nothing may destructure `COLORS` at import time.** It is a mutable singleton that `applyPalette()` rewrites in place — see [buildings and themes](../user/buildings.md).
+- **Nothing may destructure `COLORS` at import time.** It is a mutable singleton that `applyPalette()` rewrites in place — see buildings and themes.
 - **Tear down before you build.** The material cache in `scene/build.js` is keyed on colour and shares materials by reference, so building the new world first leaves it holding materials that teardown then disposes.
 - **Walls must be rotated into their face, and everything sits at or in front of it.** These walls are solid boxes with nothing punched through them, so a "recessed" element is an invisible one.
 - **A changed mapper needs a version bump** to reach Claude or Codex, which run copied plugin snapshots of this repo. See [Claude Code](adapters/claude-code.md#changing-the-plugin-means-bumping-the-version) and [Codex](adapters/codex.md).
