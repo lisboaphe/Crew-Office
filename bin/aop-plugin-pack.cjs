@@ -629,6 +629,11 @@ async function verifyRun(pluginRoot, host, label) {
         env: {
           PATH: process.env.PATH,
           HOME: home,
+          // Windows: Node's os.homedir() reads USERPROFILE, not HOME, so without this
+          // the sandbox is the real home; and Node cannot open a socket without SystemRoot.
+          ...(process.platform === 'win32'
+            ? { USERPROFILE: home, SystemRoot: process.env.SystemRoot }
+            : {}),
           AOP_URL: url,
           ...Object.fromEntries(spec.rootVars.map((name) => [name, pluginRoot])),
         },
@@ -662,10 +667,37 @@ async function verifyRun(pluginRoot, host, label) {
   }
 }
 
+/**
+ * The POSIX shell a host would run the hook command through.
+ *
+ * `/bin/sh` everywhere it exists. Windows has no such path — Node spawns it literally
+ * and fails with ENOENT — but Claude Code on Windows runs hooks through Git Bash, so
+ * that is the shell to ask for: `sh.exe` from PATH (Git Bash and most Git for Windows
+ * installs put it there), else the one beside whichever `git.exe` is on PATH. WSL's
+ * `bash.exe` in System32 is deliberately not a candidate: it runs in a different
+ * filesystem and would not see the Windows paths in the command.
+ */
+function posixShell({ platform = process.platform, exec = spawnSync, exists = fs.existsSync } = {}) {
+  if (platform !== 'win32') return '/bin/sh';
+  const where = (name) => {
+    const found = exec('where.exe', [name], { encoding: 'utf8' });
+    if (found.error || found.status !== 0) return [];
+    return found.stdout.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  };
+  const viaPath = where('sh').find((file) => /\.exe$/i.test(file) && !/[\\/](System32|WindowsApps)[\\/]/i.test(file));
+  if (viaPath) return viaPath;
+  for (const git of where('git')) {
+    // …\Git\cmd\git.exe or …\Git\bin\git.exe — the shell lives in the install's bin\.
+    const candidate = path.join(path.dirname(path.dirname(git)), 'bin', 'sh.exe');
+    if (exists(candidate)) return candidate;
+  }
+  return die('no POSIX shell found: install Git for Windows, or put its sh.exe on PATH');
+}
+
 /** One hook invocation, exactly as a host makes it: a shell command fed JSON on stdin. */
 function runHook(command, payload, { cwd, env }) {
   return new Promise((resolve) => {
-    const child = spawn('/bin/sh', ['-c', command], { cwd, env, stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = spawn(posixShell(), ['-c', command], { cwd, env, stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
     child.stdout.on('data', (chunk) => { stdout += chunk; });
@@ -872,5 +904,5 @@ if (require.main === module) {
 
 module.exports = {
   HOSTS, RUNTIME, LEGAL, APP_NOTICES, SITE_PATH, DEFAULT_BASE_URL,
-  archiveName, build, check, stage, claudeMarketplace, codexMarketplace, main,
+  archiveName, build, check, stage, claudeMarketplace, codexMarketplace, posixShell, main,
 };

@@ -72,7 +72,7 @@
     },
     {
       "path": "bin/aop-plugin-pack.cjs",
-      "sha256": "2432decca7a4106439f7039a32c3d8995c12bb26e0317b658f2fe086cadb51f6"
+      "sha256": "1b9f09ada83f70a46ea228b4bc5a5187b99387060a1e79089a57f7e90b7f39d9"
     },
     {
       "path": "bin/lib/zip.cjs",
