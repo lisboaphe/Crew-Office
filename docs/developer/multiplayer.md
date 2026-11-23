@@ -164,6 +164,25 @@ in the vault as `settingsSeal`, so a `settings.json` edited outside the worker i
 defaults at start and reported to the owner. An agent with `computer` reach runs as the owner and
 could defeat both; that is why it is opt-in on both sides.
 
+**Its screenshots last as long as its session.** `shotTags(ctx)` puts `ROVING_OFFICE_JOB`,
+`ROVING_OFFICE_AGENT_ID` and `ROVING_OFFICE_AGENT` in the Claude Code run's environment; the office
+hook inherits them and `bin/lib/shot-capture.cjs` writes them into each screenshot's `.json` note as
+`job`, `agentId` and `agent` (a value that is not a plain id is dropped). When `runJob` returns, in
+the `finally` around `runNative` and in the provider loop's own, `forgetJobShots(jobId)`
+(`lib/crew-worker/shot-cleanup.cjs`) calls `shots.clearJob`, which removes that job's screenshots
+except those marked `kept`. The worker's start calls `sweepOrphanShots()`, which removes every
+unkept screenshot carrying a job, since none is running yet. A screenshot with no `job` — taken in
+the owner's own sessions — is never touched. The worker looks in the folder the hook writes to,
+`<CREW_DATA_DIR or ~/.roving-office/crew>/shots`, so this only reaches the office's Screenshots page
+when the worker runs on the computer hosting it, which is the usual case. Tests:
+`test/crew-shot-cleanup.test.cjs`.
+
+The office shows the newest one live in `crew/shot-card.js`: a floating card and an agent panel's
+**What it sees**, both fed by one poll of `GET /api/crew/shots` every five seconds while the page is
+visible and the viewer owns the computer (`ui.ownerOfComputer`; the route answers nobody else). It
+shows the newest unkept screenshot from the last hour, and in a panel the newest whose `agentId` is
+that agent's.
+
 ## Security model
 
 **Identity.** A player is a name and a colour, per host, created by `POST /api/crew/enter`

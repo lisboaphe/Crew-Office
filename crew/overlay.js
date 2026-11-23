@@ -9,6 +9,7 @@ import { h, api, toast, modal, avatar, ago, money, helpTip, icon, confirmDeleteO
 import { openTutorial, tutorialOnFirstVisit } from './tutorial.js';
 import { gitTab, filesTab, rulesTab } from './workspace.js';
 import { shotsTab } from './shots.js';
+import { createShotWatch } from './shot-card.js';
 import { createAgentEditor } from './agent-editor.js';
 import { createOrchestrator } from './orchestrator.js';
 import { addWorkerWizard } from './wizard.js';
@@ -191,7 +192,9 @@ function buildChrome() {
     badgeOf: (key) => (key === 'approvals' ? S.approvals.filter((a) => a.status === 'pending' && a.approverId === S.me.id).length : 0),
     onGo: goTo,
   });
-  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.nav.el, ui.dash, ui.side, ui.editor.el);
+  // The newest screenshot an agent took, on the floor while it works (shot-card.js). Owner only.
+  ui.shotWatch = createShotWatch({ ui, api });
+  document.body.append(meetingLayer, pillLayer, bubbleLayer, ui.bar, ui.nav.el, ui.dash, ui.side, ui.editor.el, ui.shotWatch.el);
   window.addEventListener('resize', fitTopBars);
   // The office's own bar fills in as its parts load, and changes as offices do.
   const titleBar = document.getElementById('title-bar');
