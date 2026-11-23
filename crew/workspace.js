@@ -123,10 +123,11 @@ function linkContract(p, ctx) {
 
 // --- Office files --------------------------------------------------------------------------
 
-/** What unpacking a .zip did, in a sentence, or null when nothing was unpacked. */
+/** What unpacking a .zip or copying a Word document's text did, in a sentence, or null when nothing was done. */
 function unpackedText(u) {
   if (!u) return null;
-  if (u.error) return `Uploaded, but it could not be unpacked for the agents: ${u.error}`;
+  if (u.error) return `Uploaded, but the agents cannot read it yet: ${u.error}`;
+  if (u.file) return `Uploaded. Its text is in ${u.file} for the agents${u.cut ? ', cut short because it is very long' : ''}.`;
   return `Uploaded. ${u.unpacked} file${u.unpacked === 1 ? '' : 's'} unpacked into ${u.folder}/ for the agents${u.left ? `; ${u.left} stayed in the zip (see UNPACKED.md)` : ''}.`;
 }
 
@@ -184,8 +185,8 @@ export function filesTab(body, ctx) {
   body.append(h('p.hint', `${mb(usedBytes)} of ${mb(quotaBytes)} used`));
   body.append(h('div.cr-list', ...(files.length ? files.map((f) => h('div.cr-item',
     h('div.row', h('code.grow', f.path), h('span.pill', `v${f.version}`), h('span.muted', `${mb(f.size)} · ${f.byName} · ${ago(f.createdAt)}`),
-      /\.zip$/i.test(f.path) && p.members.includes(S.me.id)
-        ? h('button.btn.small', { title: 'Put the text inside it into the project’s files, where the agents can read it', onclick: () => api('POST', `${U}/blobs/${f.id}/unpack`).then((u) => toast(unpackedText(u), 7000)).catch((e) => toast(e.message)) }, 'Unpack for the agents')
+      /\.(zip|docx)$/i.test(f.path) && p.members.includes(S.me.id)
+        ? h('button.btn.small', { title: 'Put the text inside it into the project’s files, where the agents can read it', onclick: () => api('POST', `${U}/blobs/${f.id}/unpack`).then((u) => toast(unpackedText(u), 7000)).catch((e) => toast(e.message)) }, /\.docx$/i.test(f.path) ? 'Copy text for the agents' : 'Unpack for the agents')
         : null,
       h('a.btn.small', { href: `${U}/blobs/${f.id}`, download: '' }, 'Download')),
     f.note ? h('p.hint', f.note) : null,

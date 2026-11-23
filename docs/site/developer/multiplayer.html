@@ -279,6 +279,11 @@ ends in <code>.zip</code> calls <code>crew.work.unpackZip</code>, and <code>POST
 whose path leaves the archive, and any that inflates past the size it declares. Valid UTF-8 without
 NUL bytes, up to the 256 KB file limit, is written as project files under <code>&lt;upload without .zip&gt;/</code>,
 dropping a single top folder such as GitHub's <code>&lt;repo&gt;-main/</code>; the rest is listed in <code>UNPACKED.md</code>.</p>
+<p>A <code>.docx</code> goes the same way, through <code>crew.work.docxText</code>: <code>docxToMarkdown</code> in
+<code>lib/crew/docx.cjs</code> reads <code>word/document.xml</code> with <code>readZip</code> and writes headings (by style ID,
+including localised ones such as <code>Ttulo1</code>), numbered and bulleted items, tables, tabs and breaks
+as Markdown, to <code>&lt;upload without .docx&gt;.md</code>, cut at the 256 KB file limit. The finalize response's
+<code>unpacked</code> is then <code>{ file, chars, cut }</code> instead of <code>{ folder, unpacked, left }</code>.</p>
 <h2 id="autonomous-agents" tabindex="-1">Autonomous agents</h2>
 <p>A limited agent thinks through a model and acts only through the office's tools. An autonomous one
 (<code>lib/crew-worker/native.cjs</code>) is Claude Code run as itself in a folder, given the task as
