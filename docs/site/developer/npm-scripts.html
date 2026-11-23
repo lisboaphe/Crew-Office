@@ -592,6 +592,11 @@ next <code>npm run docs</code> will overwrite you. Add a script, add its <code>s
 <td>Build the Claude and Codex plugins as distribution artifacts, then install and fire a hook from a temp directory with no checkout above it. Writes the hosted marketplace the site serves; <code>pack:plugins:check</code> is what asserts you committed it.</td>
 </tr>
 <tr>
+<td><code>npm run worktree:remove</code></td>
+<td><code>node bin/worktree-remove.cjs</code></td>
+<td>Remove a finished worktree safely: <code>-- .worktrees/issue-N</code>. Refuses a dirty tree, unlinks the node_modules link (never following it), then removes the worktree and deletes its branch if merged.</td>
+</tr>
+<tr>
 <td><code>npm run docs:markdown</code></td>
 <td><code>node bin/gen-docs-markdown.mjs</code></td>
 <td>Publish a Markdown copy of every built page beside its HTML, so <code>/docs/user/install.md</code> serves prose rather than a page wrapped in a sidebar. The set comes from what Eleventy built, so an unpublished page is never copied. <code>npm run docs</code> does it for you.</td>
