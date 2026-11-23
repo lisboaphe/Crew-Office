@@ -326,17 +326,17 @@ A task is not finished at the merge. When the work has landed and **the request 
 
 1. **Sweep first, while you still can.** Temp files, stray headless Chromes, `git status`, the health check on whatever is still serving — all of it happens *before* the removal, because the removal takes the shell's own working directory with it and nothing can be run afterwards. An agent that leaves the sweep till last finds it cannot even `pwd`, and has to recreate the path it just deleted to get a shell back.
 2. **Stop or move any server** started for the task. Ask what it is serving before killing it, with `lsof -p <pid> | awk '$4=="cwd"{print $NF}'`: a server whose `cwd` is the worktree dies with it, so if it is one you are keeping — the office holding the endpoint — restart it from the primary worktree first and check it re-claimed `~/.roving-office/endpoint.json`.
-3. **Remove the worktree**, then **delete the branch** — but only once it is merged.
+3. **Remove the worktree and its branch** with the script below, once merged.
 
 ```bash
 lsof -p "$(pgrep -f 'server.cjs 8080')" | awk '$4=="cwd"{print $NF}'   # what would it lose?
 pkill -f "server.cjs 8082"
-git worktree remove .worktrees/issue-10
-git branch -d worktree-issue-10        # -d, never -D: it refuses an unmerged branch for us
+npm run worktree:remove -- .worktrees/issue-10    # run from the primary worktree
 ```
 
-Run both `git` commands from the primary worktree, with `git -C` and an absolute path if
-you are not standing in it.
+Never `git worktree remove` or `rm -rf` a worktree by hand: its `node_modules` is a link to the
+primary's, and following it empties the real one. The script refuses a dirty tree, unlinks the
+link with `fs` (never recursively), removes the worktree, and runs `git branch -d` (never `-D`).
 
 Leave the temporary files behind at your peril — `tmp_rovo_*` screenshots, throwaway harness pages and probe scratch files all go before the final commit, not after.
 
