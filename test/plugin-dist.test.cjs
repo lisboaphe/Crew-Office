@@ -278,3 +278,22 @@ test('CI builds and checks the artifacts by the same npm scripts a contributor r
   assert.equal(readJson('package.json').scripts['pack:plugins'], 'node bin/aop-plugin-pack.cjs --verify');
   assert.equal(readJson('package.json').scripts['pack:plugins:check'], 'node bin/aop-plugin-pack.cjs --check');
 });
+
+// The verify fires hooks through a shell. Windows has no `/bin/sh`, so it must find
+// Git Bash's — and never WSL's System32 bash, which cannot see Windows paths.
+test('the verify finds a POSIX shell on every platform', () => {
+  assert.equal(pack.posixShell({ platform: 'linux' }), '/bin/sh');
+  const where = (lists) => (cmd, [name]) => (lists[name]
+    ? { status: 0, stdout: `${lists[name].join('\r\n')}\r\n` }
+    : { status: 1, stdout: '' });
+  assert.equal(pack.posixShell({
+    platform: 'win32',
+    exec: where({ sh: ['C:/Windows/System32/sh.exe', 'C:/Program Files/Git/usr/bin/sh.exe'] }),
+  }), 'C:/Program Files/Git/usr/bin/sh.exe');
+  const besideGit = path.join(path.dirname(path.dirname('C:/Git/cmd/git.exe')), 'bin', 'sh.exe');
+  assert.equal(pack.posixShell({
+    platform: 'win32',
+    exec: where({ git: ['C:/Git/cmd/git.exe'] }),
+    exists: (file) => file === besideGit,
+  }), besideGit);
+});
