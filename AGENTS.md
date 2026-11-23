@@ -184,6 +184,26 @@ Either way the hooks are read at session start, so **restart the Claude or Codex
 session** afterwards. Each `--status` command compares the installed version with
 the checkout and says what is live, so run it rather than guessing.
 
+## Spending fewer tokens
+
+The owner works on a plan with a token allowance, and most of it goes on overhead rather
+than code: a long session re-sends its whole history with every message, and each task
+pays a fixed round of issue, worktree, docs build, pull request and CI.
+
+- **One session per task.** When a task has landed and an unrelated one arrives, start a
+  fresh session rather than carrying a long history into it.
+- **Batch small fixes.** Several small, related fixes share one issue, one branch and one
+  pull request, so they pay that round once. A feature still gets its own.
+- **Build the docs once**, just before committing, not after every Markdown edit.
+  `npm test` catches a forgotten build either way.
+- **Hand mechanical work to a subagent on a cheaper model**: searches, renames, a sweep
+  of call sites. Give it a tight brief that names the files and says what done looks like,
+  so it does not have to rediscover the repository.
+- **Read only what you need.** Read the part of a big file you need, and grep test, CI and
+  build output for failures rather than printing all of it.
+- **This file is loaded into every session**, so every line here costs every session.
+  Keep additions short, and prune rather than append.
+
 ## Landing it
 
 A branch lands by **pull request**, with both CI jobs green and up to date with `main`, and a
