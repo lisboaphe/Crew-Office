@@ -7,30 +7,30 @@ import { findPath } from '../src/office2d/walkways.js';
 const bots = (ownerId, count) => Array.from({ length: count }, (_, i) => ({ id: `${ownerId}-${i + 1}`, ownerId, ownerName: ownerId }));
 const keyOf = ({ col, row }) => `${col},${row}`;
 
-// Whether two cells of the comb share a wall: side by side in a row, or overlapping rows.
-function touching(a, b) {
-  const pa = cellOrigin(a);
-  const pb = cellOrigin(b);
-  if (a.row === b.row) return Math.abs(a.col - b.col) === 1;
-  return Math.abs(a.row - b.row) === 1 && Math.abs(pa.x - pb.x) < STEP_X;
-}
+// Whether two cells of the comb share a whole wall.
+const touching = (a, b) => Math.abs(a.col - b.col) + Math.abs(a.row - b.row) === 1;
 
-test('the comb starts in the middle and every new cell touches one already there', () => {
+test('the comb starts in the middle and every new cell shares a wall with one already there, or the break room', () => {
   const cells = combCells(37);
   assert.deepEqual(cells[0], { col: 0, row: 0 });
   assert.equal(new Set(cells.map(keyOf)).size, 37, 'no cell twice');
   for (let i = 1; i < cells.length; i++) {
-    assert.ok(cells.slice(0, i).some((c) => touching(c, cells[i])), `cell ${i} is not beside the comb`);
+    assert.ok([{ col: 1, row: 0 }, ...cells.slice(0, i)].some((c) => touching(c, cells[i])), `cell ${i} is not beside the comb`);
   }
 });
 
-test('the first ring is the six neighbours of the middle', () => {
-  const ring = combCells(7).slice(1);
-  assert.ok(ring.every((c) => touching(c, { col: 0, row: 0 })));
+test('the rooms pack into a block, as near square as it can be', () => {
+  // With the break room, 4 cells make 2 by 2, 6 make 2 by 3, 9 make 3 by 3.
+  for (const [rooms, w, h] of [[3, 2, 2], [5, 2, 3], [8, 3, 3]]) {
+    const all = [...combCells(rooms), { col: 1, row: 0 }];
+    const cols = new Set(all.map((c) => c.col));
+    const rows = new Set(all.map((c) => c.row));
+    assert.deepEqual([cols.size, rows.size].sort(), [w, h].sort(), `${rooms} rooms`);
+  }
 });
 
-test('odd rows are shifted half a room along', () => {
-  assert.deepEqual(cellOrigin({ col: 0, row: 1 }), { x: STEP_X / 2, y: STEP_Y });
+test('rooms stand on a plain grid, a shared wall apart', () => {
+  assert.deepEqual(cellOrigin({ col: 0, row: 1 }), { x: 0, y: STEP_Y });
   assert.deepEqual(cellOrigin({ col: 2, row: 0 }), { x: STEP_X * 2, y: 0 });
 });
 
@@ -87,6 +87,7 @@ test('rooms side by side share a door, and rows share a stretch of wall', () => 
   const plan = placeComb(createCombAllocator().sync(bots('a', 5), [{ id: 'a' }]).rooms);
   const links = combLinks([...plan.rooms, plan.breakRoom]);
   assert.ok(links.some((l) => l.kind === 'side' && l.from === 'a:hub' && l.to === 'break'));
+  assert.ok(links.some((l) => l.kind === 'back'));
   for (const link of links.filter((l) => l.kind === 'back')) assert.ok(link.right - link.left >= 40);
 });
 

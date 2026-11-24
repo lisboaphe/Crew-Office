@@ -1,54 +1,56 @@
 // The comb: a room for every agent. No drawing here, so the rules can be tested on their own.
 //
 // The usual layout gives a player a column of four-desk rooms and fills them in turn. The comb
-// instead gives every agent who joins a room of their own, and the rooms tile together the way the
-// cells of a honeycomb do: rows of rooms sharing their walls, every other row shifted along by half
-// a room, so each room touches up to six others. The player's own room is in the middle, the break
-// room beside it, and agents' rooms ring outwards from there in the order they arrived. Somebody
-// leaving closes the gap, as everybody after them moves one cell inwards; the view eases rooms from
-// where they were to where they are now, so the comb grows and shrinks rather than jumping.
+// instead gives every agent who joins a room of their own, and packs the rooms together in a block,
+// every room sharing whole walls with its neighbours and none left hanging off a corner. The
+// player's own room and the break room are side by side in the middle, and each new room goes in
+// the free place that touches the most rooms already there, so the block stays as close to square
+// as it can. Somebody leaving closes the gap, as everybody after them moves one place inwards; the
+// view eases rooms from where they were to where they are now, so the comb grows and shrinks
+// rather than jumping.
 //
 // A subagent has no room of its own: it sits in its parent's, at the next desk. A room has four
-// desks, so a parent with more than three subagents at once gets an annexe, the very next cell.
+// desks, so a parent with more than three subagents at once gets an annexe, the very next place.
 
 import { BORDER, INNER_W, ROOM_H, ROOM_W, STEP_X, STEP_Y } from './floor-plan.js';
 
 export const DESKS_PER_ROOM = 4;
 
-// The six ways out of a hex, in axial coordinates, going round.
-const DIRECTIONS = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]];
-
-/** Axial hex coordinates to a row and a column, with odd rows shifted half a room to the right. */
-const toCell = (q, r) => ({ col: q + (r - (r & 1)) / 2, row: r });
+/** The break room's cell: straight to the right of the player's room. */
+const BREAK_CELL = { col: 1, row: 0 };
+const SIDES = [[1, 0], [-1, 0], [0, 1], [0, -1]];
 
 /**
- * The first `count` cells of the comb, from the middle outwards a ring at a time, each ring walked
- * round in order so one cell is always beside the one before it.
+ * The first `count` cells of the comb, the player's room first. Each next one is the free cell
+ * sharing a wall with the most cells taken so far, the break room's included; a tie goes to the
+ * one nearest the middle of the two, then to the higher row, then to the left. The order never
+ * depends on `count`, so a comb of n rooms is always the first n of a bigger one.
  */
 export function combCells(count) {
   const cells = [];
   if (count <= 0) return cells;
-  cells.push(toCell(0, 0));
-  for (let radius = 1; cells.length < count; radius++) {
-    let q = DIRECTIONS[4][0] * radius;
-    let r = DIRECTIONS[4][1] * radius;
-    for (let side = 0; side < 6 && cells.length < count; side++) {
-      for (let step = 0; step < radius && cells.length < count; step++) {
-        cells.push(toCell(q, r));
-        q += DIRECTIONS[side][0];
-        r += DIRECTIONS[side][1];
+  const key = (c) => `${c.col},${c.row}`;
+  const taken = new Set([key(BREAK_CELL)]);
+  const take = (c) => { cells.push(c); taken.add(key(c)); };
+  take({ col: 0, row: 0 });
+  while (cells.length < count) {
+    const free = new Map();
+    for (const c of [...cells, BREAK_CELL]) {
+      for (const [dc, dr] of SIDES) {
+        const n = { col: c.col + dc, row: c.row + dr };
+        if (!taken.has(key(n))) free.set(key(n), n);
       }
     }
+    const touching = (c) => SIDES.filter(([dc, dr]) => taken.has(key({ col: c.col + dc, row: c.row + dr }))).length;
+    const distance = (c) => Math.hypot(c.col - 0.5, c.row * (STEP_Y / STEP_X));
+    const best = [...free.values()].sort((a, b) => touching(b) - touching(a) || distance(a) - distance(b) || a.row - b.row || a.col - b.col)[0];
+    take(best);
   }
   return cells;
 }
 
 /** Where a cell's room stands, before the comb is moved to start at nought. */
-export const cellOrigin = ({ col, row }) => ({ x: col * STEP_X + ((row & 1) ? STEP_X / 2 : 0), y: row * STEP_Y });
-
-/** The break room's cell: straight to the right of the player's room. */
-const BREAK_CELL = { col: 1, row: 0 };
-const sameCell = (a, b) => a.col === b.col && a.row === b.row;
+export const cellOrigin = ({ col, row }) => ({ x: col * STEP_X, y: row * STEP_Y });
 
 /**
  * Who has which room, kept in the order they arrived. `sync` takes everybody here now and answers
@@ -122,7 +124,7 @@ export function createCombAllocator() {
  * @param {Array<object>} rooms  in order, as `sync` gives them
  */
 export function placeComb(rooms) {
-  const cells = combCells(rooms.length + 1).filter((c) => !sameCell(c, BREAK_CELL)).slice(0, rooms.length);
+  const cells = combCells(rooms.length);
   const placed = rooms.map((room, i) => ({ ...room, cell: cells[i], ...cellOrigin(cells[i]) }));
   const breakAt = cellOrigin(BREAK_CELL);
   const minX = Math.min(breakAt.x, ...placed.map((r) => r.x));
@@ -144,8 +146,8 @@ export function placeComb(rooms) {
 
 /**
  * Which rooms share a wall, and where a way through it could go. Rooms side by side in a row share
- * a whole wall and get a door at floor level, like the usual layout's. A room and one in the row
- * behind it share only part of a wall, so the way through goes somewhere along that part.
+ * a whole wall and get a door at floor level, like the usual layout's. A room and the one behind it
+ * get a doorway somewhere along the wall they share, wherever it is clear on both sides.
  *
  * @param {Array<{key: string, cell: {col: number, row: number}, x: number, y: number}>} cells
  */
