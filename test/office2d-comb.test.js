@@ -119,3 +119,34 @@ test('rooms glide to where they belong, and new rooms appear in place', () => {
   easeRooms(shown, [], 0.016);
   assert.equal(shown.size, 0);
 });
+
+test('with the real sprites, everyone can walk in, stroll, and reach every break spot', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { routeTo, arrivalRoute, strollFrom, BREAK_SPOTS, stationAt, isSolo } = await import('../src/office2d/floor-plan.js');
+  const sizes = {
+    ...JSON.parse(readFileSync(new URL('../assets/pixel-art/office/established/sprites.json', import.meta.url))),
+    ...JSON.parse(readFileSync(new URL('../assets/pixel-art/office/comb/sprites.json', import.meta.url))),
+  };
+  let seed = 1;
+  const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (const n of [1, 3, 7]) {
+    const lead = Array.from({ length: n }, (_, i) => ({ id: `b${i}`, ownerId: 'a' }));
+    // The last agent has three subagents, so a full room of four is walked as well.
+    const subs = [1, 2, 3].map((i) => ({ id: `s${i}`, ownerId: 'a', parentId: `b${n - 1}` }));
+    const rooms = createCombAllocator().sync([...lead, ...subs], [{ id: 'a' }]).rooms.map((r) => ({ ...r, comb: true }));
+    const plan = placeComb(rooms);
+    for (const room of plan.rooms) {
+      room.rows.forEach((row, index) => {
+        const seat = { room, plan, index };
+        for (const spot of BREAK_SPOTS) assert.ok(routeTo(seat, spot, sizes), `${n}: ${row.botId} cannot get to the ${spot.action}`);
+        assert.ok(arrivalRoute(seat, sizes), `${n}: ${row.botId} cannot walk in`);
+        assert.ok([1, 2, 3, 4, 5].some(() => strollFrom(seat, sizes, random)), `${n}: ${row.botId} cannot stroll`);
+      });
+      if (isSolo(room)) {
+        const at = stationAt(room, 0);
+        const middle = room.x + 7 + 150;
+        assert.ok(Math.abs(at.deskX + 41 - middle) <= 14, `${room.key}: the desk is not in the middle`);
+      }
+    }
+  }
+});

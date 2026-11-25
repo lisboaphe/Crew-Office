@@ -13,8 +13,8 @@ import { createAllocator } from './allocation.js';
 import { createCombAllocator, easeRooms, placeComb } from './comb.js';
 import { createAmbient } from './ambient.js';
 import {
-  AISLE_X, BORDER, BREAK_DOOR_X, COZY_RUG, DESK_H, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
-  STEP_X, WALL_H, WORKER_H, WORKER_W, combDoorsOf, decorOf, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
+  AISLE_X, BORDER, BREAK_DOOR_X, COZY_RUG, DESK_H, DESK_W, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
+  STEP_X, WALL_H, WORKER_H, WORKER_W, SOLO_DESK_X, SOLO_ROW_Y, combDoorsOf, decorOf, isSolo, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
 } from './floor-plan.js';
 import { restingPose, workingPose } from './desk-poses.js';
 import { clockText, hostMinutes, phaseOf } from './sky.js';
@@ -538,7 +538,11 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
     if (clear(left + recipe.windowX, 104)) drawWindow(left + recipe.windowX, top + 5);
     if (clear(left + recipe.clockX, 48)) drawClock(left + recipe.clockX, top + 25); // below the plaque with the room's name
     if (recipe.picture && room.down === 0 && room.number !== 1 && clear(left + AISLE_X - 15, 30)) put(recipe.picture, left + AISLE_X - 15, top + 24);
-    if (recipe.rug) put(room.comb && sprites['hex-rug'] ? 'hex-rug' : 'rug', left + AISLE_X - 36, top + ROW_TOP + 40);
+    if (isSolo(room) && sprites['hex-rug']) {
+      // The comb's rug lies under the desk in the middle of the room.
+      const rug = sprites['hex-rug'];
+      put('hex-rug', left + SOLO_DESK_X + DESK_W / 2 - rug.width / 2, top + SOLO_ROW_Y + DESK_H - rug.height + 6);
+    } else if (recipe.rug) put('rug', left + AISLE_X - 36, top + ROW_TOP + 40);
     for (const x of doorways) putDoorway(x, top);
     // The cozy corner's rug, under its lamp, armchair and plant.
     if (recipe.cozy) put(COZY_RUG.sprite, left + COZY_RUG.x, top + COZY_RUG.y);
@@ -585,11 +589,14 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
   function drawStation(room, row, index, bots, layer) {
     const at = stationAt(room, index);
     const { y } = at;
-    context.fillStyle = 'rgba(247, 232, 196, 0.2)';
-    context.fillRect(at.rugX, y - 8, 124, ROW_H - 4);
-    context.strokeStyle = 'rgba(63, 98, 72, 0.4)';
-    context.lineWidth = 1;
-    context.strokeRect(at.rugX + 0.5, y - 7.5, 123, ROW_H - 5);
+    // The pale patch marks each workstation in a shared room; a room of the comb is one agent's own.
+    if (!room.comb) {
+      context.fillStyle = 'rgba(247, 232, 196, 0.2)';
+      context.fillRect(at.rugX, y - 8, 124, ROW_H - 4);
+      context.strokeStyle = 'rgba(63, 98, 72, 0.4)';
+      context.lineWidth = 1;
+      context.strokeRect(at.rugX + 0.5, y - 7.5, 123, ROW_H - 5);
+    }
 
     const desk = at.right ? put : putFlipped;
     const deskY = y - 8;
