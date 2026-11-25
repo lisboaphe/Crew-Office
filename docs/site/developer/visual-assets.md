@@ -141,6 +141,7 @@ cover what across the project.
 |---|---|---|
 | Project icon | `assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico` | A team around a desk in a stepped, rounded frame |
 | Office sprites | `assets/pixel-art/office/established/` | Everything the office shows, cut from the owner's reference sheets by `assets/pixel-art/office/source/build-established-art.sh`. Its README lists them |
+| Comb sprites | `assets/pixel-art/office/comb/` | The doorway, a rug, a beanbag and a whiteboard that only the comb layout uses, plus two unused floor tiles kept so they are never paid for twice. Generated with PixelLab from the owner's account rather than drawn: PixelLab claims no ownership of its output, and they are published under the same licence as the rest of this section. The folder's README gives every prompt, and `third-party/components.json` has them as `pixellab-comb-art` |
 
 ---
 

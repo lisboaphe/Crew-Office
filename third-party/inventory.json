@@ -36,6 +36,7 @@
       "atlassian-rovo-standee",
       "atlassian-jira-mark",
       "project-artwork",
+      "pixellab-comb-art",
       "node-container-runtime"
     ]
   },
@@ -576,6 +577,55 @@
         {
           "path": "favicon.ico",
           "sha256": "487eccf93cb416a83e4a961c51f3fc7cab42a75b35f3cc503dc500c6178ef175"
+        }
+      ],
+      "licenseEvidence": []
+    },
+    {
+      "id": "pixellab-comb-art",
+      "name": "Comb layout sprites, generated with PixelLab",
+      "version": null,
+      "license": "NOASSERTION",
+      "source": "https://www.pixellab.ai/",
+      "paths": [
+        "assets/pixel-art/office/comb/unused/floor-hex-honeycomb.png",
+        "assets/pixel-art/office/comb/comb-arch.png",
+        "assets/pixel-art/office/comb/hex-rug.png",
+        "assets/pixel-art/office/comb/beanbag.png",
+        "assets/pixel-art/office/comb/whiteboard.png",
+        "assets/pixel-art/office/comb/unused/floor-hex-first-try.png"
+      ],
+      "licenseFiles": [],
+      "distributions": [
+        "source",
+        "claude-marketplace",
+        "hosted-app"
+      ],
+      "review": "Generated on 2026-11-25 with PixelLab (create_image_pixflux, one generation each, six in all) from the project owner's account, with four of the established office sprites uploaded as palette references; the prompts are in assets/pixel-art/office/comb/README.md. Committed exactly as PixelLab returned them. PixelLab's terms of service (https://www.pixellab.ai/termsofservice) claim no ownership of generated output and allow its use, including commercially, so the project publishes them with the rest of assets/pixel-art/ under CC BY-NC 4.0 (LICENSING.md). Whether purely machine-generated images attract copyright at all is unsettled, which is why the licence field stays NOASSERTION. No third-party artwork was used as an input apart from the project's own sprites.",
+      "files": [
+        {
+          "path": "assets/pixel-art/office/comb/beanbag.png",
+          "sha256": "19e88f9c59e70df736d1701b30cc78e80995f9b583990de73c59850182bcbe76"
+        },
+        {
+          "path": "assets/pixel-art/office/comb/comb-arch.png",
+          "sha256": "8b175fbd45bde04273bd71b82a2f640d4841675392e4b3f2af9bf366161d8613"
+        },
+        {
+          "path": "assets/pixel-art/office/comb/hex-rug.png",
+          "sha256": "f2d91d47a4cea6da9a38ce89a045824817c2c301d1380401adc08ca20e32e712"
+        },
+        {
+          "path": "assets/pixel-art/office/comb/unused/floor-hex-first-try.png",
+          "sha256": "3af8f1ba481e0b5a898cd506095dc16f718e03776f2d93949948e7c56e4df6eb"
+        },
+        {
+          "path": "assets/pixel-art/office/comb/unused/floor-hex-honeycomb.png",
+          "sha256": "5685fce238896dda693aa89a5e3fe5bc06eeac5eb462175f9d9ab6a3bebfb401"
+        },
+        {
+          "path": "assets/pixel-art/office/comb/whiteboard.png",
+          "sha256": "2a037431f60ff13d3eaa426dd34c5860e8ecd524d2b408783903dad25cfb0199"
         }
       ],
       "licenseEvidence": []

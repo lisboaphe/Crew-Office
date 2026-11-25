@@ -5,17 +5,25 @@
 // this asks who is present and how they are doing, and allocation.js says who sits where. Layers,
 // from the bottom: tiled floor, walls and furniture, a workstation per bot, and one worker at each
 // active workstation. The art is in assets/pixel-art/office/established.
+//
+// With `?layout=comb` in the address the rooms are laid out as a comb instead, a room for every
+// agent, and comb.js says who sits where; the comb's own art is in assets/pixel-art/office/comb.
 
 import { createAllocator } from './allocation.js';
+import { createCombAllocator, easeRooms, placeComb } from './comb.js';
 import { createAmbient } from './ambient.js';
 import {
-  AISLE_X, BORDER, BREAK_DOOR_X, COZY_RUG, DESK_H, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
-  STEP_X, WALL_H, WORKER_H, WORKER_W, decorOf, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
+  AISLE_X, BORDER, BREAK_DOOR_X, COZY_RUG, DESK_H, DESK_W, BREAK_FURNITURE, BREAK_SPOTS, BREAK_W, FOOT_Y, INNER_H, PLAYER, ROOM_H, ROOM_W, ROW_H, ROW_TOP,
+  STEP_X, WALL_H, WORKER_H, WORKER_W, SOLO_DESK_X, SOLO_ROW_Y, combDoorsOf, decorOf, isSolo, hashOf, placeFloor, routeTo, seatFeet, arrivalRoute, sittingAt, stationAt, strollFrom,
 } from './floor-plan.js';
 import { restingPose, workingPose } from './desk-poses.js';
 import { clockText, hostMinutes, phaseOf } from './sky.js';
 
 const ROOT = '/assets/pixel-art/office/established/';
+const COMB_ROOT = '/assets/pixel-art/office/comb/';
+
+/** Whether this office is laid out as a comb, from the address: `?layout=comb`. */
+export const combLayoutWanted = (search = globalThis.location?.search ?? '') => new URLSearchParams(search).get('layout') === 'comb';
 
 const TOP_BAR = 56; // the office's top bar, in page pixels, which the scene stays below
 const MARGIN = 8;
@@ -123,7 +131,8 @@ function rosterOf(world, ownerOf) {
     const id = String(agent.id);
     if (id.includes('human-') || String(agent.name).endsWith('(human)')) continue;
     const owner = ownerOf?.(id) ?? OWNER_DEFAULT;
-    bots.push({ id, ownerId: owner.id, ownerName: owner.name, name: agent.name, status: agent.status, job: agent.job, color: agent.color });
+    const parentId = agent.parentId ?? agent.parent_id ?? null;
+    bots.push({ id, ownerId: owner.id, ownerName: owner.name, name: agent.name, status: agent.status, job: agent.job, color: agent.color, parentId: parentId === null ? null : String(parentId) });
   }
   // An agent has a desk from the moment they are added, and sits idle until their worker can run them.
   for (const agent of window.crewAgents?.() ?? []) {
@@ -133,7 +142,7 @@ function rosterOf(world, ownerOf) {
   return bots;
 }
 
-const boundsOf = ({ rooms, breakRoom }) => ({
+const boundsOf = ({ rooms, breakRoom, bounds }) => bounds ?? ({
   w: breakRoom.x + breakRoom.width,
   h: Math.max(ROOM_H, ...rooms.map((r) => r.y + ROOM_H)),
 });
@@ -142,9 +151,13 @@ const boundsOf = ({ rooms, breakRoom }) => ({
  * @param {HTMLCanvasElement} canvas  takes the whole office; pointer events go to what is under it
  * @param {HTMLElement} input  what the pointer actually lands on, for the wheel and for dragging
  */
-export function createOffice2D(canvas, input) {
+export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}) {
   const context = canvas.getContext('2d');
   const allocator = createAllocator();
+  const combAllocator = createCombAllocator();
+  const combShown = new Map(); // where each room of the comb is drawn, as it glides
+  let combPlan = { signature: '', plan: null };
+  let targetPlan = null;
   const strips = new Map();
   const shells = new Map();
   const arrived = new Map();
@@ -194,7 +207,15 @@ export function createOffice2D(canvas, input) {
 
   // Moving the camera ---------------------------------------------------------------------------
 
-  const allRooms = () => floors.flatMap((floor, index) => placeFloor(floor).rooms.map((room) => ({ ...room, floor: index })));
+  /** A floor's plan. The comb's is worked out again only when somebody comes or goes. */
+  function planOf(floor) {
+    if (!floor.comb) return placeFloor(floor);
+    const signature = JSON.stringify(floor.comb.map((r) => [r.key, r.ownerName, r.rows.map((row) => row.botId)]));
+    if (combPlan.signature !== signature) combPlan = { signature, plan: placeComb(floor.comb) };
+    return combPlan.plan;
+  }
+
+  const allRooms = () => floors.flatMap((floor, index) => planOf(floor).rooms.map((room) => ({ ...room, floor: index })));
 
   function showFloor(index = floorIndex) {
     floorIndex = Math.max(0, Math.min(floors.length - 1, index));
@@ -274,6 +295,12 @@ export function createOffice2D(canvas, input) {
       image.onerror = () => reject(new Error(`Could not load ${name}`));
       image.src = `${ROOT}${name}.png`;
     }))))
+    .then((loaded) => (comb ? fetch(`${COMB_ROOT}sprites.json`).then((res) => res.json()).then((list) => Promise.all(Object.entries(list).map(([name, meta]) => new Promise((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve([name, { ...meta, image }]);
+      image.onerror = () => resolve(null); // the comb falls back to the usual art
+      image.src = `${COMB_ROOT}${name}.png`;
+    })))).then((extra) => [...loaded, ...extra.filter(Boolean)]).catch(() => loaded) : loaded))
     .then((loaded) => { sprites = Object.fromEntries(loaded); })
     .catch((err) => console.warn(err.message));
 
@@ -468,16 +495,43 @@ export function createOffice2D(canvas, input) {
     return { x: room.x + BORDER + recipe.shelfX, y: room.y + BORDER + recipe.shelfY, width: shelf.width, height: shelf.height };
   }
 
+  /** How far a comb room is drawn from where it belongs, while it glides. */
+  function combDelta(key) {
+    const at = targetPlan && [...targetPlan.rooms, targetPlan.breakRoom].find((r) => r.key === key);
+    const shown = combShown.get(key);
+    return at && shown ? { x: shown.x - at.x, y: shown.y - at.y } : { x: 0, y: 0 };
+  }
+
+  /** The middles of the doorways in a comb room's back wall, where it is drawn now. */
+  function combDoorwaysIn(room) {
+    if (!targetPlan?.comb) return [];
+    const delta = combDelta(room.key);
+    return combDoorsOf(targetPlan, sprites).back.filter((d) => d.to === room.key).map((d) => d.x + delta.x);
+  }
+
+  function putDoorway(x, top) {
+    const name = sprites['comb-arch'] ? 'comb-arch' : 'door';
+    put(name, x - Math.round(sprites[name].width / 2), top + WALL_H - sprites[name].height);
+  }
+
   /** The room's walls and floor now, and what stands on the floor into `layer`, to go in depth. */
   function drawRoom(room, layer) {
     const left = room.x + BORDER;
     const top = room.y + BORDER;
     const recipe = decorFor(room);
     drawShell(room.x, room.y, ROOM_W);
-    drawWindow(left + recipe.windowX, top + 5);
-    drawClock(left + recipe.clockX, top + 25); // below the plaque with the room's name
-    if (recipe.picture && room.down === 0 && room.number !== 1) put(recipe.picture, left + AISLE_X - 15, top + 24);
-    if (recipe.rug) put('rug', left + AISLE_X - 36, top + ROW_TOP + 40);
+    // In the comb a doorway may be anywhere along the back wall, and what hangs there makes way for it.
+    const doorways = room.comb ? combDoorwaysIn(room) : [];
+    const clear = (x, w) => !doorways.some((d) => x < d + 24 && x + w > d - 24);
+    if (clear(left + recipe.windowX, 104)) drawWindow(left + recipe.windowX, top + 5);
+    if (clear(left + recipe.clockX, 48)) drawClock(left + recipe.clockX, top + 25); // below the plaque with the room's name
+    if (recipe.picture && room.down === 0 && room.number !== 1 && clear(left + AISLE_X - 15, 30)) put(recipe.picture, left + AISLE_X - 15, top + 24);
+    if (isSolo(room) && sprites['hex-rug']) {
+      // The comb's rug lies under the desk in the middle of the room.
+      const rug = sprites['hex-rug'];
+      put('hex-rug', left + SOLO_DESK_X + DESK_W / 2 - rug.width / 2, top + SOLO_ROW_Y + DESK_H - rug.height + 6);
+    } else if (recipe.rug) put('rug', left + AISLE_X - 36, top + ROW_TOP + 40);
+    for (const x of doorways) putDoorway(x, top);
     // The cozy corner's rug, under its lamp, armchair and plant.
     if (recipe.cozy) put(COZY_RUG.sprite, left + COZY_RUG.x, top + COZY_RUG.y);
     // A door in the back wall, from the room behind this one.
@@ -523,11 +577,14 @@ export function createOffice2D(canvas, input) {
   function drawStation(room, row, index, bots, layer) {
     const at = stationAt(room, index);
     const { y } = at;
-    context.fillStyle = 'rgba(247, 232, 196, 0.2)';
-    context.fillRect(at.rugX, y - 8, 124, ROW_H - 4);
-    context.strokeStyle = 'rgba(63, 98, 72, 0.4)';
-    context.lineWidth = 1;
-    context.strokeRect(at.rugX + 0.5, y - 7.5, 123, ROW_H - 5);
+    // The pale patch marks each workstation in a shared room; a room of the comb is one agent's own.
+    if (!room.comb) {
+      context.fillStyle = 'rgba(247, 232, 196, 0.2)';
+      context.fillRect(at.rugX, y - 8, 124, ROW_H - 4);
+      context.strokeStyle = 'rgba(63, 98, 72, 0.4)';
+      context.lineWidth = 1;
+      context.strokeRect(at.rugX + 0.5, y - 7.5, 123, ROW_H - 5);
+    }
 
     const desk = at.right ? put : putFlipped;
     const deskY = y - 8;
@@ -598,6 +655,7 @@ export function createOffice2D(canvas, input) {
     const left = breakRoom.x + BORDER;
     const top = breakRoom.y + BORDER;
     drawShell(breakRoom.x, breakRoom.y, breakRoom.width);
+    if (targetPlan?.comb) for (const x of combDoorwaysIn(breakRoom)) putDoorway(x, top);
 
     drawClock(left + 201, top + 6);
     put('noticeboard', left + 141, top + 2);
@@ -740,6 +798,20 @@ export function createOffice2D(canvas, input) {
       }
     };
     const footOf = (room) => room.y + BORDER + FOOT_Y;
+    if (targetPlan?.comb) {
+      const doors = combDoorsOf(targetPlan, sprites);
+      for (const door of doors.side) {
+        const delta = combDelta(door.to);
+        side(door.wallX + delta.x, door.y + delta.y + BORDER + FOOT_Y);
+      }
+      for (const door of doors.back) {
+        // Through the shared wall from the room behind, to the doorway on this side of it.
+        const delta = combDelta(door.to);
+        context.fillStyle = '#6e3f1f';
+        context.fillRect(door.x + delta.x - 15, door.y + delta.y, 30, BORDER);
+      }
+      return;
+    }
     for (const room of plan.rooms) {
       if (room.across > 0 && room.down === 0) side(room.x, footOf(room));
       if (room.down > 0) {
@@ -977,7 +1049,7 @@ export function createOffice2D(canvas, input) {
     for (const id of arrived.keys()) if (!bots.has(id)) arrived.delete(id);
     const present = (world === null ? [] : playersOverride ?? window.crewPlayers?.()) ?? [];
     players = new Map(present.map((p) => [p.id, p]));
-    floors = allocator.sync(roster, present).floors;
+    floors = comb ? [{ comb: combAllocator.sync(roster, present).rooms.map((r) => ({ ...r, comb: true })) }] : allocator.sync(roster, present).floors;
     floorIndex = Math.min(floorIndex, floors.length - 1);
 
     const everyRoom = allRooms();
@@ -995,7 +1067,7 @@ export function createOffice2D(canvas, input) {
     // Every bot's seat, on every floor, because a break goes on whichever floor is on screen.
     seats = new Map();
     floors.forEach((floor, index) => {
-      const plan = placeFloor(floor);
+      const plan = planOf(floor);
       for (const room of plan.rooms) {
         room.rows.forEach((row, i) => {
           if (row.botId) seats.set(row.botId, { room, plan, index: i, floor: index });
@@ -1012,13 +1084,22 @@ export function createOffice2D(canvas, input) {
     rememberWelcomed();
     ambient.update(dt, roster.map((b) => ({ id: b.id, idle: isFree(b) && !b.waiting })), planOuting);
 
-    floorPlan = placeFloor(floors[floorIndex]);
+    floorPlan = planOf(floors[floorIndex]);
+    targetPlan = floorPlan;
+    let combMoving = false;
+    if (floorPlan.comb) {
+      // Rooms glide to their new places when somebody comes or goes, and are drawn where they are now.
+      combMoving = easeRooms(combShown, [...floorPlan.rooms, floorPlan.breakRoom], dt);
+      const now = (r) => ({ ...r, ...combShown.get(r.key) });
+      floorPlan = { ...floorPlan, rooms: floorPlan.rooms.map(now), breakRoom: now(floorPlan.breakRoom) };
+    }
     rooms = floorPlan.rooms;
     if (!rooms.length) {
       rooms = [{ key: 'empty', ownerId: OWNER_DEFAULT.id, ownerName: OWNER_DEFAULT.name, number: 1, rows: [], across: 0, down: 0, x: 0, y: 0 }];
       floorPlan = { rooms, breakRoom: { x: STEP_X, y: 0, width: BREAK_W + BORDER * 2 } };
     }
     aimCamera(width, height, dt);
+    if (combMoving) moving = true;
     context.setTransform(scale, 0, 0, scale, originX, originY);
     context.imageSmoothingEnabled = scale < 1;
 
@@ -1054,17 +1135,19 @@ export function createOffice2D(canvas, input) {
     if (light) {
       const all = boundsOf(floorPlan);
       context.fillStyle = light;
-      context.fillRect(0, 0, all.w, all.h);
+      // The comb has gaps round its edge, which are not indoors and so not lit.
+      if (floorPlan.comb) for (const r of [...floorPlan.rooms, floorPlan.breakRoom]) context.fillRect(r.x, r.y, ROOM_W, ROOM_H);
+      else context.fillRect(0, 0, all.w, all.h);
     }
 
-    const floorText = `FLOOR ${floorIndex + 1}${floors.length > 1 ? ` of ${floors.length}` : ''}`;
+    const floorText = floorPlan.comb ? 'THE COMB' : `FLOOR ${floorIndex + 1}${floors.length > 1 ? ` of ${floors.length}` : ''}`;
     walkingNow = walking;
     drawLabels(selectedId, visible, view.mode === 'floor' ? floorText : '', breakPlan);
 
     const here = rooms.find((r) => r.key === view.roomKey);
     const text = view.mode === 'room' && here
       ? `${here.ownerName || 'Owner'} · Room ${here.number}`
-      : `Floor ${floorIndex + 1}`;
+      : (floorPlan.comb ? 'The comb' : `Floor ${floorIndex + 1}`);
     controls.update(text, view.mode === 'room' ? everyRoom.length > 1 : floors.length > 1, view.mode === 'room', everyRoom.length > 0);
   }
 

@@ -68,8 +68,18 @@ const FLOOR_PROPS = [
   { sprite: 'fax', on: 'side-table' },
 ];
 const SMALL_PROPS = [null, 'bin', 'bin'];
+// What only a room of the comb may have as well, from the comb's own art.
+const COMB_PROPS = [{ sprite: 'beanbag' }, { sprite: 'whiteboard' }];
 const PICTURES = [null, 'picture-hills', 'picture-chart', 'picture-night'];
 const SEATS_IN_A_ROOM = 4;
+// Where the one desk of a room of the comb with only its agent in it stands: in the middle.
+export const SOLO_DESK_X = Math.round((INNER_W - DESK_W) / 2) + 13;
+export const SOLO_ROW_Y = 140;
+/** A room of the comb with nobody in it but its agent, whose desk is in the middle. */
+export const isSolo = (room) => Boolean(room.comb) && room.number !== 1 && room.rows.length <= 1;
+// The usual rooms keep a place for all four desks, taken or not. A room of the comb is laid out
+// for whoever is in it, as it is redrawn when somebody joins.
+const seatsIn = (room) => (room.comb ? (isSolo(room) ? 1 : room.rows.length) : SEATS_IN_A_ROOM);
 const CHAIR_X = 48; // where the middle of the chair is in the desk's sprite, which is drawn mirrored on the left
 const CHAIR_TOP = 13;
 const WANDER_LEGS = 6; // straight walks in a stroll, each ending at whatever is in the way
@@ -116,6 +126,20 @@ export function placeFloor(floor) {
 /** Where a workstation is in its room. Odd seats are on the right, and desks face the aisle. */
 export function stationAt(room, index) {
   const left = room.x + BORDER;
+  if (isSolo(room)) {
+    // An agent alone in a room of the comb works in the middle of it, on the rug.
+    const deskX = left + SOLO_DESK_X;
+    return {
+      right: true,
+      y: room.y + BORDER + SOLO_ROW_Y,
+      left,
+      rugX: deskX - 30,
+      badgeX: deskX + 85,
+      deskX,
+      workerX: deskX - 26,
+      nameX: deskX + 41,
+    };
+  }
   const right = index % 2 === 1;
   const y = room.y + BORDER + ROW_TOP + (index >> 1) * ROW_H;
   return {
@@ -137,7 +161,8 @@ export function stationAt(room, index) {
  * @param {string} key  the room's name
  * @param {Record<string, {width: number, height: number}>} sizes  the sprites' sizes
  */
-export function decorOf({ key, number }, sizes) {
+export function decorOf(room, sizes) {
+  const { key, number } = room;
   const widthOf = (prop) => sizes[prop.on ?? prop.sprite].width;
   let seed = hashOf(key);
   const roll = (n) => {
@@ -147,8 +172,9 @@ export function decorOf({ key, number }, sizes) {
   // The player's room keeps its shelf on the right, as its left is the cozy corner.
   const cozy = number === 1;
   const flipped = roll(2) === 1 && !cozy;
-  let left = FLOOR_PROPS[roll(FLOOR_PROPS.length)];
-  const others = FLOOR_PROPS.filter((p) => p !== left);
+  const choices = room.comb ? [...FLOOR_PROPS, ...COMB_PROPS.filter((p) => sizes[p.sprite])] : FLOOR_PROPS;
+  let left = choices[roll(choices.length)];
+  const others = choices.filter((p) => p !== left);
   let right = others[roll(others.length)];
   const shelfX = flipped ? 6 : INNER_W - sizes.shelf.width - 8;
   // Whatever stands on the shelf's side of the room goes in the gap beside it. There is no gap in the
@@ -199,7 +225,7 @@ function roomSolids(room, sizes, ownSeat) {
     solids.push(rect(left + PLAYER.x + 4, top + PLAYER.y + WORKER_H - 14, WORKER_W - 8, 14));
   }
   // Every seat counts, taken or not, so a colleague arriving mid-walk cannot end up in somebody's way.
-  for (let index = 0; index < SEATS_IN_A_ROOM; index++) {
+  for (let index = 0; index < seatsIn(room); index++) {
     const at = stationAt(room, index);
     solids.push(rect(at.deskX, at.y - 8, DESK_W, DESK_H));
     if (index !== ownSeat) solids.push(rect(at.workerX + 4, at.y + 6 + WORKER_H - 14, WORKER_W - 8, 14));
@@ -223,6 +249,7 @@ export function walkMapOf(plan, sizes, seat = null) {
   const walkable = [];
   const solids = [];
   const links = [];
+  if (plan.comb) return combWalkMap(plan, sizes, seat, floorOf, sideDoor);
   for (const room of plan.rooms) {
     const left = room.x + BORDER;
     const top = room.y + BORDER;
@@ -240,10 +267,76 @@ export function walkMapOf(plan, sizes, seat = null) {
   const breakTop = plan.breakRoom.y + BORDER;
   walkable.push(floorOf(breakLeft, breakTop, BREAK_W));
   walkable.push(sideDoor(plan.breakRoom.x, breakTop));
-  for (const item of BREAK_FURNITURE) {
-    if (!item.onTop) solids.push(rect(breakLeft + item.x, breakTop + item.y, sizes[item.sprite].width, sizes[item.sprite].height));
-  }
+  solids.push(...breakSolids(plan.breakRoom, sizes));
   return { walkable, solids, links };
+}
+
+function breakSolids(breakRoom, sizes) {
+  const left = breakRoom.x + BORDER;
+  const top = breakRoom.y + BORDER;
+  return BREAK_FURNITURE.filter((item) => !item.onTop)
+    .map((item) => rect(left + item.x, top + item.y, sizes[item.sprite].width, sizes[item.sprite].height));
+}
+
+const combDoorCache = new WeakMap();
+
+/**
+ * The comb's ways between rooms. Side by side, a door at floor level in the shared wall; front to
+ * back, a doorway somewhere along the stretch of wall the two rooms share, wherever nothing stands
+ * in front of it on either side, as near the middle of that stretch as it can be. A stretch with
+ * no such place gets no doorway, and the rooms are reached some other way round.
+ *
+ * @returns {{side: Array<{wallX: number, y: number}>, back: Array<{x: number, y: number, to: string}>}}
+ */
+export function combDoorsOf(plan, sizes) {
+  if (combDoorCache.has(plan)) return combDoorCache.get(plan);
+  const byKey = new Map([...plan.rooms, plan.breakRoom].map((r) => [r.key, r]));
+  const solidsOf = (room) => (room === plan.breakRoom ? breakSolids(room, sizes) : roomSolids(room, sizes, null));
+  const free = (point, room) => {
+    const top = room.y + BORDER;
+    const floor = rect(room.x + BORDER + 9, top + WALL_H + 2, INNER_W - 18, INNER_H - WALL_H - 5);
+    const map = { walkable: [floor], solids: solidsOf(room) };
+    // Clear is not enough: from the doorway there has to be a way to the walk along the foot of the room.
+    const foot = { x: room.x + BORDER + AISLE_X, y: top + FOOT_Y };
+    return isClear(point, map) && Boolean(findPath(point, foot, map));
+  };
+  const side = [];
+  const back = [];
+  for (const link of plan.links) {
+    if (link.kind === 'side') {
+      side.push({ wallX: link.wallX, y: link.y, to: link.to });
+      continue;
+    }
+    const behind = byKey.get(link.from);
+    const front = byKey.get(link.to);
+    const middle = Math.round((link.left + link.right) / 2);
+    const inFront = front.y + BORDER + WALL_H + 4;
+    const behindY = front.y - 8;
+    for (let off = 0; off <= (link.right - link.left) / 2 - 22; off += 4) {
+      const x = [middle - off, middle + off].find((at) => free({ x: at, y: inFront }, front) && free({ x: at, y: behindY }, behind));
+      if (x !== undefined) {
+        back.push({ x, y: front.y, to: front.key, from: behind.key, a: { x, y: inFront }, b: { x, y: behindY } });
+        break;
+      }
+    }
+  }
+  const doors = { side, back };
+  combDoorCache.set(plan, doors);
+  return doors;
+}
+
+function combWalkMap(plan, sizes, seat, floorOf, sideDoor) {
+  const walkable = [];
+  const solids = [];
+  for (const room of plan.rooms) {
+    walkable.push(floorOf(room.x + BORDER, room.y + BORDER, INNER_W));
+    solids.push(...roomSolids(room, sizes, seat?.room.key === room.key ? seat.index : null));
+  }
+  walkable.push(floorOf(plan.breakRoom.x + BORDER, plan.breakRoom.y + BORDER, plan.breakRoom.width - BORDER * 2));
+  solids.push(...breakSolids(plan.breakRoom, sizes));
+  const doors = combDoorsOf(plan, sizes);
+  for (const door of doors.side) walkable.push(sideDoor(door.wallX, door.y + BORDER));
+  return { walkable, solids, links: doors.back.map(({ a, b }) => ({ a, b })) };
 }
 
 /** Where to draw somebody sitting at a desk, and whether they are drawn mirrored. */
@@ -289,6 +382,7 @@ const dedupe = (points) => points.filter((p, i) => !i || p.x !== points[i - 1].x
  */
 function laneWay(seat, to, map) {
   const from = seatFeet(seat.room, seat.index);
+  if (seat.plan.comb) return findPath(from, to, map);
   const top = seat.room.y + BORDER;
   const left = seat.room.x + BORDER;
   const at = stationAt(seat.room, seat.index);
@@ -341,8 +435,9 @@ export function strollFrom(seat, sizes, random) {
   if (!own) return null;
   const map = { walkable: [own], solids: whole.solids };
   const start = seatFeet(seat.room, seat.index);
+  // Out to the aisle first, or straight off from the desk if the desk is where the aisle would be.
   const aisle = { x: left + AISLE_X, y: start.y };
-  const out = findPath(start, aisle, map);
+  const out = isClear(aisle, map) ? findPath(start, aisle, map) : [start];
   if (!out) return null;
   const way = [...out];
   let heading = Math.floor(random() * HEADINGS.length);
