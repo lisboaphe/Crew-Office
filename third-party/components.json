@@ -315,7 +315,7 @@
       "license": "NOASSERTION",
       "source": "https://www.pixellab.ai/",
       "paths": [
-        "assets/pixel-art/office/comb/comb-floor.png",
+        "assets/pixel-art/office/comb/unused/floor-hex-honeycomb.png",
         "assets/pixel-art/office/comb/comb-arch.png",
         "assets/pixel-art/office/comb/hex-rug.png",
         "assets/pixel-art/office/comb/beanbag.png",

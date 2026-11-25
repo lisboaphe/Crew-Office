@@ -588,7 +588,7 @@
       "license": "NOASSERTION",
       "source": "https://www.pixellab.ai/",
       "paths": [
-        "assets/pixel-art/office/comb/comb-floor.png",
+        "assets/pixel-art/office/comb/unused/floor-hex-honeycomb.png",
         "assets/pixel-art/office/comb/comb-arch.png",
         "assets/pixel-art/office/comb/hex-rug.png",
         "assets/pixel-art/office/comb/beanbag.png",
@@ -612,16 +612,16 @@
           "sha256": "8b175fbd45bde04273bd71b82a2f640d4841675392e4b3f2af9bf366161d8613"
         },
         {
-          "path": "assets/pixel-art/office/comb/comb-floor.png",
-          "sha256": "5685fce238896dda693aa89a5e3fe5bc06eeac5eb462175f9d9ab6a3bebfb401"
-        },
-        {
           "path": "assets/pixel-art/office/comb/hex-rug.png",
           "sha256": "f2d91d47a4cea6da9a38ce89a045824817c2c301d1380401adc08ca20e32e712"
         },
         {
           "path": "assets/pixel-art/office/comb/unused/floor-hex-first-try.png",
           "sha256": "3af8f1ba481e0b5a898cd506095dc16f718e03776f2d93949948e7c56e4df6eb"
+        },
+        {
+          "path": "assets/pixel-art/office/comb/unused/floor-hex-honeycomb.png",
+          "sha256": "5685fce238896dda693aa89a5e3fe5bc06eeac5eb462175f9d9ab6a3bebfb401"
         },
         {
           "path": "assets/pixel-art/office/comb/whiteboard.png",

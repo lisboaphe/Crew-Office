@@ -1,5 +1,4 @@
 {
-  "comb-floor": { "width": 96, "height": 96, "frames": 1, "fps": 0 },
   "comb-arch": { "width": 40, "height": 56, "frames": 1, "fps": 0 },
   "hex-rug": { "width": 72, "height": 40, "frames": 1, "fps": 0 },
   "beanbag": { "width": 40, "height": 36, "frames": 1, "fps": 0 },

@@ -412,9 +412,8 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
   }
 
   /** A room's frame, floor and wall, painted once for each width and reused, as nothing in it moves. */
-  function shellFor(width, combed = false) {
-    const shellKey = `${width}${combed ? ':comb' : ''}`;
-    if (shells.has(shellKey)) return shells.get(shellKey);
+  function shellFor(width) {
+    if (shells.has(width)) return shells.get(width);
     const shell = document.createElement('canvas');
     shell.width = width;
     shell.height = ROOM_H;
@@ -431,7 +430,7 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
     g.fillRect(1, 5, 1, ROOM_H - 10);
 
     const inner = width - BORDER * 2;
-    const tile = (combed && sprites['comb-floor']) || sprites.floor;
+    const tile = sprites.floor;
     g.beginPath();
     g.rect(BORDER, BORDER, inner, INNER_H);
     g.clip();
@@ -451,17 +450,6 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
     g.globalCompositeOperation = 'source-over';
     g.fillStyle = '#f3e4c8';
     g.fillRect(BORDER, BORDER, inner, WALL_H - 4);
-    // The comb's wallpaper is its floor's honeycomb, faded into the cream of the wall.
-    const paper = combed && sprites['comb-floor'];
-    if (paper) {
-      g.save();
-      g.beginPath();
-      g.rect(BORDER, BORDER, inner, WALL_H - 14);
-      g.clip();
-      g.globalAlpha = 0.22;
-      for (let tx = BORDER; tx < BORDER + inner; tx += paper.width) g.drawImage(paper.image, tx, BORDER);
-      g.restore();
-    }
     g.fillStyle = '#ecdabb';
     g.fillRect(BORDER, BORDER + WALL_H - 14, inner, 10);
     g.fillStyle = OAK_LIGHT;
@@ -470,12 +458,12 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
     g.fillRect(BORDER, BORDER + WALL_H - 2, inner, 2);
     g.fillStyle = 'rgba(70, 35, 10, 0.18)';
     g.fillRect(BORDER, BORDER + WALL_H, inner, 3);
-    shells.set(shellKey, shell);
+    shells.set(width, shell);
     return shell;
   }
 
-  function drawShell(x, y, width, combed = false) {
-    context.drawImage(shellFor(width, combed), Math.round(x), Math.round(y));
+  function drawShell(x, y, width) {
+    context.drawImage(shellFor(width), Math.round(x), Math.round(y));
   }
 
   function decorFor(room) {
@@ -531,7 +519,7 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
     const left = room.x + BORDER;
     const top = room.y + BORDER;
     const recipe = decorFor(room);
-    drawShell(room.x, room.y, ROOM_W, Boolean(room.comb));
+    drawShell(room.x, room.y, ROOM_W);
     // In the comb a doorway may be anywhere along the back wall, and what hangs there makes way for it.
     const doorways = room.comb ? combDoorwaysIn(room) : [];
     const clear = (x, w) => !doorways.some((d) => x < d + 24 && x + w > d - 24);
@@ -666,7 +654,7 @@ export function createOffice2D(canvas, input, { comb = combLayoutWanted() } = {}
   function drawBreakRoom(breakRoom, heating, layer) {
     const left = breakRoom.x + BORDER;
     const top = breakRoom.y + BORDER;
-    drawShell(breakRoom.x, breakRoom.y, breakRoom.width, Boolean(targetPlan?.comb));
+    drawShell(breakRoom.x, breakRoom.y, breakRoom.width);
     if (targetPlan?.comb) for (const x of combDoorwaysIn(breakRoom)) putDoorway(x, top);
 
     drawClock(left + 201, top + 6);
