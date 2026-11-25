@@ -140,7 +140,8 @@ cover what across the project.
 | Asset | Where | What it is |
 |---|---|---|
 | Project icon | `assets/logo.png`, `assets/logo-256.png`, `assets/logo-64.png`, `assets/icon-512.png`, `assets/icon-192.png`, `assets/apple-touch-icon.png`, `favicon.ico` | A team around a desk in a stepped, rounded frame |
-| Office sprites | `assets/pixel-art/office/established/` | Everything the office shows, cut from the owner's reference sheets by `assets/pixel-art/office/source/build-established-art.sh`. Its README lists them |
+| Office sprites | `assets/pixel-art/office/established/` | Everything the office shows apart from the worker, cut from the owner's reference sheets by `assets/pixel-art/office/source/build-established-art.sh`. Its README lists them |
+| The worker | `assets/pixel-art/office/established/worker.png`, from `assets/pixel-art/office/worker-pixellab/` | The owner's worker, recreated and animated with PixelLab from the owner's account, with the earlier sprite as the reference, and made into six people by `source/build-pixellab-worker.lua`. PixelLab claims no ownership of its output. The folder's README lists every generation; `third-party/components.json` has it as `pixellab-worker-art` |
 
 ---
 
