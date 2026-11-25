@@ -309,6 +309,48 @@
       "review": "The logo and icon set were made by the project's owner in Aseprite and are under CC BY-NC 4.0: see LICENSING.md. Project assets are tracked here to avoid mistaking all assets for the two vendored MIT libraries. developing.md describes the original project illustration/logo direction and Atlassian-inspired theme. Ownership, project license and Brand verification are separate release gates, and assets/logo-256.png is the only tracked component inside the published plugin artifacts, so that gate applies to them too. Documentation screenshots and portraits under docs/images are rendered from the scene and can incorporate the third-party marks listed above; review and regenerate them with any asset replacement. The four that carry a mark are recorded against the components they belong to rather than here: docs/images/panels/source-picker.png (reproduces all five picker marks at once) is listed under project-artwork below, and docs/images/objects/{aceLogo,rovoLogo,kanbanBoard}.png under atlassian-ace, atlassian-rovo-standee and atlassian-jira-mark. Note these object portraits are also runtime app assets, not documentation only: src/editor/kit-menu.js fetches them live for the add-item menu."
     },
     {
+      "id": "pixellab-worker-art",
+      "name": "The office worker, recreated and animated with PixelLab",
+      "version": null,
+      "license": "NOASSERTION",
+      "source": "https://www.pixellab.ai/",
+      "paths": [
+        "assets/pixel-art/office/established/worker.png",
+        "assets/pixel-art/office/established/source/worker.aseprite",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/east.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/north.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/south.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/west.png"
+      ],
+      "licenseFiles": [],
+      "distributions": [
+        "source",
+        "claude-marketplace",
+        "hosted-app"
+      ],
+      "review": "Generated on 2026-11-25 with PixelLab from the project owner's account: create_character (v3) with the owner's earlier worker sprite as the reference, so the design is the owner's, and four animations (two unused). Six generations, listed in assets/pixel-art/office/worker-pixellab/README.md. The raw output is committed as returned; established/worker.png is built from it by assets/pixel-art/office/source/build-pixellab-worker.lua, which recolours hair and skin and moves the back view for the smaller poses. PixelLab's terms of service (https://www.pixellab.ai/termsofservice) claim no ownership of generated output and allow its use, including commercially, so it is published with the rest of assets/pixel-art/ under CC BY-NC 4.0 (LICENSING.md). Whether machine-generated images attract copyright at all is unsettled, hence NOASSERTION."
+    },
+    {
       "id": "node-container-runtime",
       "name": "Node.js and container/platform components",
       "version": "24 (major only)",

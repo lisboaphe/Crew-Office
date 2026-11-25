@@ -68,6 +68,7 @@ local function shifted(image, limit, dx, dy)
 end
 
 -- Workers: both of ours, with more heads of hair so a team is not a row of twins. ---------------
+-- The shipped worker.png now comes from source/build-pixellab-worker.lua instead; run that after this.
 
 local function rehaired(image, ramp)
   local copy = Image(image)

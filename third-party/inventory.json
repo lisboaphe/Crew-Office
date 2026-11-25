@@ -36,6 +36,7 @@
       "atlassian-rovo-standee",
       "atlassian-jira-mark",
       "project-artwork",
+      "pixellab-worker-art",
       "node-container-runtime"
     ]
   },
@@ -576,6 +577,155 @@
         {
           "path": "favicon.ico",
           "sha256": "487eccf93cb416a83e4a961c51f3fc7cab42a75b35f3cc503dc500c6178ef175"
+        }
+      ],
+      "licenseEvidence": []
+    },
+    {
+      "id": "pixellab-worker-art",
+      "name": "The office worker, recreated and animated with PixelLab",
+      "version": null,
+      "license": "NOASSERTION",
+      "source": "https://www.pixellab.ai/",
+      "paths": [
+        "assets/pixel-art/office/established/worker.png",
+        "assets/pixel-art/office/established/source/worker.aseprite",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_000.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_001.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_002.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_003.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/east.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/north.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/south.png",
+        "assets/pixel-art/office/worker-pixellab/Idle/rotations/west.png"
+      ],
+      "licenseFiles": [],
+      "distributions": [
+        "source",
+        "claude-marketplace",
+        "hosted-app"
+      ],
+      "review": "Generated on 2026-11-25 with PixelLab from the project owner's account: create_character (v3) with the owner's earlier worker sprite as the reference, so the design is the owner's, and four animations (two unused). Six generations, listed in assets/pixel-art/office/worker-pixellab/README.md. The raw output is committed as returned; established/worker.png is built from it by assets/pixel-art/office/source/build-pixellab-worker.lua, which recolours hair and skin and moves the back view for the smaller poses. PixelLab's terms of service (https://www.pixellab.ai/termsofservice) claim no ownership of generated output and allow its use, including commercially, so it is published with the rest of assets/pixel-art/ under CC BY-NC 4.0 (LICENSING.md). Whether machine-generated images attract copyright at all is unsettled, hence NOASSERTION.",
+      "files": [
+        {
+          "path": "assets/pixel-art/office/established/source/worker.aseprite",
+          "sha256": "6013fd750af6d4d2a14a47ee86d40ce19ddc3009a472eec3f12d0d5ab11467b6"
+        },
+        {
+          "path": "assets/pixel-art/office/established/worker.png",
+          "sha256": "c77b960814c086b07b26e3be741cc29093bd27940646ad104d57c872b8785be6"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_000.png",
+          "sha256": "e57ace5ff3a346ca3c482601044e0a4736760a8cfb46a40c6459fa513e7b2792"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_001.png",
+          "sha256": "38857b2022437599b05034d7a619fb6fcf1555ab60cb38a5a08e2646542f5656"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_002.png",
+          "sha256": "1e697cc0fe49834273ba392793fb2351f8d21b043c98332416886777afe958f3"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/typing/north/frame_003.png",
+          "sha256": "8253ec057a62e1e483869ab3502a56a0839b2907b442fd6b42ba2803bfbdd86d"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_000.png",
+          "sha256": "771e78c47f88447edeb673e15eb006d8c642d812587b84a271f0ddf9981909d9"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_001.png",
+          "sha256": "e17d128acfb87fe8a7e6116330c908ff86f6f2a01ea28261a72d04e79039fd0d"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_002.png",
+          "sha256": "e6bda3a468c2492d3d702eabec5f56f4fe5ac943a9c0f2461c24c2d7e3ef30be"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-away-full/north/frame_003.png",
+          "sha256": "dd2248e980ab5fd8b78b7fbdd1c18dcd2afaf8aa319db46f22e5c41be599454c"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_000.png",
+          "sha256": "5c61fec11f3b598fb91d2eaa1293b5998f666e27e1ac9ed456790e000a0d93c2"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_001.png",
+          "sha256": "64932a4bb4f1ae611a68f0adb52c7c5abef37f836bc55344908a6d78ebdef48b"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_002.png",
+          "sha256": "08999c29d8b6c69340d6eeca8d2437eea163921c013e9fcd018be28f1890e025"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk-full/south/frame_003.png",
+          "sha256": "e8509937728700ce957ff3fd2784fd07c40c13b5652d423e71cf19108f7b5282"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_000.png",
+          "sha256": "187878c39fa608d36460886c29467be2d6b672b232e25f1a6326851d931bdc63"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_001.png",
+          "sha256": "f9960bd2c1612cb015749e426497bbdef7555bb546010b973d2823c42b4ab893"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_002.png",
+          "sha256": "970f6e955a66b4c27465e0fc40b1ee63efeac771605ba66ec4de30c0dae2cdf4"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/north/frame_003.png",
+          "sha256": "f9198bef454bf53137c7dcf0cd3b568502760e63101fa10c8c80168062b7407f"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_000.png",
+          "sha256": "bc01e1b37a42404cfac2da1b163f8e7e48632aeb5b7c1cf1852886ae7bfba09e"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_001.png",
+          "sha256": "c60ce084bbc2019694090fda39a623a405d9a6888c3107b259357b7055236fa4"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_002.png",
+          "sha256": "d0cd30172c408b2c6862ad5ae3e1ae147af9fe3789090b24849cd3745c82d025"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/animations/walk/south/frame_003.png",
+          "sha256": "9021f749e89d9475ffd7a66e450da77f3c31f808b681a306b9a9fbc971c68557"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/rotations/east.png",
+          "sha256": "d4dbea86c5d6db02c08156dae82210b2465673ac77406f5b99812c8736d88f44"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/rotations/north.png",
+          "sha256": "5f5e8e4b5a7dbb865069e8e52225a7a111306125b419528e0857e8cd9e7c8484"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/rotations/south.png",
+          "sha256": "c53b7a75ed2d8ec1a4654351dd7c6623f569ede32cc6a03dc2ed26dbca82636c"
+        },
+        {
+          "path": "assets/pixel-art/office/worker-pixellab/Idle/rotations/west.png",
+          "sha256": "8b62136b5d74476879257e6df5fb392f92b6a6b1b1c12f618cc9b37f355a5205"
         }
       ],
       "licenseEvidence": []
